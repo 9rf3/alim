@@ -2988,6 +2988,15 @@ body.lab-mode .hero {
     filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.6));
 }
 
+@keyframes logoPulse {
+    0%, 100% { box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3); }
+    50% { box-shadow: 0 12px 50px rgba(139, 92, 246, 0.4); }
+}
+
+.signin-page .logo-wrapper {
+    animation: logoPulse 3s ease-in-out infinite;
+}
+
 .signin-page .title {
     font-size: 28px;
     font-weight: 700;

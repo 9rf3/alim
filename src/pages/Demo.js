@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import '../styles/main.css';
 import '../styles/demo.css';
-import '../data/translations';
+import { translations } from '../data/translations';
 
 const elements = {
     hydrogen: { symbol: 'H', name: 'Водород', nameEn: 'Hydrogen', color: '#EF4444', number: 1 },
@@ -15,34 +15,51 @@ const elements = {
 };
 
 const reactions = {
-    'H-O': { formula: 'H₂O', key: 'water', name: 'Вода', nameEn: 'Water' },
-    'C-O-O': { formula: 'CO₂', key: 'co2', name: 'Углекислый газ', nameEn: 'Carbon Dioxide' },
-    'C-H-H-H-H': { formula: 'CH₄', key: 'methane', name: 'Метан', nameEn: 'Methane' },
-    'N-H-H-H': { formula: 'NH₃', key: 'ammonia', name: 'Аммиак', nameEn: 'Ammonia' }
+    'H-O': { formula: 'H₂O', key: 'water', ratios: { H: 2, O: 1 } },
+    'H-O-O': { formula: 'H₂O₂', key: 'peroxide', ratios: { H: 2, O: 2 } },
+    'C-O': { formula: 'CO', key: 'co', ratios: { C: 1, O: 1 } },
+    'C-O-O': { formula: 'CO₂', key: 'co2', ratios: { C: 1, O: 2 } },
+    'C-H-H-H-H': { formula: 'CH₄', key: 'methane', ratios: { C: 1, H: 4 } },
+    'N-H-H-H': { formula: 'NH₃', key: 'ammonia', ratios: { N: 1, H: 3 } }
 };
 
 export default function Demo() {
     const { theme } = useTheme();
     const { language, t } = useLanguage();
     const canvasRef = useRef(null);
+    const particlesRef = useRef([]);
+    const bubblesRef = useRef([]);
+    const liquidLevelRef = useRef(0.4);
+    const targetLiquidLevelRef = useRef(0.4);
+    const liquidColorRef = useRef({ r: 59, g: 130, b: 246 });
+    const targetLiquidColorRef = useRef({ r: 59, g: 130, b: 246 });
+    const glowIntensityRef = useRef(1);
+    const animationIdRef = useRef(null);
+
     const [selectedElements, setSelectedElements] = useState([]);
     const [isExperimentRunning, setIsExperimentRunning] = useState(false);
     const [currentResult, setCurrentResult] = useState(null);
+    const [hasResult, setHasResult] = useState(false);
 
+    const getResultTranslation = useCallback((key) => {
+        return translations[language]?.[key] || translations['ru']?.[key] || key;
+    }, [language]);
+
+    // Canvas resize
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
         const container = canvas.parentElement;
-        
+
         const resize = () => {
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
             canvas.width = container.clientWidth * dpr;
             canvas.height = container.clientHeight * dpr;
             canvas.style.width = container.clientWidth + 'px';
             canvas.style.height = container.clientHeight + 'px';
-            ctx.scale(dpr, dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         };
 
         resize();
@@ -50,223 +67,495 @@ export default function Demo() {
         return () => window.removeEventListener('resize', resize);
     }, []);
 
-    useEffect(() => {
-        if (!canvasRef.current) return;
-        
+    // Create particle
+    const createParticle = useCallback((symbol, color) => {
         const canvas = canvasRef.current;
+        if (!canvas) return null;
+        const container = canvas.parentElement;
+        const centerX = container.clientWidth / 2;
+        const centerY = container.clientHeight / 2;
+
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 150 + Math.random() * 100;
+
+        return {
+            x: centerX + Math.cos(angle) * distance,
+            y: centerY + Math.sin(angle) * distance,
+            targetX: centerX + (Math.random() - 0.5) * 60,
+            targetY: centerY + 20 + Math.random() * 40,
+            symbol,
+            color,
+            size: 6 + Math.random() * 4,
+            speed: 0.02 + Math.random() * 0.02,
+            progress: 0,
+            orbit: Math.random() * Math.PI * 2,
+            orbitSpeed: 0.01 + Math.random() * 0.02,
+            orbitRadius: 80 + Math.random() * 40
+        };
+    }, []);
+
+    // Draw flask
+    const drawFlask = useCallback(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
         const ctx = canvas.getContext('2d');
-        let animationId;
-        let time = 0;
-        let bubbles = [];
+        const w = canvas.width / (window.devicePixelRatio || 1);
+        const h = canvas.height / (window.devicePixelRatio || 1);
+        const cx = w / 2;
+        const cy = h / 2 + 20;
+        const time = Date.now() * 0.001;
 
-        const drawFlask = () => {
-            const w = canvas.width / (window.devicePixelRatio || 1);
-            const h = canvas.height / (window.devicePixelRatio || 1);
-            const cx = w / 2;
-            const cy = h / 2 + 20;
+        ctx.clearRect(0, 0, w, h);
 
-            ctx.clearRect(0, 0, w, h);
+        const isDark = theme === 'dark';
 
-            const isDark = theme === 'dark';
-            const bodyWidth = 160;
-            const bodyHeight = 180;
-            const neckWidth = 45;
-            const neckHeight = 90;
-            const bottomY = cy + bodyHeight / 2;
-            const bodyTopY = cy - bodyHeight / 4;
-            const neckBottomY = cy - bodyHeight / 2 - 10;
-            const neckTopY = cy - bodyHeight / 2 - neckHeight + 20;
+        const bodyWidth = 160;
+        const bodyHeight = 180;
+        const neckWidth = 45;
+        const neckHeight = 90;
+        const rimWidth = 55;
+        const rimHeight = 8;
 
-            const glowRadius = 180;
-            const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
-            glowGrad.addColorStop(0, 'rgba(59, 130, 246, 0.15)');
-            glowGrad.addColorStop(0.6, 'rgba(59, 130, 246, 0.05)');
-            glowGrad.addColorStop(1, 'transparent');
-            ctx.fillStyle = glowGrad;
-            ctx.beginPath();
-            ctx.arc(cx, cy, glowRadius, 0, Math.PI * 2);
-            ctx.fill();
+        const bottomY = cy + bodyHeight / 2;
+        const bodyTopY = cy - bodyHeight / 4;
+        const neckBottomY = cy - bodyHeight / 2 - 10;
+        const neckTopY = cy - bodyHeight / 2 - neckHeight + 20;
+        const rimY = neckTopY;
 
+        // Interpolate liquid color
+        const lc = liquidColorRef.current;
+        const tlc = targetLiquidColorRef.current;
+        lc.r += (tlc.r - lc.r) * 0.03;
+        lc.g += (tlc.g - lc.g) * 0.03;
+        lc.b += (tlc.b - lc.b) * 0.03;
+
+        const liquidMaxH = bodyHeight * 0.85;
+        const liquidH = liquidMaxH * liquidLevelRef.current;
+        const liquidY = bodyTopY + (bodyHeight * 0.75) - liquidH;
+
+        // GLOW EFFECT
+        const glowRadius = 180;
+        const glowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
+        const glowA = isDark ? 0.4 : 0.15;
+        const gi = glowIntensityRef.current;
+        glowGrad.addColorStop(0, `rgba(${lc.r}, ${lc.g}, ${lc.b}, ${glowA * gi})`);
+        glowGrad.addColorStop(0.6, `rgba(${lc.r}, ${lc.g}, ${lc.b}, ${glowA * 0.3 * gi})`);
+        glowGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // FLASK INNER SHADOW
+        ctx.save();
+        ctx.beginPath();
+        const curveR = 25;
+        ctx.moveTo(cx - bodyWidth / 2 + curveR, bottomY);
+        ctx.quadraticCurveTo(cx - bodyWidth / 2, bottomY, cx - bodyWidth / 2, bottomY - curveR);
+        ctx.lineTo(cx - bodyWidth / 2, bodyTopY);
+        ctx.lineTo(cx - neckWidth / 2, neckBottomY);
+        ctx.lineTo(cx - neckWidth / 2, neckTopY);
+        ctx.lineTo(cx - rimWidth / 2, neckTopY);
+        ctx.lineTo(cx - rimWidth / 2, neckTopY - rimHeight);
+        ctx.lineTo(cx + rimWidth / 2, neckTopY - rimHeight);
+        ctx.lineTo(cx + rimWidth / 2, neckTopY);
+        ctx.lineTo(cx + neckWidth / 2, neckTopY);
+        ctx.lineTo(cx + neckWidth / 2, neckBottomY);
+        ctx.lineTo(cx + bodyWidth / 2, bodyTopY);
+        ctx.lineTo(cx + bodyWidth / 2, bottomY - curveR);
+        ctx.quadraticCurveTo(cx + bodyWidth / 2, bottomY, cx + bodyWidth / 2 - curveR, bottomY);
+        ctx.closePath();
+
+        const innerShadow = ctx.createLinearGradient(cx - bodyWidth / 2, cy, cx + bodyWidth / 2, cy);
+        innerShadow.addColorStop(0, isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.08)');
+        innerShadow.addColorStop(0.5, isDark ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.02)');
+        innerShadow.addColorStop(1, isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.08)');
+        ctx.fillStyle = innerShadow;
+        ctx.fill();
+        ctx.restore();
+
+        // LIQUID
+        if (liquidLevelRef.current > 0.05) {
             ctx.save();
             ctx.beginPath();
-            const curveR = 25;
-            ctx.moveTo(cx - bodyWidth / 2 + curveR, bottomY);
-            ctx.quadraticCurveTo(cx - bodyWidth / 2, bottomY, cx - bodyWidth / 2, bottomY - curveR);
-            ctx.lineTo(cx - bodyWidth / 2, bodyTopY);
-            ctx.lineTo(cx - neckWidth / 2, neckBottomY);
-            ctx.lineTo(cx - neckWidth / 2, neckTopY);
-            ctx.lineTo(cx - 27, neckTopY);
-            ctx.lineTo(cx - 27, neckTopY - 8);
-            ctx.lineTo(cx + 27, neckTopY - 8);
-            ctx.lineTo(cx + 27, neckTopY);
-            ctx.lineTo(cx + neckWidth / 2, neckTopY);
-            ctx.lineTo(cx + neckWidth / 2, neckBottomY);
-            ctx.lineTo(cx + bodyWidth / 2, bodyTopY);
-            ctx.lineTo(cx + bodyWidth / 2, bottomY - curveR);
-            ctx.quadraticCurveTo(cx + bodyWidth / 2, bottomY, cx + bodyWidth / 2 - curveR, bottomY);
-            ctx.closePath();
 
-            const innerShadow = ctx.createLinearGradient(cx - bodyWidth / 2, cy, cx + bodyWidth / 2, cy);
-            innerShadow.addColorStop(0, isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.08)');
-            innerShadow.addColorStop(0.5, isDark ? 'rgba(0,0,0,0.1)' : 'rgba(0,0,0,0.02)');
-            innerShadow.addColorStop(1, isDark ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.08)');
-            ctx.fillStyle = innerShadow;
-            ctx.fill();
-            ctx.restore();
+            const lCurveR = 20;
+            ctx.moveTo(cx - bodyWidth / 2 + lCurveR + 5, bottomY - 5);
+            ctx.quadraticCurveTo(cx - bodyWidth / 2 + 5, bottomY - 5, cx - bodyWidth / 2 + 5, bottomY - lCurveR - 5);
+            ctx.lineTo(cx - bodyWidth / 2 + 5, liquidY + 10);
 
-            const liquidLevel = selectedElements.length > 0 ? 0.5 + selectedElements.length * 0.15 : 0.4;
-            const liquidMaxH = bodyHeight * 0.7;
-            const liquidH = liquidMaxH * liquidLevel;
-            const liquidY = bodyTopY + bodyHeight * 0.65 - liquidH;
-
-            if (selectedElements.length > 0) {
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(cx - bodyWidth / 2 + 20, bottomY - 10);
-                ctx.quadraticCurveTo(cx - bodyWidth / 2 + 10, bottomY - 10, cx - bodyWidth / 2 + 10, liquidY);
-                ctx.lineTo(cx + bodyWidth / 2 - 10, liquidY);
-                ctx.lineTo(cx + bodyWidth / 2 - 10, bottomY - 10);
-                ctx.quadraticCurveTo(cx + bodyWidth / 2 - 10, bottomY - 10, cx + bodyWidth / 2 - 20, bottomY - 10);
-                ctx.closePath();
-
-                const colors = selectedElements.map(el => elements[el]?.color || '#3B82F6');
-                const liqGrad = ctx.createLinearGradient(cx, liquidY, cx, bottomY);
-                liqGrad.addColorStop(0, colors[0] || '#3B82F6');
-                liqGrad.addColorStop(1, colors[colors.length - 1] || '#8B5CF6');
-                ctx.fillStyle = liqGrad;
-                ctx.fill();
-                ctx.restore();
-
-                if (Math.random() < 0.03 && liquidLevel > 0.1) {
-                    bubbles.push({
-                        x: cx + (Math.random() - 0.5) * bodyWidth * 0.6,
-                        y: bottomY - 15,
-                        size: 2 + Math.random() * 3,
-                        speed: 0.6 + Math.random() * 1.2,
-                        wobble: Math.random() * Math.PI * 2
-                    });
-                }
-
-                bubbles = bubbles.filter(b => {
-                    b.y -= b.speed;
-                    b.x += Math.sin(time * 4 + b.wobble) * 0.4;
-                    b.size *= 0.997;
-                    
-                    if (b.y < liquidY || b.size < 0.8) return false;
-                    
-                    const bubbleGrad = ctx.createRadialGradient(b.x - b.size * 0.3, b.y - b.size * 0.3, 0, b.x, b.y, b.size);
-                    bubbleGrad.addColorStop(0, 'rgba(255,255,255,0.9)');
-                    bubbleGrad.addColorStop(0.5, isDark ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.7)');
-                    bubbleGrad.addColorStop(1, isDark ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.3)');
-                    
-                    ctx.beginPath();
-                    ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
-                    ctx.fillStyle = bubbleGrad;
-                    ctx.fill();
-                    
-                    return true;
-                });
+            // Wavy surface
+            for (let x = -bodyWidth / 2 + 5; x <= bodyWidth / 2 - 5; x += 4) {
+                const curveX = x * 0.8;
+                const waveY = liquidY + Math.sin((x * 0.12) + (time * 2.5)) * 2.5;
+                ctx.lineTo(cx + curveX, waveY);
             }
 
-            ctx.save();
-            ctx.beginPath();
-            ctx.moveTo(cx - bodyWidth / 2 + curveR, bottomY);
-            ctx.quadraticCurveTo(cx - bodyWidth / 2, bottomY, cx - bodyWidth / 2, bottomY - curveR);
-            ctx.lineTo(cx - bodyWidth / 2, bodyTopY);
-            ctx.lineTo(cx - neckWidth / 2, neckBottomY);
-            ctx.lineTo(cx - neckWidth / 2, neckTopY);
-            ctx.lineTo(cx - 27, neckTopY);
-            ctx.lineTo(cx - 27, neckTopY - 8);
-            ctx.lineTo(cx + 27, neckTopY - 8);
-            ctx.lineTo(cx + 27, neckTopY);
-            ctx.lineTo(cx + neckWidth / 2, neckTopY);
-            ctx.lineTo(cx + neckWidth / 2, neckBottomY);
-            ctx.lineTo(cx + bodyWidth / 2, bodyTopY);
-            ctx.lineTo(cx + bodyWidth / 2, bottomY - curveR);
-            ctx.quadraticCurveTo(cx + bodyWidth / 2, bottomY, cx + bodyWidth / 2 - curveR, bottomY);
+            ctx.lineTo(cx + bodyWidth / 2 - 5, liquidY + 10);
+            ctx.lineTo(cx + bodyWidth / 2 - 5, bottomY - lCurveR - 5);
+            ctx.quadraticCurveTo(cx + bodyWidth / 2 - 5, bottomY - 5, cx + bodyWidth / 2 - lCurveR - 5, bottomY - 5);
             ctx.closePath();
 
-            ctx.strokeStyle = 'rgba(139, 92, 246, 0.5)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            const liqGrad = ctx.createLinearGradient(cx, liquidY, cx, bottomY);
+            liqGrad.addColorStop(0, `rgba(${lc.r}, ${lc.g}, ${lc.b}, 0.9)`);
+            liqGrad.addColorStop(0.2, `rgba(${lc.r}, ${lc.g}, ${lc.b}, 0.85)`);
+            liqGrad.addColorStop(0.5, `rgba(${Math.min(255, lc.r + 10)}, ${Math.min(255, lc.g + 10)}, ${Math.min(255, lc.b + 10)}, 0.7)`);
+            liqGrad.addColorStop(1, `rgba(${Math.min(255, lc.r + 30)}, ${Math.min(255, lc.g + 30)}, ${Math.min(255, lc.b + 30)}, 0.5)`);
+            ctx.fillStyle = liqGrad;
+            ctx.fill();
 
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            // Meniscus
+            ctx.fillStyle = `rgba(255, 255, 255, ${isDark ? 0.5 : 0.7})`;
+            ctx.beginPath();
+            ctx.ellipse(cx, liquidY, bodyWidth / 2 - 8, 5, 0, 0, Math.PI);
+            ctx.fill();
+
+            // Surface reflection line
+            ctx.strokeStyle = `rgba(255, 255, 255, ${isDark ? 0.3 : 0.5})`;
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(cx - bodyWidth / 3, bodyTopY + 20);
-            ctx.lineTo(cx - bodyWidth / 3 + 15, liquidY - 10);
+            ctx.moveTo(cx - bodyWidth / 4, liquidY - 2);
+            ctx.lineTo(cx + bodyWidth / 4, liquidY - 2);
             ctx.stroke();
+
             ctx.restore();
-        };
 
-        const animate = () => {
-            time += 0.01;
-            drawFlask();
-            animationId = requestAnimationFrame(animate);
-        };
-
-        animate();
-
-        return () => {
-            if (animationId) cancelAnimationFrame(animationId);
-        };
-    }, [theme, selectedElements]);
-
-    const addElement = (elementKey) => {
-        if (selectedElements.length >= 4) return;
-        setSelectedElements([...selectedElements, elementKey]);
-    };
-
-    const checkReaction = () => {
-        if (selectedElements.length < 2) return;
-        
-        setIsExperimentRunning(true);
-        
-        const sortedKey = [...selectedElements].sort().join('-');
-        const reaction = reactions[sortedKey];
-        
-        setTimeout(() => {
-            if (reaction) {
-                setCurrentResult({
-                    name: language === 'ru' ? reaction.name : reaction.nameEn,
-                    formula: reaction.formula
-                });
-            } else {
-                setCurrentResult({
-                    name: language === 'ru' ? 'Нет реакции' : 'No Reaction',
-                    formula: ''
+            // BUBBLES
+            if (Math.random() < 0.04 && liquidLevelRef.current > 0.1) {
+                bubblesRef.current.push({
+                    x: cx + (Math.random() - 0.5) * bodyWidth * 0.6,
+                    y: bottomY - 15,
+                    size: 2 + Math.random() * 3,
+                    speed: 0.6 + Math.random() * 1.2,
+                    wobble: Math.random() * Math.PI * 2
                 });
             }
+
+            bubblesRef.current = bubblesRef.current.filter(b => {
+                b.y -= b.speed;
+                b.x += Math.sin(time * 4 + b.wobble) * 0.4;
+                b.size *= 0.997;
+
+                if (b.y < liquidY || b.size < 0.8) return false;
+
+                const bubbleGrad = ctx.createRadialGradient(b.x - b.size * 0.3, b.y - b.size * 0.3, 0, b.x, b.y, b.size);
+                bubbleGrad.addColorStop(0, 'rgba(255,255,255,0.9)');
+                bubbleGrad.addColorStop(0.5, `rgba(255,255,255,${isDark ? 0.5 : 0.7})`);
+                bubbleGrad.addColorStop(1, `rgba(255,255,255,${isDark ? 0.2 : 0.3})`);
+
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.size, 0, Math.PI * 2);
+                ctx.fillStyle = bubbleGrad;
+                ctx.fill();
+
+                return true;
+            });
+        }
+
+        // PARTICLES
+        particlesRef.current.forEach(p => {
+            if (p.progress < 1) {
+                p.progress += p.speed;
+                p.x += (p.targetX - p.x) * 0.06;
+                p.y += (p.targetY - p.y) * 0.06;
+            } else {
+                p.orbit += p.orbitSpeed;
+                p.x = cx + Math.cos(p.orbit) * (bodyWidth / 2 + 35);
+                p.y = cy + Math.sin(p.orbit) * 25;
+            }
+
+            // Glow
+            const pGlow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 5);
+            pGlow.addColorStop(0, p.color + 'FF');
+            pGlow.addColorStop(0.4, p.color + '60');
+            pGlow.addColorStop(1, 'transparent');
+            ctx.fillStyle = pGlow;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size * 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Core
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+
+            // Symbol
+            ctx.fillStyle = p.color;
+            ctx.font = `bold ${Math.floor(p.size * 0.9)}px Inter, -apple-system, BlinkMacSystemFont, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(p.symbol, p.x, p.y);
+        });
+
+        // GLASS OVERLAY
+        ctx.save();
+
+        ctx.beginPath();
+        ctx.moveTo(cx - bodyWidth / 2 + curveR, bottomY);
+        ctx.quadraticCurveTo(cx - bodyWidth / 2, bottomY, cx - bodyWidth / 2, bottomY - curveR);
+        ctx.lineTo(cx - bodyWidth / 2, bodyTopY);
+        ctx.lineTo(cx - neckWidth / 2, neckBottomY);
+        ctx.lineTo(cx - neckWidth / 2, neckTopY);
+        ctx.lineTo(cx - rimWidth / 2, neckTopY);
+        ctx.lineTo(cx - rimWidth / 2, neckTopY - rimHeight);
+        ctx.lineTo(cx + rimWidth / 2, neckTopY - rimHeight);
+        ctx.lineTo(cx + rimWidth / 2, neckTopY);
+        ctx.lineTo(cx + neckWidth / 2, neckTopY);
+        ctx.lineTo(cx + neckWidth / 2, neckBottomY);
+        ctx.lineTo(cx + bodyWidth / 2, bodyTopY);
+        ctx.lineTo(cx + bodyWidth / 2, bottomY - curveR);
+        ctx.quadraticCurveTo(cx + bodyWidth / 2, bottomY, cx + bodyWidth / 2 - curveR, bottomY);
+        ctx.closePath();
+
+        const sheenGrad = ctx.createLinearGradient(cx - bodyWidth / 2, cy, cx + bodyWidth / 2, cy);
+        if (isDark) {
+            sheenGrad.addColorStop(0, 'rgba(255,255,255,0.08)');
+            sheenGrad.addColorStop(0.1, 'rgba(255,255,255,0.03)');
+            sheenGrad.addColorStop(0.5, 'rgba(255,255,255,0)');
+            sheenGrad.addColorStop(0.9, 'rgba(255,255,255,0.03)');
+            sheenGrad.addColorStop(1, 'rgba(255,255,255,0.1)');
+        } else {
+            sheenGrad.addColorStop(0, 'rgba(255,255,255,0.4)');
+            sheenGrad.addColorStop(0.15, 'rgba(255,255,255,0.15)');
+            sheenGrad.addColorStop(0.5, 'rgba(255,255,255,0.05)');
+            sheenGrad.addColorStop(0.85, 'rgba(255,255,255,0.15)');
+            sheenGrad.addColorStop(1, 'rgba(255,255,255,0.35)');
+        }
+        ctx.fillStyle = sheenGrad;
+        ctx.fill();
+
+        // Outline
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.12)';
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+
+        // Outer subtle glow
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
+        ctx.lineWidth = 6;
+        ctx.stroke();
+
+        // Primary highlight (left edge)
+        ctx.beginPath();
+        ctx.moveTo(cx - bodyWidth / 2 + 8, bottomY - curveR - 10);
+        ctx.lineTo(cx - bodyWidth / 2 + 8, bodyTopY + 20);
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.7)';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // Secondary highlight
+        ctx.beginPath();
+        ctx.moveTo(cx - bodyWidth / 2 + 16, bottomY - curveR - 5);
+        ctx.lineTo(cx - bodyWidth / 2 + 16, bodyTopY + 40);
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.4)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Neck highlight
+        ctx.beginPath();
+        ctx.moveTo(cx - neckWidth / 2 + 4, neckBottomY - 10);
+        ctx.lineTo(cx - neckWidth / 2 + 4, neckTopY + 5);
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Right edge subtle
+        ctx.beginPath();
+        ctx.moveTo(cx + bodyWidth / 2 - 6, bottomY - curveR - 5);
+        ctx.lineTo(cx + bodyWidth / 2 - 6, bodyTopY + 30);
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.restore();
+
+        // RIM
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(cx, rimY - rimHeight / 2, rimWidth / 2, rimHeight / 2, 0, 0, Math.PI * 2);
+        ctx.fillStyle = isDark ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.8)';
+        ctx.fill();
+        ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.15)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Inner opening
+        ctx.beginPath();
+        ctx.ellipse(cx, rimY - rimHeight / 2, rimWidth / 2 - 5, rimHeight / 2 - 2, 0, 0, Math.PI * 2);
+        ctx.fillStyle = isDark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.08)';
+        ctx.fill();
+
+        // Top highlight
+        ctx.beginPath();
+        ctx.ellipse(cx, rimY - rimHeight / 2, rimWidth / 2 - 2, rimHeight / 2 - 1, 0, 0, Math.PI);
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        ctx.restore();
+
+        // Animation updates
+        liquidLevelRef.current += (targetLiquidLevelRef.current - liquidLevelRef.current) * 0.03;
+        glowIntensityRef.current = 1 + Math.sin(time * 3) * 0.12;
+    }, [theme]);
+
+    // Main animation loop
+    useEffect(() => {
+        const animate = () => {
+            drawFlask();
+            animationIdRef.current = requestAnimationFrame(animate);
+        };
+        animate();
+        return () => {
+            if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
+        };
+    }, [drawFlask]);
+
+    // Update particles when selected elements change
+    useEffect(() => {
+        const targetParticles = selectedElements.map(e => {
+            const el = elements[e];
+            return { symbol: el.symbol, color: el.color };
+        });
+
+        targetParticles.forEach((tp, i) => {
+            if (!particlesRef.current[i] || particlesRef.current[i].symbol !== tp.symbol) {
+                const p = createParticle(tp.symbol, tp.color);
+                if (p) particlesRef.current[i] = p;
+            }
+        });
+
+        particlesRef.current = particlesRef.current.slice(0, targetParticles.length);
+    }, [selectedElements, createParticle]);
+
+    // Toggle element selection
+    const toggleElement = useCallback((elementKey) => {
+        if (isExperimentRunning) return;
+
+        setSelectedElements(prev => {
+            const index = prev.indexOf(elementKey);
+            if (index > -1) {
+                return prev.filter(e => e !== elementKey);
+            } else {
+                if (prev.length < 4) {
+                    return [...prev, elementKey];
+                }
+                return prev;
+            }
+        });
+    }, [isExperimentRunning]);
+
+    // Show result
+    const showResult = useCallback((result) => {
+        setCurrentResult(result);
+        setHasResult(true);
+    }, []);
+
+    // Run experiment
+    const runExperiment = useCallback(() => {
+        if (selectedElements.length < 2 || isExperimentRunning) return;
+
+        setIsExperimentRunning(true);
+
+        // Animate particles into flask
+        const canvas = canvasRef.current;
+        const cx = canvas.parentElement.clientWidth / 2;
+        const cy = canvas.parentElement.clientHeight / 2 + 20;
+
+        particlesRef.current.forEach(p => {
+            p.progress = 1;
+            p.targetX = cx;
+            p.targetY = cy + 20;
+        });
+
+        // Determine result
+        const sorted = [...selectedElements].sort();
+        const key = sorted.map(e => elements[e].symbol).join('-');
+        const reverseKey = [...sorted].reverse().map(e => elements[e].symbol).join('-');
+        const result = reactions[key] || reactions[reverseKey];
+
+        // Animate liquid rising
+        targetLiquidLevelRef.current = 0.7;
+
+        // Change liquid color based on result
+        setTimeout(() => {
+            if (result) {
+                switch (result.key) {
+                    case 'water':
+                        targetLiquidColorRef.current = { r: 59, g: 130, b: 246 };
+                        break;
+                    case 'co2':
+                        targetLiquidColorRef.current = { r: 156, g: 163, b: 175 };
+                        break;
+                    case 'methane':
+                        targetLiquidColorRef.current = { r: 245, g: 158, b: 11 };
+                        break;
+                    case 'ammonia':
+                        targetLiquidColorRef.current = { r: 139, g: 92, b: 246 };
+                        break;
+                    default:
+                        targetLiquidColorRef.current = { r: 16, g: 185, b: 129 };
+                }
+                showResult(result);
+            } else {
+                targetLiquidColorRef.current = { r: 120, g: 53, b: 15 };
+                showResult({ formula: '?', key: 'noReaction' });
+            }
+        }, 800);
+
+        // Clear particles after animation
+        setTimeout(() => {
+            particlesRef.current = [];
             setIsExperimentRunning(false);
         }, 1500);
-    };
+    }, [selectedElements, isExperimentRunning, showResult]);
 
-    const resetExperiment = () => {
+    // Reset selection
+    const resetSelection = useCallback(() => {
         setSelectedElements([]);
         setCurrentResult(null);
-    };
+        setHasResult(false);
+        setIsExperimentRunning(false);
+        particlesRef.current = [];
+        bubblesRef.current = [];
+
+        targetLiquidLevelRef.current = 0.4;
+        targetLiquidColorRef.current = { r: 59, g: 130, b: 246 };
+        liquidLevelRef.current = 0.4;
+        liquidColorRef.current = { r: 59, g: 130, b: 246 };
+    }, []);
+
+    // New experiment (keeps liquid state but lowers it)
+    const newExperiment = useCallback(() => {
+        setSelectedElements([]);
+        setCurrentResult(null);
+        setHasResult(false);
+        setIsExperimentRunning(false);
+        particlesRef.current = [];
+        bubblesRef.current = [];
+
+        targetLiquidLevelRef.current = 0.4;
+    }, []);
 
     return (
         <div className="App">
             <Navbar />
-            
+
             <div className="lab-container">
                 <div className="elements-panel">
                     <div>
-                        <h3 className="panel-title">
-                            {language === 'ru' ? 'Выбор элементов' : 'Select Elements'}
-                        </h3>
-                        <p className="panel-subtitle">
-                            {language === 'ru' ? 'Кликните чтобы добавить в реакцию' : 'Click to add to reaction'}
-                        </p>
+                        <h3 className="panel-title">{t('elements.title')}</h3>
+                        <p className="panel-subtitle">{t('elements.subtitle')}</p>
                     </div>
-                    
+
                     <div className="elements-grid">
                         {Object.entries(elements).map(([key, el]) => (
-                            <div 
+                            <div
                                 key={key}
                                 className={`element-card ${selectedElements.includes(key) ? 'selected' : ''}`}
-                                onClick={() => addElement(key)}
+                                onClick={() => toggleElement(key)}
                             >
                                 <span className="element-number">{el.number}</span>
                                 <span className="element-symbol">{el.symbol}</span>
@@ -276,28 +565,24 @@ export default function Demo() {
                             </div>
                         ))}
                     </div>
-                    
+
                     <div className="selection-display">
-                        <div className="selection-label">
-                            {language === 'ru' ? 'Выбрано:' : 'Selected:'}
-                        </div>
+                        <div className="selection-label">{t('selection.label')}</div>
                         <div className="selection-formula">
-                            {selectedElements.map(el => elements[el]?.symbol).join(' + ') || '—'}
+                            {selectedElements.map(e => elements[e]?.symbol).join(' + ') || '—'}
                         </div>
                     </div>
                 </div>
 
                 <div className="flask-area">
                     <div className="flask-header">
-                        <h2 className="flask-title">
-                            {language === 'ru' ? 'Реакционная смесь' : 'Reaction Mixture'}
-                        </h2>
-                        <button 
-                            className="experiment-btn" 
+                        <h2 className="flask-title">{t('flask.title')}</h2>
+                        <button
+                            className="experiment-btn"
                             disabled={selectedElements.length < 2 || isExperimentRunning}
-                            onClick={checkReaction}
+                            onClick={runExperiment}
                         >
-                            {language === 'ru' ? 'Запустить реакцию' : 'Start Reaction'}
+                            {t('experiment.btn')}
                         </button>
                     </div>
                     <div className="flask-canvas-container">
@@ -305,35 +590,32 @@ export default function Demo() {
                     </div>
                 </div>
 
-                <div className="result-panel">
+                <div className={`result-panel ${hasResult ? 'has-result' : ''}`}>
                     <div className="result-content">
-                        <div className="result-label">
-                            {language === 'ru' ? 'Результат' : 'Result'}
-                        </div>
+                        <div className="result-label">{t('result.label')}</div>
                         {currentResult ? (
                             <>
-                                <div className="result-title">{currentResult.name}</div>
-                                <div className="result-formula">{currentResult.formula}</div>
+                                <div className="result-title">{getResultTranslation(`result.${currentResult.key}`)}</div>
+                                <div className="result-formula">{currentResult.formula !== '?' ? currentResult.formula : ''}</div>
+                                <div className="result-description">{getResultTranslation(`result.${currentResult.key}.desc`)}</div>
                             </>
                         ) : (
                             <div className="result-title">
-                                <span className="result-empty">
-                                    {language === 'ru' ? 'Начните эксперимент' : 'Start an experiment'}
-                                </span>
+                                <span className="result-empty">{t('result.empty')}</span>
                             </div>
                         )}
                     </div>
                     <div className="control-btns">
-                        <button className="btn-secondary" onClick={resetExperiment}>
-                            {language === 'ru' ? 'Очистить' : 'Clear'}
+                        <button className="btn-secondary" onClick={resetSelection}>
+                            {t('btn.reset')}
                         </button>
-                        <button className="btn-secondary" onClick={resetExperiment}>
-                            {language === 'ru' ? 'Новый эксперимент' : 'New Experiment'}
+                        <button className="btn-secondary" onClick={newExperiment}>
+                            {t('btn.new')}
                         </button>
                     </div>
                 </div>
             </div>
-            
+
             <Footer />
         </div>
     );

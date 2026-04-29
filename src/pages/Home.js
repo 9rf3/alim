@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import Timer from '../components/Timer';
@@ -9,8 +8,6 @@ import Footer from '../components/Footer';
 import '../styles/main.css';
 
 export default function Home() {
-    const [scrolled, setScrolled] = useState(false);
-
     return (
         <div className="App">
             <div className="floating-bg">

@@ -1,11 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Hero({ onInteraction }) {
-    const { language, t } = useLanguage();
+    const { t } = useLanguage();
     const [hasInteracted, setHasInteracted] = useState(false);
     const canvasRef = useRef(null);
-    const sceneRef = useRef(null);
 
     useEffect(() => {
         const canvas = canvasRef.current;

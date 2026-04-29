@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 
 export default function Navbar() {
-    const { theme, toggleTheme } = useTheme();
+    const { toggleTheme } = useTheme();
     const { language, changeLanguage, t } = useLanguage();
     const [scrolled, setScrolled] = useState(false);
     const [searchExpanded, setSearchExpanded] = useState(false);
+    const searchWrapperRef = useRef(null);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -16,10 +17,23 @@ export default function Navbar() {
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Close search when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target)) {
+                setSearchExpanded(false);
+            }
+        };
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
+
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const isDemo = pathname === '/demo';
     const navLinks = [
-        { href: '/', label: t('nav.home'), active: true },
+        { href: '/', label: t('nav.home'), active: !isDemo && (pathname === '/' || pathname === '') },
         { href: '#labs', label: t('nav.labs') },
-        { href: '/demo', label: t('nav.demo') },
+        { href: '/demo', label: t('nav.demo'), active: isDemo },
         { href: '#features', label: t('nav.features') },
         { href: '#about', label: t('nav.about') },
         { href: '#contact', label: t('nav.contact') },
@@ -52,7 +66,7 @@ export default function Navbar() {
                 </div>
 
                 <div className="nav-actions">
-                    <div className={`search-wrapper ${searchExpanded ? 'expanded' : ''}`}>
+                    <div className="search-wrapper" ref={searchWrapperRef}>
                         <button 
                             className="icon-btn search-btn" 
                             id="searchBtn"
@@ -65,7 +79,7 @@ export default function Navbar() {
                         </button>
                         <input 
                             type="text" 
-                            className="search-input" 
+                            className={`search-input ${searchExpanded ? 'active' : ''}`}
                             placeholder={language === 'ru' ? 'Поиск...' : 'Search...'}
                         />
                     </div>
