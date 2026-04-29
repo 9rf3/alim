@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/alim/static/css/main.01988058.css",
+    "main.js": "/alim/static/js/main.1e9d6cd4.js",
+    "index.html": "/alim/index.html",
+    "main.01988058.css.map": "/alim/static/css/main.01988058.css.map",
+    "main.1e9d6cd4.js.map": "/alim/static/js/main.1e9d6cd4.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.01988058.css",
+    "static/js/main.1e9d6cd4.js"
+  ]
+}
