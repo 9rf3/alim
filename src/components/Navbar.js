@@ -31,7 +31,7 @@ export default function Navbar() {
     const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
     const isDemo = pathname === '/demo';
     const navLinks = [
-        { href: '/', label: t('nav.home'), active: !isDemo && (pathname === '/' || pathname === '') },
+        { href: '#home', label: t('nav.home'), active: !isDemo && (pathname === '/' || pathname === '') },
         { href: '#labs', label: t('nav.labs') },
         { href: '/demo', label: t('nav.demo'), active: isDemo },
         { href: '#features', label: t('nav.features') },
