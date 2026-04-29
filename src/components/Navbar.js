@@ -1,0 +1,123 @@
+import { useState, useEffect } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
+
+export default function Navbar() {
+    const { theme, toggleTheme } = useTheme();
+    const { language, changeLanguage, t } = useLanguage();
+    const [scrolled, setScrolled] = useState(false);
+    const [searchExpanded, setSearchExpanded] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+        };
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const navLinks = [
+        { href: '/', label: t('nav.home'), active: true },
+        { href: '#labs', label: t('nav.labs') },
+        { href: '/demo', label: t('nav.demo') },
+        { href: '#features', label: t('nav.features') },
+        { href: '#about', label: t('nav.about') },
+        { href: '#contact', label: t('nav.contact') },
+    ];
+
+    return (
+        <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar">
+            <div className="nav-container">
+                <a href="/" className="logo">
+                    <svg className="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 3L7 17C7 18.6569 8.34315 20 10 20H14C15.6569 20 17 18.6569 17 17L15 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M6 8H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <path d="M8 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        <circle cx="12" cy="17" r="2" fill="currentColor"/>
+                    </svg>
+                    <span className="logo-text">Alim-lab</span>
+                </a>
+
+                <div className="nav-links">
+                    {navLinks.map((link, index) => (
+                        <a 
+                            key={index}
+                            href={link.href} 
+                            className={`nav-link ${link.active ? 'active' : ''}`}
+                        >
+                            <span>{link.label}</span>
+                            <div className="nav-link-line"></div>
+                        </a>
+                    ))}
+                </div>
+
+                <div className="nav-actions">
+                    <div className={`search-wrapper ${searchExpanded ? 'expanded' : ''}`}>
+                        <button 
+                            className="icon-btn search-btn" 
+                            id="searchBtn"
+                            onClick={() => setSearchExpanded(!searchExpanded)}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="M21 21L16.65 16.65"/>
+                            </svg>
+                        </button>
+                        <input 
+                            type="text" 
+                            className="search-input" 
+                            placeholder={language === 'ru' ? 'Поиск...' : 'Search...'}
+                        />
+                    </div>
+
+                    <button 
+                        className="theme-toggle" 
+                        id="themeToggle" 
+                        aria-label={language === 'ru' ? 'Переключить тему' : 'Toggle theme'}
+                        onClick={toggleTheme}
+                    >
+                        <div className="theme-toggle-track">
+                            <div className="theme-toggle-thumb">
+                                <svg className="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <circle cx="12" cy="12" r="5"/>
+                                    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                                </svg>
+                                <svg className="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </button>
+
+                    <div className="language-selector">
+                        <button 
+                            className={`lang-btn ${language === 'ru' ? 'active' : ''}`}
+                            onClick={() => changeLanguage('ru')}
+                            data-lang="ru"
+                        >
+                            RU
+                        </button>
+                        <button 
+                            className={`lang-btn ${language === 'en' ? 'active' : ''}`}
+                            onClick={() => changeLanguage('en')}
+                            data-lang="en"
+                        >
+                            EN
+                        </button>
+                    </div>
+
+                    <div className="auth-container" id="authContainer">
+                        <a href="/signin" className="auth-login-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                <polyline points="10 17 15 12 10 7"/>
+                                <line x1="15" y1="12" x2="3" y2="12"/>
+                            </svg>
+                            {t('auth.login')}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    );
+}
