@@ -45,6 +45,8 @@ export const translations = {
         'footer.about': 'О нас',
         'footer.contact': 'Контакты',
         'footer.copyright': '© 2026 Alim-lab. Все права защищены.',
+        'nav.dashboard': 'Панель',
+        'nav.logout': 'Выйти',
         'timer.hours': 'часы',
         'timer.minutes': 'мин',
         'timer.seconds': 'сек',
@@ -168,5 +170,7 @@ export const translations = {
         'result.ammonia.desc': 'Nitrogen + Hydrogen = NH₃ — fertilizer',
         'result.noReaction': 'No Reaction',
         'result.noReaction.desc': 'These elements do not react with each other',
+        'nav.dashboard': 'Dashboard',
+        'nav.logout': 'Log out',
     }
 };

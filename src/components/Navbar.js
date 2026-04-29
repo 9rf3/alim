@@ -1,13 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
     const { toggleTheme } = useTheme();
     const { language, changeLanguage, t } = useLanguage();
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
     const [scrolled, setScrolled] = useState(false);
     const [searchExpanded, setSearchExpanded] = useState(false);
     const searchWrapperRef = useRef(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -28,26 +34,43 @@ export default function Navbar() {
         return () => document.removeEventListener('click', handleClickOutside);
     }, []);
 
-    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-    const isDemo = pathname === '/demo';
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+                setDropdownOpen(false);
+            }
+        };
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, []);
+
+    const handleLogout = () => {
+        logout();
+        setDropdownOpen(false);
+        navigate('/');
+    };
+
     const navLinks = [
-        { href: '#home', label: t('nav.home'), active: !isDemo && (pathname === '/' || pathname === '') },
+        { href: '/', label: t('nav.home'), active: true },
         { href: '#labs', label: t('nav.labs') },
-        { href: '/demo', label: t('nav.demo'), active: isDemo },
+        { href: '/demo', label: t('nav.demo') },
         { href: '#features', label: t('nav.features') },
         { href: '#about', label: t('nav.about') },
         { href: '#contact', label: t('nav.contact') },
     ];
 
+    const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+    const isDemo = pathname === '/demo';
+
     return (
         <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar">
             <div className="nav-container">
                 <a href="/" className="logo">
-                    <svg className="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 3L7 17C7 18.6569 8.34315 20 10 20H14C15.6569 20 17 18.6569 17 17L15 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M6 8H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <path d="M8 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        <circle cx="12" cy="17" r="2" fill="currentColor"/>
+                    <svg className="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 3L7 17C7 18.6569 8.34315 20 10 20H14C15.6569 20 17 18.6569 17 17L15 3" strokeLinecap="round"/>
+                        <path d="M6 8H18" strokeLinecap="round"/>
+                        <path d="M7 3H17" strokeLinecap="round"/>
                     </svg>
                     <span className="logo-text">Alim-lab</span>
                 </a>
@@ -57,7 +80,7 @@ export default function Navbar() {
                         <a 
                             key={index}
                             href={link.href} 
-                            className={`nav-link ${link.active ? 'active' : ''}`}
+                            className={`nav-link ${link.active && !isDemo ? 'active' : ''} ${link.href === '/demo' && isDemo ? 'active' : ''}`}
                         >
                             <span>{link.label}</span>
                             <div className="nav-link-line"></div>
@@ -66,7 +89,7 @@ export default function Navbar() {
                 </div>
 
                 <div className="nav-actions">
-                    <div className="search-wrapper" ref={searchWrapperRef}>
+                    <div className={`search-wrapper ${searchExpanded ? 'expanded' : ''}`} ref={searchWrapperRef}>
                         <button 
                             className="icon-btn search-btn" 
                             id="searchBtn"
@@ -120,16 +143,66 @@ export default function Navbar() {
                         </button>
                     </div>
 
-                    <div className="auth-container" id="authContainer">
-                        <a href="/signin" className="auth-login-btn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                                <polyline points="10 17 15 12 10 7"/>
-                                <line x1="15" y1="12" x2="3" y2="12"/>
-                            </svg>
-                            {t('auth.login')}
-                        </a>
-                    </div>
+                    {user ? (
+                        <div className="auth-user-dropdown" ref={dropdownRef}>
+                            <button 
+                                className="auth-user-btn"
+                                onClick={() => setDropdownOpen(!dropdownOpen)}
+                            >
+                                <div className="auth-avatar">
+                                    {user.photoURL ? (
+                                        <img src={user.photoURL} alt="Avatar" />
+                                    ) : (
+                                        <span>{user.displayName?.[0] || 'U'}</span>
+                                    )}
+                                </div>
+                                <span className="auth-user-name">
+                                    {user.displayName || 'User'}
+                                </span>
+                                <svg className={`auth-dropdown-arrow ${dropdownOpen ? 'rotated' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+
+                            {dropdownOpen && (
+                                <div className="auth-dropdown-menu">
+                                    <a 
+                                        href="/dashboard" 
+                                        className="auth-dropdown-item"
+                                        onClick={() => setDropdownOpen(false)}
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                            <circle cx="12" cy="7" r="4"/>
+                                        </svg>
+                                        {t('nav.dashboard', 'Dashboard')}
+                                    </a>
+                                    <button 
+                                        className="auth-dropdown-item"
+                                        onClick={handleLogout}
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                            <polyline points="16 17 21 12 16 7"/>
+                                            <line x1="21" y1="12" x2="9" y2="12"/>
+                                        </svg>
+                                        {t('nav.logout', 'Log out')}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="auth-container" id="authContainer">
+                            <a href="/signin" className="auth-login-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                                    <polyline points="10 17 15 12 10 7"/>
+                                    <line x1="15" y1="12" x2="3" y2="12"/>
+                                </svg>
+                                {t('auth.login')}
+                            </a>
+                        </div>
+                    )}
                 </div>
             </div>
         </nav>

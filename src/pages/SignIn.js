@@ -6,22 +6,22 @@ import '../styles/main.css';
 
 export default function SignIn() {
     const { language } = useLanguage();
-    const { user, login } = useAuth();
+    const { user, login, loading } = useAuth();
     const navigate = useNavigate();
     const [termsChecked, setTermsChecked] = useState(false);
-    const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const termsWrapperRef = useRef(null);
 
     // Redirect if already logged in
     useEffect(() => {
-        if (user) {
+        if (!loading && user) {
             if (user.profileComplete) {
                 navigate('/dashboard');
             } else {
                 navigate('/profile-setup');
             }
         }
-    }, [user, navigate]);
+    }, [user, loading, navigate]);
 
     // Create background particles on mount
     useEffect(() => {
@@ -60,31 +60,29 @@ export default function SignIn() {
     }, [termsChecked]);
 
     const handleGoogleSignIn = async () => {
-        if (!termsChecked || loading) return;
+        if (!termsChecked || googleLoading) return;
 
-        setLoading(true);
+        setGoogleLoading(true);
 
         try {
-            // Mock Google login for demo - replace with actual Firebase in production
-            const mockGoogleUser = {
-                uid: 'user-' + Date.now(),
-                displayName: 'Demo User',
-                email: 'demo@alimlab.com',
-                photoURL: null,
-                role: null,
-                profileComplete: false
-            };
-
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            await login(mockGoogleUser);
-
-            // Redirect to profile setup
-            navigate('/profile-setup');
+            await login();
+            // AuthContext will handle the redirect via the useEffect above
         } catch (error) {
             console.error('Login error:', error);
-            setLoading(false);
+            setGoogleLoading(false);
+
+            // Handle specific errors silently
+            if (error.code === 'auth/popup-closed-by-user') {
+                // Silent
+            } else if (error.code === 'auth/cancelled-popup-request') {
+                // Silent
+            } else {
+                alert(
+                    language === 'ru'
+                        ? 'Ошибка входа: ' + (error.message || 'Попробуйте ещё раз')
+                        : 'Sign in error: ' + (error.message || 'Please try again')
+                );
+            }
         }
     };
 
@@ -93,6 +91,16 @@ export default function SignIn() {
     };
 
     const t = (ruText, enText) => language === 'ru' ? ruText : enText;
+
+    if (loading) {
+        return (
+            <div className="signin-page">
+                <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="signin-page">
@@ -148,10 +156,10 @@ export default function SignIn() {
                 <button
                     className="google-btn"
                     id="googleBtn"
-                    disabled={!termsChecked || loading}
+                    disabled={!termsChecked || googleLoading}
                     onClick={handleGoogleSignIn}
                 >
-                    {loading ? (
+                    {googleLoading ? (
                         <span>{t('Вход...', 'Signing in...')}</span>
                     ) : (
                         <>
