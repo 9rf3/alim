@@ -74,9 +74,9 @@ export default function Navbar() {
             { href: '/profile', label: t('nav.profile', 'Profile'), active: pathname === '/profile' },
         ]
         : [
-            { href: '/', label: t('nav.home'), active: true },
+            { href: '#/', label: t('nav.home'), active: true },
             { href: '#labs', label: t('nav.labs') },
-            { href: '/demo', label: t('nav.demo') },
+            { href: '#/demo', label: t('nav.demo') },
             { href: '#features', label: t('nav.features') },
             { href: '#about', label: t('nav.about') },
             { href: '#contact', label: t('nav.contact') },
@@ -208,7 +208,7 @@ export default function Navbar() {
                                 {dropdownOpen && (
                                     <div className="auth-dropdown-menu">
                                         <a
-                                            href="/profile"
+                                            href="#/profile"
                                             className="auth-dropdown-item"
                                             onClick={() => setDropdownOpen(false)}
                                         >
@@ -219,7 +219,7 @@ export default function Navbar() {
                                             {t('nav.profile', 'Profile')}
                                         </a>
                                         <a
-                                            href="/dashboard"
+                                            href="#/dashboard"
                                             className="auth-dropdown-item"
                                             onClick={() => setDropdownOpen(false)}
                                         >
@@ -249,7 +249,7 @@ export default function Navbar() {
                         </>
                     ) : (
                         <div className="auth-container" id="authContainer">
-                            <a href="/signin" className="auth-login-btn">
+                            <a href="#/signin" className="auth-login-btn">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                                     <polyline points="10 17 15 12 10 7"/>
@@ -264,14 +264,14 @@ export default function Navbar() {
 
             {mobileMenuOpen && user && isAuthPage && (
                 <div className="mobile-menu">
-                    <a href="/" className="mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+                    <a href="#/" className="mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                             <polyline points="9 22 9 12 15 12 15 22"/>
                         </svg>
                         {t('nav.home', 'Home')}
                     </a>
-                    <a href="/dashboard" className="mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+                    <a href="#/dashboard" className="mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <rect x="3" y="3" width="7" height="7"/>
                             <rect x="14" y="3" width="7" height="7"/>
@@ -280,7 +280,7 @@ export default function Navbar() {
                         </svg>
                         {t('nav.dashboard', 'Dashboard')}
                     </a>
-                    <a href="/profile" className="mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
+                    <a href="#/profile" className="mobile-menu-item" onClick={() => setMobileMenuOpen(false)}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                             <circle cx="12" cy="7" r="4"/>
