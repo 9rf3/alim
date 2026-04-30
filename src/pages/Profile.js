@@ -8,18 +8,18 @@ import EditProfileModal from '../components/profile/EditProfileModal';
 import GoalsPlanner from '../components/profile/GoalsPlanner';
 import ActivityHeatmap from '../components/profile/ActivityHeatmap';
 import ReviewsSection from '../components/profile/ReviewsSection';
-import { subjects, getSubjectName } from '../data/subjects';
+import { subjects } from '../data/subjects'; // getSubjectName
 import '../styles/main.css';
 import '../styles/profile.css';
 
 export default function Profile() {
     const { language } = useLanguage();
-    const { user, logout } = useAuth();
+    const { user } = useAuth(); // logout
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
     const [showEditModal, setShowEditModal] = useState(false);
     const [profile, setProfile] = useState(null);
-    const [photoUrl, setPhotoUrl] = useState(null);
+    const [photoUrl, setPhotoUrl] = useState(null); // photoURL
 
     useEffect(() => {
         if (!user) {
@@ -169,6 +169,7 @@ export default function Profile() {
 
                         <div className="profile-section">
                             <div className="profile-section-title">
+                                <div style={{ display: "none"  }}>{displayPhoto}</div>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                                     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
