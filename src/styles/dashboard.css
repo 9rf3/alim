@@ -8,6 +8,12 @@
     padding: 100px 24px 24px;
 }
 
+.dashboard-header-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
 .dashboard-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -102,6 +108,16 @@
     backdrop-filter: blur(20px);
 }
 
+.dashboard-card.clickable {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dashboard-card.clickable:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+}
+
 .dashboard-card h2 {
     font-size: 20px;
     font-weight: 700;
@@ -136,6 +152,19 @@
 .dashboard-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(94, 92, 230, 0.3);
+}
+
+.dashboard-btn.secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #94a3b8;
+}
+
+.dashboard-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    transform: translateY(-2px);
 }
 
 /* Stats Grid */

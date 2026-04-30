@@ -85,8 +85,20 @@ export function AuthProvider({ children }) {
         setUser(updated);
     };
 
+    const updateProfile = (profileData) => {
+        const currentProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+        const updatedProfile = { ...currentProfile, ...profileData };
+        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+
+        if (user) {
+            const updated = { ...user, ...profileData };
+            localStorage.setItem('authUser', JSON.stringify(updated));
+            setUser(updated);
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, loading, login, logout, updateUser }}>
+        <AuthContext.Provider value={{ user, loading, login, logout, updateUser, updateProfile }}>
             {children}
         </AuthContext.Provider>
     );

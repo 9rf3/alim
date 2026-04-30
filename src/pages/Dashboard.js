@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import '../styles/main.css';
 import '../styles/dashboard.css';
 
@@ -9,6 +10,7 @@ export default function Dashboard() {
     const { language } = useLanguage();
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const [photoUrl, setPhotoUrl] = useState(null);
 
     useEffect(() => {
         if (!user) {
@@ -16,21 +18,28 @@ export default function Dashboard() {
         } else if (!user.profileComplete) {
             navigate('/profile-setup');
         }
+        const storedPhoto = localStorage.getItem('userPhoto');
+        if (storedPhoto) {
+            setPhotoUrl(storedPhoto);
+        }
     }, [user, navigate]);
 
     const t = (ruText, enText) => language === 'ru' ? ruText : enText;
 
     if (!user) return null;
 
+    const avatarSrc = photoUrl || user.photoURL;
+
     return (
         <div className="dashboard-page">
+            <Navbar />
             <div className="dashboard-container">
                 {/* Header */}
                 <div className="dashboard-header">
                     <div className="user-greeting">
-                        <div className="user-avatar">
-                            {user.photoURL ? (
-                                <img src={user.photoURL} alt="Avatar" />
+                        <div className="user-avatar" onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }}>
+                            {avatarSrc ? (
+                                <img src={avatarSrc} alt="Avatar" />
                             ) : (
                                 <span>{user.displayName?.[0] || 'U'}</span>
                             )}
@@ -38,16 +47,21 @@ export default function Dashboard() {
                         <div>
                             <h1>{t('Добро пожаловать,', 'Welcome,')} {user.displayName}!</h1>
                             <p className="user-role">
-                                {user.role === 'student' 
+                                {user.role === 'student'
                                     ? t('Ученик', 'Student')
                                     : t('Учитель', 'Teacher')
                                 }
                             </p>
                         </div>
                     </div>
-                    <button className="logout-btn" onClick={() => { logout(); navigate('/'); }}>
-                        {t('Выйти', 'Log out')}
-                    </button>
+                    <div className="dashboard-header-actions">
+                        <button className="dashboard-btn secondary" onClick={() => navigate('/profile')}>
+                            {t('Мой профиль', 'My Profile')}
+                        </button>
+                        <button className="logout-btn" onClick={() => { logout(); navigate('/'); }}>
+                            {t('Выйти', 'Log out')}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Content based on role */}
@@ -67,6 +81,20 @@ export default function Dashboard() {
                             <h2>{t('Рекомендации', 'Recommendations')}</h2>
                             <p className="empty-state">
                                 {t('Курсы будут появляться здесь на основе ваших интересов', 'Courses will appear here based on your interests')}
+                            </p>
+                        </div>
+
+                        <div className="dashboard-card clickable" onClick={() => navigate('/profile')}>
+                            <h2>{t('Мои цели', 'My Goals')}</h2>
+                            <p className="empty-state">
+                                {t('Перейдите в профиль, чтобы управлять целями', 'Go to profile to manage your goals')}
+                            </p>
+                        </div>
+
+                        <div className="dashboard-card clickable" onClick={() => navigate('/profile')}>
+                            <h2>{t('Активность', 'Activity')}</h2>
+                            <p className="empty-state">
+                                {t('Посмотрите свою активность в профиле', 'View your activity in profile')}
                             </p>
                         </div>
                     </div>
@@ -100,6 +128,20 @@ export default function Dashboard() {
                                     <span className="stat-label">{t('Отзывов', 'Reviews')}</span>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="dashboard-card clickable" onClick={() => navigate('/profile')}>
+                            <h2>{t('Мои цели', 'My Goals')}</h2>
+                            <p className="empty-state">
+                                {t('Перейдите в профиль, чтобы управлять целями', 'Go to profile to manage your goals')}
+                            </p>
+                        </div>
+
+                        <div className="dashboard-card clickable" onClick={() => navigate('/profile')}>
+                            <h2>{t('Отзывы студентов', 'Student Reviews')}</h2>
+                            <p className="empty-state">
+                                {t('Посмотрите отзывы в вашем профиле', 'View reviews in your profile')}
+                            </p>
                         </div>
                     </div>
                 )}
