@@ -75,12 +75,67 @@ export function LabProvider({ children }) {
         localStorage.setItem(`labNotifs_${user.uid}`, JSON.stringify(notifications));
     }, [notifications, user]);
 
+    // Sync subjects from userProfile (onboarding) to Lab subscriptions
+    // Also watch for profile changes to keep in sync
     useEffect(() => {
         if (!user) {
             setSubscriptions({ subjects: [], courses: [], teachers: [] });
             setNotifications([]);
+            return;
         }
-    }, [user]);
+        
+        // Read user's selected subjects from profile setup
+        const userProfile = localStorage.getItem('userProfile');
+        if (userProfile) {
+            try {
+                const profile = JSON.parse(userProfile);
+                const profileSubjects = profile.subjectsToStudy || profile.subjectsToTeach || [];
+                
+                setSubscriptions(prev => {
+                    // Always sync profile subjects to subscriptions
+                    const merged = [...prev.subjects];
+                    let changed = false;
+                    
+                    profileSubjects.forEach(s => {
+                        if (!merged.includes(s)) {
+                            merged.push(s);
+                            changed = true;
+                        }
+                    });
+                    
+                    if (changed) {
+                        return { ...prev, subjects: merged };
+                    }
+                    return prev;
+                });
+            } catch (e) {
+                console.error('Error syncing subjects from profile:', e);
+            }
+        }
+    }, [user, subscriptions]); // Re-run when subscriptions change to keep in sync
+
+    // Two-way sync: when Lab subscriptions change, also update userProfile
+    useEffect(() => {
+        if (!user || !subscriptions.subjects.length) return;
+        
+        const userProfile = localStorage.getItem('userProfile');
+        if (userProfile) {
+            try {
+                const profile = JSON.parse(userProfile);
+                const isTeacher = user.role === 'teacher';
+                const field = isTeacher ? 'subjectsToTeach' : 'subjectsToStudy';
+                
+                // Only update if different
+                const current = profile[field] || [];
+                if (JSON.stringify(current.sort()) !== JSON.stringify(subscriptions.subjects.sort())) {
+                    profile[field] = subscriptions.subjects;
+                    localStorage.setItem('userProfile', JSON.stringify(profile));
+                }
+            } catch (e) {
+                console.error('Error syncing subjects to profile:', e);
+            }
+        }
+    }, [subscriptions.subjects, user]);
 
     const subscribeSubject = useCallback((subjectId) => {
         if (!user) return;

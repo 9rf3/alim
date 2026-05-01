@@ -128,7 +128,7 @@ body {
 .nav-container {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    /*justify-content: space-between;*/
     padding: 12px 24px;
     background: var(--glass-bg);
     backdrop-filter: blur(20px);
@@ -2010,8 +2010,40 @@ body.lab-mode .timer-container {
     transform: translateY(0);
 }
 
+.search-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-modal-close {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all var(--transition-fast);
+}
+
+.search-modal-close:hover {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+.search-modal-close svg {
+    width: 18px;
+    height: 18px;
+}
+
 .search-modal-input {
-    width: 100%;
+    flex: 1;
     padding: 16px 20px;
     background: var(--bg-tertiary);
     border: 1px solid var(--glass-border);

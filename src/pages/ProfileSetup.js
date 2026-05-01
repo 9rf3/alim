@@ -85,7 +85,7 @@ export default function ProfileSetup() {
         localStorage.setItem('userProfile', JSON.stringify(profileData));
         updateUser({ profileComplete: true, role });
 
-        navigate('/dashboard');
+        navigate('/labs');
     };
 
     const t = (ruText, enText) => language === 'ru' ? ruText : enText;

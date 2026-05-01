@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { Link } from 'react-router-dom';
 
 export default function Hero() {
     const { t } = useLanguage();
@@ -229,19 +230,19 @@ export default function Hero() {
                     </p>
                     
                     <div className="hero-buttons">
-                        <a href="/signin" className="btn-primary">
+                        <Link to="/signin" className="btn-primary">
                             <span>{t('hero.button.primary')}</span>
                             <svg className="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <path d="M5 12h14M12 5l7 7-7 7"/>
                             </svg>
-                        </a>
-                        <a href="/demo" className="btn-secondary">
+                        </Link>
+                        <Link to="/demo" className="btn-secondary">
                             <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <circle cx="12" cy="12" r="10"/>
                                 <polygon points="10 8 16 12 10 16" fill="currentColor"/>
                             </svg>
                             <span>{t('hero.button.secondary')}</span>
-                        </a>
+                        </Link>
                     </div>
                     
                     <div className="hero-stats">

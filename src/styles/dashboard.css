@@ -4,7 +4,7 @@
 
 .dashboard-page {
     min-height: 100vh;
-    background: linear-gradient(135deg, #0a0f1a 0%, #111827 50%, #1a1f3a 100%);
+    background: var(--bg-primary);
     padding: 100px 24px 24px;
 }
 
@@ -24,8 +24,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: linear-gradient(135deg, rgba(16, 24, 48, 0.95), rgba(24, 36, 72, 0.9));
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
     border-radius: 20px;
     padding: 24px 32px;
     margin-bottom: 24px;
@@ -59,27 +59,27 @@
 .user-avatar span {
     font-size: 24px;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .user-greeting h1 {
     font-size: 24px;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
 .user-role {
     font-size: 14px;
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 .logout-btn {
     padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
     border-radius: 10px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     font-family: inherit;
     font-size: 14px;
     font-weight: 500;
@@ -88,9 +88,9 @@
 }
 
 .logout-btn:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.25);
-    color: #fff;
+    background: var(--bg-secondary);
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
 }
 
 /* Content */
@@ -101,8 +101,8 @@
 }
 
 .dashboard-card {
-    background: linear-gradient(135deg, rgba(16, 24, 48, 0.95), rgba(24, 36, 72, 0.9));
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
     border-radius: 20px;
     padding: 32px;
     backdrop-filter: blur(20px);
@@ -114,16 +114,16 @@
 }
 
 .dashboard-card.clickable:hover {
-    border-color: rgba(59, 130, 246, 0.3);
+    border-color: var(--accent-primary);
     transform: translateY(-2px);
 }
 
 .dashboard-card h2 {
     font-size: 20px;
     font-weight: 700;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 16px;
-    background: linear-gradient(135deg, #fff, #a5b4fc);
+    background: var(--accent-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -131,14 +131,14 @@
 
 .empty-state {
     font-size: 15px;
-    color: #94a3b8;
+    color: var(--text-secondary);
     line-height: 1.6;
     margin-bottom: 20px;
 }
 
 .dashboard-btn {
     padding: 12px 24px;
-    background: linear-gradient(90deg, #0A84FF, #5E5CE6);
+    background: var(--accent-gradient);
     border: none;
     border-radius: 10px;
     color: #fff;
@@ -151,19 +151,19 @@
 
 .dashboard-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(94, 92, 230, 0.3);
+    box-shadow: 0 8px 24px var(--glow-secondary);
 }
 
 .dashboard-btn.secondary {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #94a3b8;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
 }
 
 .dashboard-btn.secondary:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.25);
-    color: #fff;
+    background: var(--bg-secondary);
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
     transform: translateY(-2px);
 }
 
@@ -178,22 +178,22 @@
 .stat-item {
     text-align: center;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--glass-bg);
     border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--glass-border);
 }
 
 .stat-number {
     display: block;
     font-size: 32px;
     font-weight: 700;
-    color: #3b82f6;
+    color: var(--accent-primary);
     margin-bottom: 4px;
 }
 
 .stat-label {
     font-size: 13px;
-    color: #94a3b8;
+    color: var(--text-secondary);
 }
 
 /* Responsive */

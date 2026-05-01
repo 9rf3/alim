@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useLab } from '../contexts/LabContext';
 import Navbar from '../components/Navbar';
+import '../styles/main.css';
 import '../styles/laboratories.css';
 
 export default function Laboratories() {
@@ -72,9 +73,24 @@ export default function Laboratories() {
         setShowAddCourse(false);
     };
 
-    const filteredCourses = filterSubject
-        ? getSubjectCourses(filterSubject)
-        : courses;
+    // Sort courses: user's subjects first, then others
+    // "Browse All" shows only subscribed subjects' courses
+    const getSortedCourses = () => {
+        if (filterSubject) {
+            return getSubjectCourses(filterSubject);
+        }
+        
+        // Only show courses for user's subscribed subjects
+        const userSubjects = subscriptions.subjects;
+        if (userSubjects.length > 0) {
+            return courses.filter(c => userSubjects.includes(c.subject));
+        }
+        
+        // If no subjects subscribed, show none (user must pick subjects first)
+        return [];
+    };
+    
+    const filteredCourses = getSortedCourses();
 
     const teacherMyCourses = isTeacher ? courses.filter(c => c.teacherId === user?.uid) : [];
 
@@ -273,7 +289,7 @@ export default function Laboratories() {
                                                     <span className="labs-course-stat">{course.studentCount} students</span>
                                                     <span className="labs-course-stat">{course.lessons} lessons</span>
                                                 </div>
-                                                <button className="labs-continue-btn">Continue Learning</button>
+                                                <button className="labs-continue-btn" onClick={() => navigate(`/labs?course=${course.id}`)}>Continue Learning</button>
                                             </div>
                                         ))
                                     ) : (
@@ -343,7 +359,7 @@ export default function Laboratories() {
                                                     {course.price === 'free' ? 'Free' : 'Premium'}
                                                 </span>
                                                 {subscribed ? (
-                                                    <button className="labs-continue-btn">Continue</button>
+                                                    <button className="labs-continue-btn" onClick={() => navigate(`/labs?course=${course.id}`)}>Continue</button>
                                                 ) : (
                                                     <button className="labs-subscribe-btn" onClick={() => handleSubscribeCourse(course.id)}>
                                                         Enroll Now

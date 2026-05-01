@@ -18,6 +18,7 @@ export default function AdminUsers({ globalSearch }) {
         const profileData = localStorage.getItem('userProfile');
         const allUsers = [];
 
+        // Load current logged in user if exists
         if (authData) {
             const auth = JSON.parse(authData);
             const profile = profileData ? JSON.parse(profileData) : {};
@@ -29,17 +30,17 @@ export default function AdminUsers({ globalSearch }) {
             });
         }
 
+        // Load any additional registered users from admin storage
         const storedUsers = JSON.parse(localStorage.getItem('adminUsers') || '[]');
-        allUsers.push(...storedUsers);
-
-        if (allUsers.length === 0) {
-            allUsers.push(
-                { uid: '1', displayName: 'John Student', email: 'john@example.com', role: 'student', age: 20, subjectsToStudy: ['math', 'programming'], status: 'active', bio: 'Studying computer science', registeredAt: '2026-04-15T10:00:00Z' },
-                { uid: '2', displayName: 'Dr. Sarah Teacher', email: 'sarah@example.com', role: 'teacher', age: 35, subjectsToTeach: ['math', 'physics'], coursePrice: '$50/course', experience: '10 years', availability: 'Mon-Fri 18:00-21:00', status: 'active', bio: 'PhD in Mathematics', registeredAt: '2026-04-10T08:00:00Z' },
-                { uid: '3', displayName: 'Mike Learner', email: 'mike@example.com', role: 'student', age: 22, subjectsToStudy: ['english', 'history'], status: 'active', bio: '', registeredAt: '2026-04-20T14:00:00Z' },
-            );
-            localStorage.setItem('adminUsers', JSON.stringify(allUsers.slice(1)));
-        }
+        // Filter out any demo/fake users (those without valid email domains or with example.com)
+        const realUsers = storedUsers.filter(u => 
+            u.email && 
+            !u.email.includes('example.com') &&
+            u.email !== 'john@example.com' &&
+            u.email !== 'sarah@example.com' &&
+            u.email !== 'mike@example.com'
+        );
+        allUsers.push(...realUsers);
 
         setUsers(allUsers);
     };

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import '../styles/main.css';
 
 export default function SignIn() {
@@ -16,7 +16,7 @@ export default function SignIn() {
     useEffect(() => {
         if (!loading && user) {
             if (user.profileComplete) {
-                navigate('/dashboard');
+                navigate('/labs');
             } else {
                 navigate('/profile-setup');
             }
@@ -182,12 +182,12 @@ export default function SignIn() {
                     {t('Продолжить без входа', 'Continue without sign in')}
                 </button>
 
-                <a href="/" className="back-link">
+                <Link to="/" className="back-link">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M19 12H5M12 19l-7-7 7-7" />
                     </svg>
                     {t('Вернуться на главную', 'Back to home')}
-                </a>
+                </Link>
             </div>
         </div>
     );

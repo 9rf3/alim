@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import Timer from '../components/Timer';
@@ -5,9 +6,48 @@ import Features from '../components/Features';
 import About from '../components/About';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
+import { useLanguage } from '../contexts/LanguageContext';
 import '../styles/main.css';
 
 export default function Home() {
+    const { language } = useLanguage();
+    const [searchOpen, setSearchOpen] = useState(false);
+    
+    useEffect(() => {
+        // Initialize theme from localStorage
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    }, []);
+    
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            // Escape key to close search
+            if (e.key === 'Escape' && searchOpen) {
+                setSearchOpen(false);
+            }
+            // Ctrl+K or Cmd+K to open search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                setSearchOpen(true);
+            }
+        };
+        
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [searchOpen]);
+    
+    const openSearch = () => setSearchOpen(true);
+    const closeSearch = () => setSearchOpen(false);
+    
+    // Add search button listener after mount
+    useEffect(() => {
+        const searchBtn = document.getElementById('searchBtn');
+        if (searchBtn) {
+            searchBtn.addEventListener('click', openSearch);
+            return () => searchBtn.removeEventListener('click', openSearch);
+        }
+    }, []);
+    
     return (
         <div className="App">
             <div className="floating-bg">
@@ -51,15 +91,24 @@ export default function Home() {
             
             <Footer />
             
-            <div className="search-modal" id="searchModal">
-                <div className="search-modal-overlay" id="searchOverlay"></div>
+            <div className={`search-modal ${searchOpen ? 'active' : ''}`} id="searchModal">
+                <div className="search-modal-overlay" onClick={closeSearch}></div>
                 <div className="search-modal-content">
-                    <input 
-                        type="text" 
-                        className="search-modal-input" 
-                        placeholder="Поиск по лаборатории..." 
-                        id="searchModalInput"
-                    />
+                    <div className="search-modal-header">
+                        <input 
+                            type="text" 
+                            className="search-modal-input" 
+                            placeholder={language === 'ru' ? 'Поиск по лаборатории...' : 'Search the lab...'} 
+                            id="searchModalInput"
+                            autoFocus={searchOpen}
+                        />
+                        <button className="search-modal-close" onClick={closeSearch}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
                     <div className="search-results" id="searchResults"></div>
                 </div>
             </div>

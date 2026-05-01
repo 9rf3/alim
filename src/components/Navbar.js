@@ -3,7 +3,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useLab } from '../contexts/LabContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 
 export default function Navbar() {
     const { toggleTheme } = useTheme();
@@ -106,25 +106,25 @@ export default function Navbar() {
         <>
             <nav className={`navbar ${scrolled ? 'scrolled' : ''}`} id="navbar">
                 <div className="nav-container">
-                    <a href="/" className="logo">
+                    <Link to="/" className="logo">
                         <svg className="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M9 3L7 17C7 18.6569 8.34315 20 10 20H14C15.6569 20 17 18.6569 17 17L15 3" strokeLinecap="round"/>
                             <path d="M6 8H18" strokeLinecap="round"/>
                             <path d="M7 3H17" strokeLinecap="round"/>
                         </svg>
                         <span className="logo-text">Alim-lab</span>
-                    </a>
+                    </Link>
 
                     <div className="nav-links">
                         {navLinks.map((link, index) => (
-                            <a
+                            <Link
                                 key={index}
-                                href={link.href}
+                                to={link.href}
                                 className={`nav-link ${link.active ? 'active' : ''}`}
                             >
                                 <span>{link.label}</span>
                                 <div className="nav-link-line"></div>
-                            </a>
+                            </Link>
                         ))}
                     </div>
 
@@ -133,7 +133,16 @@ export default function Navbar() {
                             <button
                                 className="icon-btn search-btn"
                                 id="searchBtn"
-                                onClick={() => document.getElementById('searchModal')?.classList.add('active')}
+                                onClick={() => {
+                                    const modal = document.getElementById('searchModal');
+                                    if (modal) {
+                                        modal.classList.add('active');
+                                        setTimeout(() => {
+                                            const input = document.getElementById('searchModalInput');
+                                            input?.focus();
+                                        }, 100);
+                                    }
+                                }}
                             >
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <circle cx="11" cy="11" r="8"/>
@@ -264,22 +273,22 @@ export default function Navbar() {
 
                                     {dropdownOpen && (
                                         <div className="auth-dropdown-menu">
-                                            <a href="/profile" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
+                                            <Link to="/profile" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                                                     <circle cx="12" cy="7" r="4"/>
                                                 </svg>
-                                                {t('nav.profile', 'Profile')}
-                                            </a>
-                                            <a href="/dashboard" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
+                                                {t('Profile')}
+                                            </Link>
+                                             <Link to="/dashboard" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                     <rect x="3" y="3" width="7" height="7"/>
                                                     <rect x="14" y="3" width="7" height="7"/>
                                                     <rect x="14" y="14" width="7" height="7"/>
                                                     <rect x="3" y="14" width="7" height="7"/>
                                                 </svg>
-                                                {t('nav.dashboard', 'Dashboard')}
-                                            </a>
+                                                {t('Dashboard')}
+                                            </Link>
                                             <div className="auth-dropdown-divider"></div>
                                             <button className="auth-dropdown-item logout-item" onClick={handleLogout}>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -295,14 +304,14 @@ export default function Navbar() {
                             </>
                         ) : (
                             <div className="auth-container">
-                                <a href="/signin" className="auth-login-btn">
+                                 <Link to="/signin" className="auth-login-btn">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                                         <polyline points="10 17 15 12 10 7"/>
                                         <line x1="15" y1="12" x2="3" y2="12"/>
                                     </svg>
                                     {t('auth.login')}
-                                </a>
+                                </Link>
                             </div>
                         )}
                     </div>
@@ -391,15 +400,15 @@ export default function Navbar() {
                     <div className="mobile-menu-section">
                         <div className="mobile-menu-label">Navigation</div>
                         {navLinks.map((link, index) => (
-                            <a
+                            <Link
                                 key={index}
-                                href={link.href}
+                                to={link.href}
                                 className={`mobile-menu-item ${link.active ? 'active' : ''}`}
                                 onClick={handleMobileNavClick}
                             >
                                 <span>{link.label}</span>
                                 {link.active && <div className="mobile-menu-active-dot"></div>}
-                            </a>
+                            </Link>
                         ))}
                     </div>
 
@@ -447,14 +456,14 @@ export default function Navbar() {
                                         <div className="mobile-user-email">{user.email}</div>
                                     </div>
                                 </div>
-                                <a href="/profile" className="mobile-menu-item" onClick={handleMobileNavClick}>
+                                <Link to="/profile" className="mobile-menu-item" onClick={handleMobileNavClick}>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                                         <circle cx="12" cy="7" r="4"/>
                                     </svg>
                                     <span>{t('nav.profile', 'Profile')}</span>
-                                </a>
-                                <a href="/dashboard" className="mobile-menu-item" onClick={handleMobileNavClick}>
+                                </Link>
+                                <Link to="/dashboard" className="mobile-menu-item" onClick={handleMobileNavClick}>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <rect x="3" y="3" width="7" height="7"/>
                                         <rect x="14" y="3" width="7" height="7"/>
@@ -462,15 +471,15 @@ export default function Navbar() {
                                         <rect x="3" y="14" width="7" height="7"/>
                                     </svg>
                                     <span>{t('nav.dashboard', 'Dashboard')}</span>
-                                </a>
+                                </Link>
                                 {isAdmin && (
-                                    <a href="/admin" className="mobile-menu-item" onClick={handleMobileNavClick}>
+                                     <Link to="/admin" className="mobile-menu-item" onClick={handleMobileNavClick}>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <circle cx="12" cy="12" r="3"/>
                                             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                                         </svg>
                                         <span>Admin Panel</span>
-                                    </a>
+                                    </Link>
                                 )}
                                 <div className="mobile-menu-divider"></div>
                                 <button className="mobile-menu-item mobile-logout-btn" onClick={handleLogout}>
@@ -489,14 +498,14 @@ export default function Navbar() {
                         <>
                             <div className="mobile-menu-divider"></div>
                             <div className="mobile-menu-section mobile-auth-section">
-                                <a href="/signin" className="mobile-menu-item mobile-signin-btn" onClick={handleMobileNavClick}>
+                                <Link to="/signin" className="mobile-menu-item mobile-signin-btn" onClick={handleMobileNavClick}>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
                                         <polyline points="10 17 15 12 10 7"/>
                                         <line x1="15" y1="12" x2="3" y2="12"/>
                                     </svg>
                                     <span>{t('auth.login', 'Sign in')}</span>
-                                </a>
+                                </Link>
                             </div>
                         </>
                     )}
