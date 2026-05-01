@@ -2,12 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useLab } from '../contexts/LabContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function Navbar() {
     const { toggleTheme } = useTheme();
     const { language, changeLanguage, t } = useLanguage();
     const { user, logout } = useAuth();
+    const { notifications, unreadCount, markNotificationRead, markAllNotificationsRead, deleteNotification, clearAllNotifications } = useLab();
     const navigate = useNavigate();
     const location = useLocation();
     const [scrolled, setScrolled] = useState(false);
@@ -15,10 +17,12 @@ export default function Navbar() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
     const [mobileSearchValue, setMobileSearchValue] = useState('');
+    const [notifOpen, setNotifOpen] = useState(false);
     const dropdownRef = useRef(null);
     const mobileMenuRef = useRef(null);
     const hamburgerRef = useRef(null);
     const mobileSearchRef = useRef(null);
+    const notifRef = useRef(null);
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -30,6 +34,9 @@ export default function Navbar() {
         const handleClickOutside = (e) => {
             if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
                 setDropdownOpen(false);
+            }
+            if (notifRef.current && !notifRef.current.contains(e.target)) {
+                setNotifOpen(false);
             }
         };
         document.addEventListener('click', handleClickOutside);
@@ -81,11 +88,11 @@ export default function Navbar() {
         ]
         : [
             { href: '/', label: t('nav.home'), active: pathname === '/' },
-            { href: '#labs', label: t('nav.labs'), active: false },
+            { href: '/labs', label: t('nav.labs'), active: pathname === '/labs' },
             { href: '/demo', label: t('nav.demo'), active: pathname === '/demo' },
-            { href: '#features', label: t('nav.features'), active: false },
-            { href: '#about', label: t('nav.about'), active: false },
-            { href: '#contact', label: t('nav.contact'), active: false },
+            // { href: '#features', label: t('nav.features'), active: false },
+            // { href: '#about', label: t('nav.about'), active: false },
+            // { href: '#contact', label: t('nav.contact'), active: false },
         ];
 
     const handleMobileSearch = (e) => {
@@ -134,6 +141,71 @@ export default function Navbar() {
                                 </svg>
                             </button>
                         </div>
+
+                        {user && (
+                            <div className="notif-wrapper" ref={notifRef}>
+                                <button
+                                    className="icon-btn notif-btn"
+                                    onClick={() => setNotifOpen(!notifOpen)}
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                    </svg>
+                                    {unreadCount > 0 && <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                                </button>
+
+                                {notifOpen && (
+                                    <div className="notif-dropdown">
+                                        <div className="notif-header">
+                                            <h4>Notifications</h4>
+                                            <div className="notif-actions">
+                                                {notifications.length > 0 && (
+                                                    <button onClick={() => { markAllNotificationsRead(); }}>Mark all read</button>
+                                                )}
+                                                {notifications.length > 0 && (
+                                                    <button onClick={() => { clearAllNotifications(); }}>Clear</button>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="notif-list">
+                                            {notifications.length === 0 ? (
+                                                <div className="notif-empty">No notifications yet</div>
+                                            ) : (
+                                                notifications.slice(0, 10).map(notif => (
+                                                    <div
+                                                        key={notif.id}
+                                                        className={`notif-item ${notif.read ? 'read' : 'unread'}`}
+                                                        onClick={() => { markNotificationRead(notif.id); if (notif.linkTo) navigate(notif.linkTo); setNotifOpen(false); }}
+                                                    >
+                                                        <div className="notif-icon">
+                                                            {notif.type === 'subject' && '📚'}
+                                                            {notif.type === 'course' && '🎓'}
+                                                            {notif.type === 'teacher' && '👨‍🏫'}
+                                                            {notif.type === 'new_course' && '✨'}
+                                                            {notif.type === 'lesson_update' && '📝'}
+                                                        </div>
+                                                        <div className="notif-content">
+                                                            <div className="notif-title">{notif.title}</div>
+                                                            <div className="notif-message">{notif.message}</div>
+                                                            <div className="notif-time">{new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                                        </div>
+                                                        <button
+                                                            className="notif-delete"
+                                                            onClick={(e) => { e.stopPropagation(); deleteNotification(notif.id); }}
+                                                        >
+                                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                                                                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
                         <button
                             className="theme-toggle theme-toggle-desktop"
@@ -259,45 +331,61 @@ export default function Navbar() {
                 </div>
             </nav>
 
-            {/* Mobile Menu Overlay */}
-            <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={closeMobileMenu}></div>
+                    {/* Mobile Menu Overlay */}
+                    <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'active' : ''}`} onClick={closeMobileMenu}></div>
 
-            {/* Mobile Menu */}
-            <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`} ref={mobileMenuRef}>
-                <div className="mobile-menu-scroll">
-                    {/* Search Section */}
-                    <div className="mobile-menu-section mobile-search-section">
-                        {mobileSearchOpen ? (
-                            <form className="mobile-search-form" onSubmit={handleMobileSearch} ref={mobileSearchRef}>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="11" cy="11" r="8"/>
-                                    <path d="M21 21L16.65 16.65"/>
-                                </svg>
-                                <input
-                                    type="text"
-                                    className="mobile-search-input"
-                                    placeholder={language === 'ru' ? 'Поиск по лаборатории...' : 'Search the lab...'}
-                                    value={mobileSearchValue}
-                                    onChange={(e) => setMobileSearchValue(e.target.value)}
-                                    autoFocus
-                                />
-                                <button type="button" className="mobile-search-close" onClick={() => setMobileSearchOpen(false)}>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <line x1="18" y1="6" x2="6" y2="18"/>
-                                        <line x1="6" y1="6" x2="18" y2="18"/>
-                                    </svg>
-                                </button>
-                            </form>
-                        ) : (
-                            <button className="mobile-menu-item mobile-search-btn" onClick={() => setMobileSearchOpen(true)}>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="11" cy="11" r="8"/>
-                                    <path d="M21 21L16.65 16.65"/>
-                                </svg>
-                                <span>{language === 'ru' ? 'Поиск' : 'Search'}</span>
-                            </button>
-                        )}
-                    </div>
+                    {/* Mobile Menu */}
+                    <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`} ref={mobileMenuRef}>
+                        <div className="mobile-menu-scroll">
+                            {/* Search Section */}
+                            <div className="mobile-menu-section mobile-search-section">
+                                {mobileSearchOpen ? (
+                                    <form className="mobile-search-form" onSubmit={handleMobileSearch} ref={mobileSearchRef}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <circle cx="11" cy="11" r="8"/>
+                                            <path d="M21 21L16.65 16.65"/>
+                                        </svg>
+                                        <input
+                                            type="text"
+                                            className="mobile-search-input"
+                                            placeholder={language === 'ru' ? 'Поиск по лаборатории...' : 'Search the lab...'}
+                                            value={mobileSearchValue}
+                                            onChange={(e) => setMobileSearchValue(e.target.value)}
+                                            autoFocus
+                                        />
+                                        <button type="button" className="mobile-search-close" onClick={() => setMobileSearchOpen(false)}>
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                                <line x1="6" y1="6" x2="18" y2="18"/>
+                                            </svg>
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <button className="mobile-menu-item mobile-search-btn" onClick={() => setMobileSearchOpen(true)}>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <circle cx="11" cy="11" r="8"/>
+                                            <path d="M21 21L16.65 16.65"/>
+                                        </svg>
+                                        <span>{language === 'ru' ? 'Поиск' : 'Search'}</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            {user && unreadCount > 0 && (
+                                <div className="mobile-menu-section mobile-notif-section">
+                                    <button
+                                        className="mobile-menu-item mobile-notif-btn"
+                                        onClick={() => { navigate('/labs'); closeMobileMenu(); }}
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                                        </svg>
+                                        <span>Notifications</span>
+                                        <span className="mobile-notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+                                    </button>
+                                </div>
+                            )}
 
                     {/* Navigation Links */}
                     <div className="mobile-menu-section">
