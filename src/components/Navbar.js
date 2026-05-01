@@ -78,11 +78,15 @@ export default function Navbar() {
     const isAdmin = user?.email === 'admin@alimlab.com';
 
     const pathname = location.pathname;
-    const isAuthPage = ['/signin', '/profile-setup', '/dashboard', '/profile'].includes(pathname);
+    const isAuthPage = ['/signin', '/profile-setup', '/dashboard', '/profile', '/cabinet', '/cabinet/laboratory', '/cabinet/payment', '/cabinet/library', '/cabinet/study-plan', '/cabinet/simulations', '/cabinet/editor', '/cabinet/certificates', '/cabinet/data', '/cabinet/marketplace', '/teacher', '/teacher/dashboard', '/teacher/video', '/teacher/quiz', '/teacher/pricing', '/teacher/resources', '/teacher/laboratory', '/teacher/students', '/teacher/earnings', '/teacher/analytics'].some(p => pathname.startsWith(p));
 
     const navLinks = isAuthPage
         ? [
             { href: '/', label: t('nav.home', 'Home'), active: pathname === '/' },
+            ...(user?.role === 'teacher'
+                ? [{ href: '/teacher', label: t('nav.teacher', 'Teacher'), active: pathname.startsWith('/teacher') }]
+                : [{ href: '/cabinet', label: t('nav.cabinet', 'Cabinet'), active: pathname.startsWith('/cabinet') }]
+            ),
             { href: '/dashboard', label: t('nav.dashboard', 'Dashboard'), active: pathname === '/dashboard' },
             { href: '/profile', label: t('nav.profile', 'Profile'), active: pathname === '/profile' },
         ]
@@ -90,9 +94,6 @@ export default function Navbar() {
             { href: '/', label: t('nav.home'), active: pathname === '/' },
             { href: '/labs', label: t('nav.labs'), active: pathname === '/labs' },
             { href: '/demo', label: t('nav.demo'), active: pathname === '/demo' },
-            // { href: '#features', label: t('nav.features'), active: false },
-            // { href: '#about', label: t('nav.about'), active: false },
-            // { href: '#contact', label: t('nav.contact'), active: false },
         ];
 
     const handleMobileSearch = (e) => {
@@ -273,6 +274,22 @@ export default function Navbar() {
 
                                     {dropdownOpen && (
                                         <div className="auth-dropdown-menu">
+                                            {user.role === 'teacher' && (
+                                                <Link to="/teacher" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                                                    </svg>
+                                                    {t('Teacher Cabinet', 'Кабинет учителя')}
+                                                </Link>
+                                            )}
+                                            {user.role === 'student' && (
+                                                <Link to="/cabinet" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                                                    </svg>
+                                                    {t('Student Cabinet', 'Кабинет')}
+                                                </Link>
+                                            )}
                                             <Link to="/profile" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -282,10 +299,7 @@ export default function Navbar() {
                                             </Link>
                                              <Link to="/dashboard" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                    <rect x="3" y="3" width="7" height="7"/>
-                                                    <rect x="14" y="3" width="7" height="7"/>
-                                                    <rect x="14" y="14" width="7" height="7"/>
-                                                    <rect x="3" y="14" width="7" height="7"/>
+                                                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
                                                 </svg>
                                                 {t('Dashboard')}
                                             </Link>
@@ -396,21 +410,31 @@ export default function Navbar() {
                                 </div>
                             )}
 
-                    {/* Navigation Links */}
-                    <div className="mobile-menu-section">
-                        <div className="mobile-menu-label">Navigation</div>
-                        {navLinks.map((link, index) => (
-                            <Link
-                                key={index}
-                                to={link.href}
-                                className={`mobile-menu-item ${link.active ? 'active' : ''}`}
-                                onClick={handleMobileNavClick}
-                            >
-                                <span>{link.label}</span>
-                                {link.active && <div className="mobile-menu-active-dot"></div>}
-                            </Link>
-                        ))}
-                    </div>
+                            <div className="mobile-menu-section">
+                                <div className="mobile-menu-label">Navigation</div>
+                                {navLinks.map((link, index) => (
+                                    <Link
+                                        key={index}
+                                        to={link.href}
+                                        className={`mobile-menu-item ${link.active ? 'active' : ''}`}
+                                        onClick={handleMobileNavClick}
+                                    >
+                                        <span>{link.label}</span>
+                                        {link.active && <div className="mobile-menu-active-dot"></div>}
+                                    </Link>
+                                ))}
+                                <Link
+                                    to="/cabinet"
+                                    className={`mobile-menu-item ${pathname.startsWith('/cabinet') ? 'active' : ''}`}
+                                    onClick={handleMobileNavClick}
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                                    </svg>
+                                    <span>{language === 'ru' ? 'Кабинет' : 'Cabinet'}</span>
+                                    {pathname.startsWith('/cabinet') && <div className="mobile-menu-active-dot"></div>}
+                                </Link>
+                            </div>
 
                     {/* Controls */}
                     <div className="mobile-menu-section">
