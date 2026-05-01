@@ -137,6 +137,16 @@ export function LabProvider({ children }) {
         }
     }, [subscriptions.subjects, user]);
 
+    const addNotification = useCallback((notif) => {
+        const newNotif = {
+            id: `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            ...notif,
+            read: false,
+            timestamp: new Date().toISOString()
+        };
+        setNotifications(prev => [newNotif, ...prev]);
+    }, []);
+
     const subscribeSubject = useCallback((subjectId) => {
         if (!user) return;
         setSubscriptions(prev => {
@@ -149,7 +159,7 @@ export function LabProvider({ children }) {
             message: `${getSubjectName(subjectId)} has been added to your learning subjects.`,
             linkTo: `/labs?subject=${subjectId}`
         });
-    }, [user]);
+    }, [user, addNotification]);
 
     const unsubscribeSubject = useCallback((subjectId) => {
         setSubscriptions(prev => ({
@@ -176,7 +186,7 @@ export function LabProvider({ children }) {
             message: `You've enrolled in "${course?.title}". Happy learning!`,
             linkTo: `/labs?course=${courseId}`
         });
-    }, [user, courses]);
+    }, [user, courses, addNotification]);
 
     const unsubscribeCourse = useCallback((courseId) => {
         setSubscriptions(prev => ({
@@ -198,23 +208,13 @@ export function LabProvider({ children }) {
             message: `You're now following ${teacher?.name}. You'll receive updates about new courses and lessons.`,
             linkTo: `/labs?teacher=${teacherId}`
         });
-    }, [user, teachers]);
+    }, [user, teachers, addNotification]);
 
     const unfollowTeacher = useCallback((teacherId) => {
         setSubscriptions(prev => ({
             ...prev,
             teachers: prev.teachers.filter(t => t !== teacherId)
         }));
-    }, []);
-
-    const addNotification = useCallback((notif) => {
-        const newNotif = {
-            id: `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            ...notif,
-            read: false,
-            timestamp: new Date().toISOString()
-        };
-        setNotifications(prev => [newNotif, ...prev]);
     }, []);
 
     const markNotificationRead = useCallback((id) => {
