@@ -644,15 +644,199 @@ body {
     animation: pulse-glow 2s ease-in-out infinite;
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
     .lab-container {
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr auto;
+        padding: 100px 16px 16px;
     }
 
     .elements-grid {
         grid-template-columns: repeat(4, 1fr);
+    }
+
+    .elements-panel {
+        padding: 20px;
+    }
+
+    .panel-title {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        top: 10px;
+        width: calc(100% - 20px);
+    }
+
+    .nav-container {
+        padding: 10px 14px;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .language-selector {
+        display: none;
+    }
+
+    .lab-container {
+        padding: 90px 12px 12px;
+        gap: 16px;
+    }
+
+    .elements-panel {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    .panel-title {
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+
+    .panel-subtitle {
+        font-size: 13px;
+        margin-bottom: 12px;
+    }
+
+    .elements-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+
+    .element-card {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .element-symbol {
+        font-size: 24px;
+    }
+
+    .element-name {
+        font-size: 10px;
+    }
+
+    .element-number {
+        font-size: 9px;
+    }
+
+    .selection-formula {
+        font-size: 20px;
+    }
+
+    .flask-area {
+        border-radius: 16px;
+    }
+
+    .flask-header {
+        padding: 16px;
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .flask-title {
+        font-size: 16px;
+    }
+
+    .experiment-btn {
+        padding: 12px 24px;
+        font-size: 14px;
+        width: 100%;
+    }
+
+    .flask-canvas-container {
+        min-height: 300px;
+    }
+
+    .result-panel {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 20px;
+        border-radius: 16px;
+    }
+
+    .result-title {
+        font-size: 22px;
+    }
+
+    .result-formula {
+        font-size: 16px;
+    }
+
+    .result-description {
+        font-size: 13px;
+    }
+
+    .control-btns {
+        width: 100%;
+    }
+
+    .btn-secondary {
+        flex: 1;
+        padding: 12px 20px;
+        font-size: 13px;
+    }
+
+    .demo-greeting {
+        top: 70px;
+        padding: 10px 18px;
+        font-size: 14px;
+    }
+
+    .search-input.active {
+        width: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lab-container {
+        padding: 80px 8px 8px;
+    }
+
+    .elements-panel {
+        padding: 12px;
+    }
+
+    .elements-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .element-card {
+        padding: 10px;
+    }
+
+    .element-symbol {
+        font-size: 20px;
+    }
+
+    .element-name {
+        font-size: 9px;
+    }
+
+    .flask-canvas-container {
+        min-height: 250px;
+    }
+
+    .result-panel {
+        padding: 16px;
+    }
+
+    .result-title {
+        font-size: 18px;
+    }
+
+    .result-formula {
+        font-size: 14px;
+    }
+
+    .btn-secondary {
+        padding: 10px 16px;
+        font-size: 12px;
     }
 }
 

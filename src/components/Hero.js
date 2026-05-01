@@ -1,9 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 
-export default function Hero({ onInteraction }) {
+export default function Hero() {
     const { t } = useLanguage();
-    const [hasInteracted, setHasInteracted] = useState(false);
     const canvasRef = useRef(null);
 
     useEffect(() => {
@@ -181,6 +180,20 @@ export default function Hero({ onInteraction }) {
             liqGrad.addColorStop(1, 'rgba(94, 92, 230, 0.7)');
             ctx.fillStyle = liqGrad;
             ctx.fill();
+
+            const bubbleCount = 5;
+            for (let i = 0; i < bubbleCount; i++) {
+                const bx = cx + Math.sin(time * 3 + i * 1.5) * (flaskWidth / 4);
+                const by = liquidY + (liquidH * (0.2 + (i * 0.15) + (Math.sin(time * 2 + i) * 0.1)));
+                const bSize = 1.5 + Math.sin(time * 4 + i) * 0.8;
+                if (by < liquidY + liquidH && by > liquidY) {
+                    ctx.beginPath();
+                    ctx.arc(bx, by, bSize, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                    ctx.fill();
+                }
+            }
+
             ctx.restore();
         };
 
@@ -190,13 +203,6 @@ export default function Hero({ onInteraction }) {
             if (animationId) cancelAnimationFrame(animationId);
         };
     }, []);
-
-    const handleSceneClick = () => {
-        if (!hasInteracted) {
-            setHasInteracted(true);
-            if (onInteraction) onInteraction();
-        }
-    };
 
     return (
         <section className="hero" id="home">
@@ -214,65 +220,50 @@ export default function Hero({ onInteraction }) {
                         <span className="title-line gradient-text">{t('hero.title.line2')}</span>
                     </h1>
                     
-                    {!hasInteracted && (
-                        <div className="hero-hint" id="heroHint">
-                            <div className="hint-arrow">↓</div>
-                            <span>{t('hero.hint.initial')}</span>
-                        </div>
-                    )}
+                    <div className="hero-value-message">
+                        <p>{t('hero.value')}</p>
+                    </div>
                     
-                    {hasInteracted && (
-                        <>
-                            <div className="hero-value-message" id="valueMessage">
-                                <p>{t('hero.value')}</p>
-                            </div>
-                            
-                            <p className="hero-description" id="heroDescription" data-i18n="hero.description">
-                                {t('hero.description')}
-                            </p>
-                            
-                            <div className="hero-buttons" id="heroButtons">
-                                <a href="/signin" className="btn-primary">
-                                    <span>{t('hero.button.primary')}</span>
-                                    <svg className="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M5 12h14M12 5l7 7-7 7"/>
-                                    </svg>
-                                </a>
-                                <a href="/demo" className="btn-secondary">
-                                    <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <circle cx="12" cy="12" r="10"/>
-                                        <polygon points="10 8 16 12 10 16" fill="currentColor"/>
-                                    </svg>
-                                    <span>{t('hero.button.secondary')}</span>
-                                </a>
-                            </div>
-                            
-                            <div className="hero-stats" id="heroStats">
-                                <div className="stat-item">
-                                    <span className="stat-number" data-count="50000">50K+</span>
-                                    <span className="stat-label">{t('hero.stats.students')}</span>
-                                </div>
-                                <div className="stat-divider"></div>
-                                <div className="stat-item">
-                                    <span className="stat-number" data-count="100">100+</span>
-                                    <span className="stat-label">{t('hero.stats.experiments')}</span>
-                                </div>
-                                <div className="stat-divider"></div>
-                                <div className="stat-item">
-                                    <span className="stat-number" data-count="99">99%</span>
-                                    <span className="stat-label">{t('hero.stats.satisfaction')}</span>
-                                </div>
-                            </div>
-                        </>
-                    )}
+                    <p className="hero-description" data-i18n="hero.description">
+                        {t('hero.description')}
+                    </p>
+                    
+                    <div className="hero-buttons">
+                        <a href="/signin" className="btn-primary">
+                            <span>{t('hero.button.primary')}</span>
+                            <svg className="btn-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M5 12h14M12 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                        <a href="/demo" className="btn-secondary">
+                            <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polygon points="10 8 16 12 10 16" fill="currentColor"/>
+                            </svg>
+                            <span>{t('hero.button.secondary')}</span>
+                        </a>
+                    </div>
+                    
+                    <div className="hero-stats">
+                        <div className="stat-item">
+                            <span className="stat-number" data-count="50000">50K+</span>
+                            <span className="stat-label">{t('hero.stats.students')}</span>
+                        </div>
+                        <div className="stat-divider"></div>
+                        <div className="stat-item">
+                            <span className="stat-number" data-count="100">100+</span>
+                            <span className="stat-label">{t('hero.stats.experiments')}</span>
+                        </div>
+                        <div className="stat-divider"></div>
+                        <div className="stat-item">
+                            <span className="stat-number" data-count="99">99%</span>
+                            <span className="stat-label">{t('hero.stats.satisfaction')}</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="hero-visual">
-                    <div className="scene-hint" id="sceneHint">
-                        <span>{t('scene.hint')}</span>
-                    </div>
-                    
-                    <div className="particles-container" onClick={handleSceneClick}>
+                    <div className="particles-container">
                         <canvas ref={canvasRef} id="particles-canvas"></canvas>
                         <div className="particles-glow"></div>
                     </div>

@@ -39,3 +39,17 @@ export function getSubjectName(id, lang = 'en') {
     if (!subject) return id;
     return lang === 'ru' ? subject.ru : subject.en;
 }
+
+export const elements = [
+    { symbol: 'H', name: 'Hydrogen', nameRu: 'Водород', number: 1, color: '#3B82F6' },
+    { symbol: 'O', name: 'Oxygen', nameRu: 'Кислород', number: 8, color: '#EF4444' },
+    { symbol: 'C', name: 'Carbon', nameRu: 'Углерод', number: 6, color: '#6B7280' },
+    { symbol: 'N', name: 'Nitrogen', nameRu: 'Азот', number: 7, color: '#8B5CF6' },
+];
+
+export const reactions = [
+    { id: 'reaction_water', elements: ['H', 'O'], result: 'H₂O', resultRu: 'Вода', description: 'Hydrogen + Oxygen = Water — the essence of life', descriptionRu: 'Водород + Кислород = Вода — основа жизни' },
+    { id: 'reaction_co2', elements: ['C', 'O'], result: 'CO₂', resultRu: 'Углекислый газ', description: 'Carbon + Oxygen = CO₂ — gas for photosynthesis', descriptionRu: 'Углерод + Кислород = CO₂ — газ для фотосинтеза' },
+    { id: 'reaction_methane', elements: ['C', 'H'], result: 'CH₄', resultRu: 'Метан', description: 'Carbon + Hydrogen = CH₄ — natural gas', descriptionRu: 'Углерод + Водород = CH₄ — природный газ' },
+    { id: 'reaction_ammonia', elements: ['N', 'H'], result: 'NH₃', resultRu: 'Аммиак', description: 'Nitrogen + Hydrogen = NH₃ — fertilizer', descriptionRu: 'Азот + Водород = NH₃ — удобрение' },
+];
