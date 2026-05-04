@@ -23,7 +23,7 @@ function generateSampleActivity() {
 
 export default function ActivityHeatmap() {
     const { language } = useLanguage();
-    const { user } = useAuth();
+    const { userProfile } = useAuth();
     const [activity, setActivity] = useState({});
 
     useEffect(() => {
@@ -39,10 +39,10 @@ export default function ActivityHeatmap() {
     }, []);
 
     useEffect(() => {
-        if (user) {
+        if (userProfile) {
             logActivity();
         }
-    }, [user]);
+    }, [userProfile]);
 
     const logActivity = () => {
         const today = new Date().toISOString().split('T')[0];

@@ -8,7 +8,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom';
 export default function Navbar() {
     const { toggleTheme } = useTheme();
     const { language, changeLanguage, t } = useLanguage();
-    const { user, logout } = useAuth();
+    const { userProfile, firebaseUser, logout } = useAuth();
     const { notifications, unreadCount, markNotificationRead, markAllNotificationsRead, deleteNotification, clearAllNotifications } = useLab();
     const navigate = useNavigate();
     const location = useLocation();
@@ -74,8 +74,8 @@ export default function Navbar() {
         setMobileMenuOpen(false);
     };
 
-    const photoUrl = localStorage.getItem('userPhoto') || user?.photoURL;
-    const isAdmin = user?.email === 'admin@alimlab.com';
+    const photoUrl = localStorage.getItem('userPhoto') || userProfile?.photoURL || firebaseUser?.photoURL;
+    const isAdmin = firebaseUser?.email === 'admin@alimlab.com';
 
     const pathname = location.pathname;
     const isAuthPage = ['/signin', '/profile-setup', '/dashboard', '/profile', '/cabinet', '/cabinet/laboratory', '/cabinet/payment', '/cabinet/library', '/cabinet/study-plan', '/cabinet/simulations', '/cabinet/editor', '/cabinet/certificates', '/cabinet/data', '/cabinet/marketplace', '/teacher', '/teacher/dashboard', '/teacher/video', '/teacher/quiz', '/teacher/pricing', '/teacher/resources', '/teacher/laboratory', '/teacher/students', '/teacher/earnings', '/teacher/analytics'].some(p => pathname.startsWith(p));
@@ -83,7 +83,7 @@ export default function Navbar() {
     const navLinks = isAuthPage
         ? [
             { href: '/', label: t('nav.home', 'Home'), active: pathname === '/' },
-            ...(user?.role === 'teacher'
+            ...(userProfile?.role === 'teacher'
                 ? [{ href: '/teacher', label: t('nav.teacher', 'Teacher'), active: pathname.startsWith('/teacher') }]
                 : [{ href: '/cabinet', label: t('nav.cabinet', 'Cabinet'), active: pathname.startsWith('/cabinet') }]
             ),
@@ -152,7 +152,7 @@ export default function Navbar() {
                             </button>
                         </div>
 
-                        {user && (
+                        {firebaseUser && (
                             <div className="notif-wrapper" ref={notifRef}>
                                 <button
                                     className="icon-btn notif-btn"
@@ -250,7 +250,7 @@ export default function Navbar() {
                             </button>
                         </div>
 
-                        {user ? (
+                        {firebaseUser ? (
                             <>
                                 <div className="auth-user-dropdown" ref={dropdownRef}>
                                     <button
@@ -261,11 +261,11 @@ export default function Navbar() {
                                             {photoUrl ? (
                                                 <img src={photoUrl} alt="Avatar" />
                                             ) : (
-                                                <span>{user.displayName?.[0] || 'U'}</span>
+                                                <span>{userProfile?.displayName || firebaseUser?.displayName || 'U'}</span>
                                             )}
                                         </div>
                                         <span className="auth-user-name">
-                                            {user.displayName || 'User'}
+                                            {userProfile?.fullName || firebaseUser?.displayName || 'User'}
                                         </span>
                                         <svg className={`auth-dropdown-arrow ${dropdownOpen ? 'rotated' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <polyline points="6 9 12 15 18 9"/>
@@ -274,7 +274,7 @@ export default function Navbar() {
 
                                     {dropdownOpen && (
                                         <div className="auth-dropdown-menu">
-                                            {user.role === 'teacher' && (
+                                            {userProfile?.role === 'teacher' && (
                                                 <Link to="/teacher" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
@@ -282,7 +282,7 @@ export default function Navbar() {
                                                     {t('Teacher Cabinet', 'Кабинет учителя')}
                                                 </Link>
                                             )}
-                                            {user.role === 'student' && (
+                                            {userProfile?.role === 'student' && (
                                                 <Link to="/cabinet" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
                                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                         <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
@@ -394,7 +394,7 @@ export default function Navbar() {
                                 )}
                             </div>
 
-                            {user && unreadCount > 0 && (
+                            {firebaseUser && unreadCount > 0 && (
                                 <div className="mobile-menu-section mobile-notif-section">
                                     <button
                                         className="mobile-menu-item mobile-notif-btn"
@@ -463,7 +463,7 @@ export default function Navbar() {
                     </div>
 
                     {/* User Section */}
-                    {user && (
+                    {firebaseUser && (
                         <>
                             <div className="mobile-menu-divider"></div>
                             <div className="mobile-menu-section mobile-user-section">
@@ -472,12 +472,12 @@ export default function Navbar() {
                                         {photoUrl ? (
                                             <img src={photoUrl} alt="Avatar" />
                                         ) : (
-                                            <span>{user.displayName?.[0] || 'U'}</span>
+                                            <span>{userProfile?.fullName || firebaseUser?.displayName || 'U'}</span>
                                         )}
                                     </div>
                                     <div className="mobile-user-details">
-                                        <div className="mobile-user-name">{user.displayName || 'User'}</div>
-                                        <div className="mobile-user-email">{user.email}</div>
+                                        <div className="mobile-user-name">{userProfile?.fullName || firebaseUser?.displayName || 'User'}</div>
+                                        <div className="mobile-user-email">{firebaseUser?.email}</div>
                                     </div>
                                 </div>
                                 <Link to="/profile" className="mobile-menu-item" onClick={handleMobileNavClick}>
@@ -518,7 +518,7 @@ export default function Navbar() {
                         </>
                     )}
 
-                    {!user && (
+                    {!firebaseUser && (
                         <>
                             <div className="mobile-menu-divider"></div>
                             <div className="mobile-menu-section mobile-auth-section">

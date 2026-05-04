@@ -9,53 +9,50 @@ import EditProfileModal from '../components/profile/EditProfileModal';
 import GoalsPlanner from '../components/profile/GoalsPlanner';
 import ActivityHeatmap from '../components/profile/ActivityHeatmap';
 import ReviewsSection from '../components/profile/ReviewsSection';
-import { subjects } from '../data/subjects'; // getSubjectName
+import { subjects } from '../data/subjects';
 import '../styles/main.css';
 import '../styles/profile.css';
 
 export default function Profile() {
     const { language } = useLanguage();
-    const { user } = useAuth(); // logout
+    const { userProfile, firebaseUser } = useAuth();
     const { getSubscribedCourses, getSubscribedTeachers, subscriptions, getSubjectName, getSubjectIcon, getSubjectColor } = useLab();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
     const [showEditModal, setShowEditModal] = useState(false);
-    const [profile, setProfile] = useState(null);
-    const [photoUrl, setPhotoUrl] = useState(null); // photoURL
+    const [photoUrl, setPhotoUrl] = useState(null);
 
     useEffect(() => {
-        if (!user) {
+        if (!userProfile) {
             navigate('/signin');
             return;
-        }
-        const stored = localStorage.getItem('userProfile');
-        if (stored) {
-            setProfile(JSON.parse(stored));
         }
         const storedPhoto = localStorage.getItem('userPhoto');
         if (storedPhoto) {
             setPhotoUrl(storedPhoto);
         }
-    }, [user, navigate]);
+    }, [userProfile, navigate]);
 
-    if (!user) return null;
+    if (!userProfile) return null;
 
     const t = (ru, en) => language === 'ru' ? ru : en;
-    const displayPhoto = photoUrl || user.photoURL;
+    const displayPhoto = photoUrl || userProfile.photoURL || firebaseUser?.photoURL;
+    const displayName = userProfile.fullName || firebaseUser?.displayName || 'User';
+    const role = userProfile.role;
 
-    const profileSubjects = user.role === 'teacher'
-        ? (profile?.subjectsToTeach || [])
-        : (profile?.subjectsToStudy || []);
+    const profileSubjects = role === 'teacher'
+        ? (userProfile.subjectsToTeach || [])
+        : (userProfile.subjectsToStudy || []);
 
     const completionItems = [
-        !!user.displayName,
-        !!profile?.age,
-        !!profile?.bio,
+        !!displayName,
+        !!userProfile.age,
+        !!userProfile.bio,
         profileSubjects.length > 0,
-        !!profile?.learningGoalMonth || !!profile?.teachingGoalsMonth,
-        !!profile?.learningGoalYear || !!profile?.teachingGoalsYear,
-        user.role === 'teacher' ? !!profile?.coursePrice : true,
-        user.role === 'teacher' ? !!profile?.experience : true,
+        !!userProfile.learningGoalMonth || !!userProfile.teachingGoalsMonth,
+        !!userProfile.learningGoalYear || !!userProfile.teachingGoalsYear,
+        role === 'teacher' ? !!userProfile.coursePrice : true,
+        role === 'teacher' ? !!userProfile.experience : true,
     ].filter(Boolean).length;
 
     const completionPercent = Math.round((completionItems / completionItems.length) * 100);
@@ -224,7 +221,7 @@ export default function Profile() {
                             <div className="stat-card">
                                 <div className="stat-card-icon blue">📚</div>
                                 <div className="stat-card-value">{profileSubjects.length}</div>
-                                <div className="stat-card-label">{user.role === 'teacher' ? t('Предметов', 'Subjects') : t('Предметов', 'Subjects')}</div>
+                                <div className="stat-card-label">{t('Предметов', 'Subjects')}</div>
                             </div>
                             <div className="stat-card">
                                 <div className="stat-card-icon purple">🎯</div>
@@ -233,7 +230,7 @@ export default function Profile() {
                             </div>
                             <div className="stat-card">
                                 <div className="stat-card-icon green">📅</div>
-                                <div className="stat-card-value">{profile?.age || '—'}</div>
+                                <div className="stat-card-value">{userProfile.age || '—'}</div>
                                 <div className="stat-card-label">{t('Возраст', 'Age')}</div>
                             </div>
                             <div className="stat-card">
@@ -253,38 +250,38 @@ export default function Profile() {
                                 {t('О себе', 'About Me')}
                             </div>
                             <div className="profile-section-subtitle">
-                                {profile?.bio || t('Информация не добавлена', 'No bio added yet')}
+                                {userProfile.bio || t('Информация не добавлена', 'No bio added yet')}
                             </div>
 
-                            {user.role === 'teacher' && profile?.experience && (
+                            {role === 'teacher' && userProfile.experience && (
                                 <div style={{ marginTop: 16 }}>
                                     <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 6 }}>
                                         {t('Опыт преподавания', 'Teaching Experience')}
                                     </div>
                                     <div style={{ fontSize: 15, color: '#cbd5e1' }}>
-                                        {profile.experience}
+                                        {userProfile.experience}
                                     </div>
                                 </div>
                             )}
 
-                            {user.role === 'teacher' && profile?.availability && (
+                            {role === 'teacher' && userProfile.availability && (
                                 <div style={{ marginTop: 16 }}>
                                     <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 6 }}>
                                         {t('Доступность', 'Availability')}
                                     </div>
                                     <div style={{ fontSize: 15, color: '#cbd5e1' }}>
-                                        {profile.availability}
+                                        {userProfile.availability}
                                     </div>
                                 </div>
                             )}
 
-                            {user.role === 'teacher' && profile?.coursePrice && (
+                            {role === 'teacher' && userProfile.coursePrice && (
                                 <div style={{ marginTop: 16 }}>
                                     <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 6 }}>
                                         {t('Стоимость курсов', 'Course Pricing')}
                                     </div>
                                     <div style={{ fontSize: 15, color: '#cbd5e1' }}>
-                                        {profile.coursePrice}
+                                        {userProfile.coursePrice}
                                     </div>
                                 </div>
                             )}
@@ -292,18 +289,18 @@ export default function Profile() {
 
                         <div className="profile-section">
                             <div className="profile-section-title">
-                                <div style={{ display: "none"  }}>{displayPhoto}</div>
+                                <div style={{ display: "none" }}>{displayPhoto}</div>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
                                     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
                                 </svg>
-                                {user.role === 'teacher'
+                                {role === 'teacher'
                                     ? t('Предметы преподавания', 'Teaching Subjects')
                                     : t('Предметы изучения', 'Study Subjects')
                                 }
                             </div>
                             <div className="profile-section-subtitle">
-                                {user.role === 'teacher'
+                                {role === 'teacher'
                                     ? t('Предметы, которые вы преподаёте', 'Subjects you teach')
                                     : t('Предметы, которые вы изучаете', 'Subjects you study')
                                 }
@@ -378,23 +375,23 @@ export default function Profile() {
 
                         <div className="profile-info">
                             <div className="profile-name-row">
-                                <h1 className="profile-name">{user.displayName || t('Пользователь', 'User')}</h1>
-                                <span className={`profile-role-badge ${user.role}`}>
-                                    {user.role === 'student' ? t('Ученик', 'Student') : t('Учитель', 'Teacher')}
+                                <h1 className="profile-name">{displayName}</h1>
+                                <span className={`profile-role-badge ${role}`}>
+                                    {role === 'student' ? t('Ученик', 'Student') : t('Учитель', 'Teacher')}
                                 </span>
                             </div>
 
                             <div className="profile-meta">
-                                {user.email && (
+                                {firebaseUser?.email && (
                                     <div className="profile-meta-item">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
                                             <polyline points="22,6 12,13 2,6"/>
                                         </svg>
-                                        {user.email}
+                                        {firebaseUser.email}
                                     </div>
                                 )}
-                                {profile?.age && (
+                                {userProfile.age && (
                                     <div className="profile-meta-item">
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -402,7 +399,7 @@ export default function Profile() {
                                             <line x1="8" y1="2" x2="8" y2="6"/>
                                             <line x1="3" y1="10" x2="21" y2="10"/>
                                         </svg>
-                                        {profile.age} {t('лет', 'years old')}
+                                        {userProfile.age} {t('лет', 'years old')}
                                     </div>
                                 )}
                             </div>

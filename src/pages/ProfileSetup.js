@@ -25,36 +25,36 @@ const skillLevels = [
 
 export default function ProfileSetup() {
     const { language } = useLanguage();
-    const { user, updateUser } = useAuth();
+    const { firebaseUser, userProfile, completeOnboarding, loading } = useAuth();
     const navigate = useNavigate();
 
     const [step, setStep] = useState(1);
-    const [role, setRole] = useState(user?.role || '');
+    const [role, setRole] = useState(userProfile?.role || '');
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
-        fullName: user?.displayName || '',
-        age: '',
-        // Student fields
-        subjectsToStudy: [],
-        learningGoalMonth: '',
-        learningGoalYear: '',
-        skillLevel: '',
-        interests: [],
-        // Teacher fields
-        subjectsToTeach: [],
-        teachingCategories: [],
-        coursePrice: '',
-        experience: '',
-        bio: '',
-        teachingGoalsMonth: '',
-        teachingGoalsYear: '',
-        availability: '',
+        fullName: userProfile?.fullName || firebaseUser?.displayName || '',
+        age: userProfile?.age || '',
+        subjectsToStudy: userProfile?.subjectsToStudy || [],
+        learningGoalMonth: userProfile?.learningGoalMonth || '',
+        learningGoalYear: userProfile?.learningGoalYear || '',
+        skillLevel: userProfile?.skillLevel || '',
+        interests: userProfile?.interests || [],
+        subjectsToTeach: userProfile?.subjectsToTeach || [],
+        teachingCategories: userProfile?.teachingCategories || [],
+        coursePrice: userProfile?.coursePrice || '',
+        experience: userProfile?.experience || '',
+        bio: userProfile?.bio || '',
+        teachingGoalsMonth: userProfile?.teachingGoalsMonth || '',
+        teachingGoalsYear: userProfile?.teachingGoalsYear || '',
+        availability: userProfile?.availability || '',
     });
 
     useEffect(() => {
-        if (!user) {
+        if (!loading && !firebaseUser) {
             navigate('/signin');
         }
-    }, [user, navigate]);
+    }, [firebaseUser, loading, navigate]);
 
     const handleInputChange = (field, value) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -74,21 +74,57 @@ export default function ProfileSetup() {
         });
     };
 
-    const handleSubmit = () => {
-        const profileData = {
-            ...formData,
-            role,
-            profileComplete: true,
-            completedAt: new Date().toISOString()
-        };
+    const handleSubmit = async () => {
+        setError('');
+        setSaving(true);
 
-        localStorage.setItem('userProfile', JSON.stringify(profileData));
-        updateUser({ profileComplete: true, role });
+        try {
+            const profileData = {
+                role,
+                fullName: formData.fullName,
+                age: formData.age ? parseInt(formData.age) : null,
+                subjects: role === 'student' ? formData.subjectsToStudy : formData.subjectsToTeach,
+            };
 
-        navigate('/labs');
+            if (role === 'student') {
+                profileData.subjectsToStudy = formData.subjectsToStudy;
+                profileData.learningGoalMonth = formData.learningGoalMonth;
+                profileData.learningGoalYear = formData.learningGoalYear;
+                profileData.skillLevel = formData.skillLevel;
+                profileData.interests = formData.interests;
+            }
+
+            if (role === 'teacher') {
+                profileData.subjectsToTeach = formData.subjectsToTeach;
+                profileData.experience = formData.experience;
+                profileData.bio = formData.bio;
+                profileData.coursePrice = formData.coursePrice;
+                profileData.teachingGoalsMonth = formData.teachingGoalsMonth;
+                profileData.teachingGoalsYear = formData.teachingGoalsYear;
+                profileData.availability = formData.availability;
+            }
+
+            await completeOnboarding(profileData);
+            navigate('/dashboard');
+        } catch (err) {
+            console.error('Profile save error:', err);
+            setError(language === 'ru' ? 'Ошибка сохранения профиля. Попробуйте снова.' : 'Failed to save profile. Please try again.');
+        } finally {
+            setSaving(false);
+        }
     };
 
     const t = (ruText, enText) => language === 'ru' ? ruText : enText;
+
+    if (loading) {
+        return (
+            <div className="profile-setup-page">
+                <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="profile-setup-page">
@@ -97,7 +133,6 @@ export default function ProfileSetup() {
             <div className="glow-orb glow-orb-2"></div>
 
             <div className="setup-card">
-                {/* Progress indicator */}
                 <div className="step-indicator">
                     <div className={`step-dot ${step >= 1 ? 'active' : ''}`}></div>
                     <div className={`step-line ${step >= 2 ? 'active' : ''}`}></div>
@@ -105,6 +140,12 @@ export default function ProfileSetup() {
                     <div className={`step-line ${step >= 3 ? 'active' : ''}`}></div>
                     <div className={`step-dot ${step >= 3 ? 'active' : ''}`}></div>
                 </div>
+
+                {error && (
+                    <div className="error-message">
+                        {error}
+                    </div>
+                )}
 
                 {step === 1 && (
                     <div className="setup-step">
@@ -362,8 +403,12 @@ export default function ProfileSetup() {
                             <button className="setup-btn secondary-btn" onClick={() => setStep(2)}>
                                 {t('Назад', 'Back')}
                             </button>
-                            <button className="setup-btn primary-btn" onClick={handleSubmit}>
-                                {t('Завершить', 'Complete Setup')}
+                            <button
+                                className="setup-btn primary-btn"
+                                onClick={handleSubmit}
+                                disabled={saving}
+                            >
+                                {saving ? t('Сохранение...', 'Saving...') : t('Завершить', 'Complete Setup')}
                             </button>
                         </div>
                     </div>

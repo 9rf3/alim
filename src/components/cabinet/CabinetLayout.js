@@ -65,23 +65,25 @@ function getIcon(type, className) {
 }
 
 export default function CabinetLayout({ children }) {
-    const { user } = useAuth();
+    const { isAuthenticated, isOnboardingComplete, loading, userProfile } = useAuth();
     const { language } = useLanguage();
     const navigate = useNavigate();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
-        if (!user) {
+        if (loading) return;
+        if (!isAuthenticated) {
             navigate('/signin');
-        } else if (!user.profileComplete) {
+        } else if (!isOnboardingComplete) {
             navigate('/profile-setup');
         }
-    }, [user, navigate]);
+    }, [isAuthenticated, isOnboardingComplete, loading, navigate]);
 
-    if (!user) return null;
+    if (loading) return null;
+    if (!isAuthenticated) return null;
 
-    const photoUrl = localStorage.getItem('userPhoto') || user.photoURL;
+    const photoUrl = localStorage.getItem('userPhoto') || userProfile?.photoURL;
 
     return (
         <div className="cabinet-page">
@@ -96,14 +98,14 @@ export default function CabinetLayout({ children }) {
                             {photoUrl ? (
                                 <img src={photoUrl} alt="Avatar" />
                             ) : (
-                                <span>{user.displayName?.[0] || 'U'}</span>
+                                <span>{userProfile?.fullName?.[0] || 'U'}</span>
                             )}
                         </div>
                         <div className="cabinet-user-details">
-                            <div className="cabinet-user-name">{user.displayName}</div>
+                            <div className="cabinet-user-name">{userProfile?.fullName || 'User'}</div>
                             <div className="cabinet-user-role">
                                 <span className="role-badge">
-                                    {user.role === 'student'
+                                    {userProfile?.role === 'student'
                                         ? (language === 'ru' ? 'Ученик' : 'Student')
                                         : (language === 'ru' ? 'Учитель' : 'Teacher')
                                     }

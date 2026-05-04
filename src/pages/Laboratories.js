@@ -7,7 +7,7 @@ import '../styles/main.css';
 import '../styles/laboratories.css';
 
 export default function Laboratories() {
-    const { user } = useAuth();
+    const { userProfile } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const {
@@ -26,7 +26,7 @@ export default function Laboratories() {
     const [filterSubject, setFilterSubject] = useState(null);
 
     useEffect(() => {
-        if (!user) {
+        if (!userProfile) {
             navigate('/signin?redirect=/labs');
             return;
         }
@@ -38,9 +38,9 @@ export default function Laboratories() {
         if (subjectParam) setFilterSubject(subjectParam);
         if (courseParam) setActiveTab('browse');
         if (teacherParam) setActiveTab('teachers');
-    }, [user, searchParams, navigate]);
+    }, [userProfile, searchParams, navigate]);
 
-    const isTeacher = user?.role === 'teacher';
+    const isTeacher = userProfile?.role === 'teacher';
 
     const subscribedCourses = getSubscribedCourses();
     const subscribedTeachers = getSubscribedTeachers();
@@ -63,8 +63,8 @@ export default function Laboratories() {
         if (!newCourse.title || !newCourse.subject) return;
         addCourse({
             ...newCourse,
-            teacherId: user?.uid || 'teacher_demo',
-            teacherName: user?.displayName || 'Teacher',
+            teacherId: userProfile?.uid || 'teacher_demo',
+            teacherName: userProfile?.fullName || 'Teacher',
             lessons: parseInt(newCourse.lessons) || 0,
             rating: 0,
             studentCount: 0
@@ -92,9 +92,9 @@ export default function Laboratories() {
     
     const filteredCourses = getSortedCourses();
 
-    const teacherMyCourses = isTeacher ? courses.filter(c => c.teacherId === user?.uid) : [];
+    const teacherMyCourses = isTeacher ? courses.filter(c => c.teacherId === userProfile?.uid) : [];
 
-    if (!user) return null;
+    if (!userProfile) return null;
 
     return (
         <>
@@ -384,7 +384,7 @@ export default function Laboratories() {
                                         <span className="labs-stat-label">Courses</span>
                                     </div>
                                     <div className="labs-stat-box">
-                                        <span className="labs-stat-number">{subscriptions.teachers.includes(user?.uid) ? 'Active' : 'Building'}</span>
+                                        <span className="labs-stat-number">{subscriptions.teachers.includes(userProfile?.uid) ? 'Active' : 'Building'}</span>
                                         <span className="labs-stat-label">Audience</span>
                                     </div>
                                 </div>

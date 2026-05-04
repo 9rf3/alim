@@ -59,25 +59,26 @@ function getIcon(type, className) {
 }
 
 export default function TeacherLayout({ children }) {
-    const { user } = useAuth();
+    const { userProfile, isAuthenticated, isOnboardingComplete, loading } = useAuth();
     const { language } = useLanguage();
     const navigate = useNavigate();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
-        if (!user) {
+        if (loading) return;
+        if (!isAuthenticated) {
             navigate('/signin');
-        } else if (!user.profileComplete) {
+        } else if (!isOnboardingComplete) {
             navigate('/profile-setup');
-        } else if (user.role !== 'teacher') {
+        } else if (userProfile?.role !== 'teacher') {
             navigate('/cabinet');
         }
-    }, [user, navigate]);
+    }, [userProfile, isAuthenticated, isOnboardingComplete, loading, navigate]);
 
-    if (!user) return null;
+    if (loading) return null;
 
-    const photoUrl = localStorage.getItem('userPhoto') || user.photoURL;
+    const photoUrl = localStorage.getItem('userPhoto') || userProfile?.photoURL;
 
     return (
         <div className="teacher-page">
@@ -92,11 +93,11 @@ export default function TeacherLayout({ children }) {
                             {photoUrl ? (
                                 <img src={photoUrl} alt="Avatar" />
                             ) : (
-                                <span>{user.displayName?.[0] || 'T'}</span>
+                                <span>{userProfile?.fullName?.[0] || 'T'}</span>
                             )}
                         </div>
                         <div className="teacher-user-details">
-                            <div className="teacher-user-name">{user.displayName}</div>
+                            <div className="teacher-user-name">{userProfile?.fullName || 'User'}</div>
                             <div className="teacher-user-role">
                                 <span className="teacher-role-badge">
                                     {language === 'ru' ? 'Учитель' : 'Teacher'}

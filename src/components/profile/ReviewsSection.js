@@ -33,7 +33,7 @@ const sampleReviews = [
 
 export default function ReviewsSection() {
     const { language } = useLanguage();
-    const { user } = useAuth();
+    const { userProfile } = useAuth();
     const [reviews, setReviews] = useState([]);
     const [newRating, setNewRating] = useState(0);
     const [newText, setNewText] = useState('');
@@ -54,8 +54,8 @@ export default function ReviewsSection() {
 
         const review = {
             id: Date.now(),
-            author: user?.displayName || 'Anonymous',
-            avatar: user?.displayName?.[0] || 'A',
+            author: userProfile?.fullName || 'Anonymous',
+            avatar: userProfile?.fullName?.[0] || 'A',
             rating: newRating,
             text: newText.trim(),
             date: new Date().toISOString().split('T')[0],
@@ -126,7 +126,7 @@ export default function ReviewsSection() {
                     </div>
                 </div>
 
-                {user && user.role === 'student' && (
+                {userProfile && userProfile.role === 'student' && (
                     <div className="review-form">
                         <div className="review-form-title">
                             {t('Оставить отзыв', 'Leave a Review')}

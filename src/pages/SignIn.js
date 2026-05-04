@@ -6,24 +6,22 @@ import '../styles/main.css';
 
 export default function SignIn() {
     const { language } = useLanguage();
-    const { user, login, loading } = useAuth();
+    const { login, loading, isAuthenticated, isOnboardingComplete } = useAuth();
     const navigate = useNavigate();
     const [termsChecked, setTermsChecked] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const termsWrapperRef = useRef(null);
 
-    // Redirect if already logged in
     useEffect(() => {
-        if (!loading && user) {
-            if (user.profileComplete) {
-                navigate('/labs');
+        if (!loading && isAuthenticated) {
+            if (isOnboardingComplete) {
+                navigate('/dashboard', { replace: true });
             } else {
-                navigate('/profile-setup');
+                navigate('/profile-setup', { replace: true });
             }
         }
-    }, [user, loading, navigate]);
+    }, [isAuthenticated, isOnboardingComplete, loading, navigate]);
 
-    // Create background particles on mount
     useEffect(() => {
         const container = document.getElementById('particles');
         if (!container) return;
@@ -47,7 +45,6 @@ export default function SignIn() {
         };
     }, []);
 
-    // Handle terms checkbox styling
     useEffect(() => {
         const termsWrapper = termsWrapperRef.current;
         if (!termsWrapper) return;
@@ -66,16 +63,14 @@ export default function SignIn() {
 
         try {
             await login();
-            // AuthContext will handle the redirect via the useEffect above
         } catch (error) {
             console.error('Login error:', error);
             setGoogleLoading(false);
 
-            // Handle specific errors silently
             if (error.code === 'auth/popup-closed-by-user') {
-                // Silent
+                // User closed popup
             } else if (error.code === 'auth/cancelled-popup-request') {
-                // Silent
+                // User cancelled
             } else {
                 alert(
                     language === 'ru'
@@ -129,8 +124,8 @@ export default function SignIn() {
 
                 <h1 className="title">{t('Добро пожаловать', 'Welcome')}</h1>
                 <p className="subtitle">
-                    {t('Войдите через Google, чтобы сохранять эксперименты и получить доступ ко всем функциям',
-                        'Sign in with Google to save experiments and access all features')}
+                    {t('Войдите через Google, чтобы сохранить прогресс и получить доступ ко всем функциям',
+                        'Sign in with Google to save your progress and access all features')}
                 </p>
 
                 <label

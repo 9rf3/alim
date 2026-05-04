@@ -4,7 +4,7 @@ import CabinetLayout from '../../components/cabinet/CabinetLayout';
 
 export default function CabinetData() {
     const { language } = useLanguage();
-    const { user } = useAuth();
+    const { userProfile } = useAuth();
     const t = (ru, en) => language === 'ru' ? ru : en;
 
     const stats = [
@@ -88,16 +88,16 @@ export default function CabinetData() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                     <div>
                         <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>{t('Имя', 'Name')}</div>
-                        <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>{user?.displayName || '—'}</div>
+                        <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>{userProfile?.fullName || '—'}</div>
                     </div>
                     <div>
                         <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>{t('Email', 'Email')}</div>
-                        <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>{user?.email || '—'}</div>
+                        <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>{userProfile?.email || '—'}</div>
                     </div>
                     <div>
                         <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>{t('Роль', 'Role')}</div>
                         <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                            {user?.role === 'student' ? t('Ученик', 'Student') : t('Учитель', 'Teacher')}
+                            {userProfile?.role === 'student' ? t('Ученик', 'Student') : t('Учитель', 'Teacher')}
                         </div>
                     </div>
                     <div>

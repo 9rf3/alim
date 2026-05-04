@@ -21,7 +21,7 @@ const defaultCategories = (role) => {
 
 export default function GoalsPlanner() {
     const { language } = useLanguage();
-    const { user } = useAuth();
+    const { userProfile } = useAuth();
     const [goals, setGoals] = useState({});
 
     useEffect(() => {
@@ -30,12 +30,12 @@ export default function GoalsPlanner() {
             setGoals(JSON.parse(stored));
         } else {
             const defaults = {};
-            defaultCategories(user?.role).forEach(cat => {
+            defaultCategories(userProfile?.role).forEach(cat => {
                 defaults[cat.id] = [];
             });
             setGoals(defaults);
         }
-    }, [user?.role]);
+    }, [userProfile?.role]);
 
     useEffect(() => {
         if (Object.keys(goals).length > 0) {
@@ -43,7 +43,7 @@ export default function GoalsPlanner() {
         }
     }, [goals]);
 
-    const categories = defaultCategories(user?.role);
+    const categories = defaultCategories(userProfile?.role);
 
     const addGoal = (categoryId, text) => {
         if (!text.trim()) return;

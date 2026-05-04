@@ -4,6 +4,7 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { AdminProvider } from './contexts/AdminContext';
 import { LabProvider } from './contexts/LabContext';
+import { ProtectedRoute, OnboardingRoute, PublicRoute } from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Demo from './pages/Demo';
 import SignIn from './pages/SignIn';
@@ -45,33 +46,133 @@ function App() {
                                 <Routes>
                                     <Route path="/" element={<Home />} />
                                     <Route path="/demo" element={<Demo />} />
-                                    <Route path="/signin" element={<SignIn />} />
-                                    <Route path="/profile-setup" element={<ProfileSetup />} />
-                                    <Route path="/dashboard" element={<Dashboard />} />
-                                    <Route path="/profile" element={<Profile />} />
-                                    <Route path="/labs" element={<Laboratories />} />
+                                    <Route path="/signin" element={
+                                        <PublicRoute>
+                                            <SignIn />
+                                        </PublicRoute>
+                                    } />
+                                    <Route path="/profile-setup" element={
+                                        <OnboardingRoute>
+                                            <ProfileSetup />
+                                        </OnboardingRoute>
+                                    } />
+                                    <Route path="/dashboard" element={
+                                        <ProtectedRoute>
+                                            <Dashboard />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/profile" element={
+                                        <ProtectedRoute>
+                                            <Profile />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/labs" element={
+                                        <ProtectedRoute>
+                                            <Laboratories />
+                                        </ProtectedRoute>
+                                    } />
                                     <Route path="/admin" element={<AdminLogin />} />
                                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                                    <Route path="/cabinet" element={<CabinetOverview />} />
-                                    <Route path="/cabinet/laboratory" element={<CabinetLaboratory />} />
-                                    <Route path="/cabinet/payment" element={<CabinetPayment />} />
-                                    <Route path="/cabinet/library" element={<CabinetLibrary />} />
-                                    <Route path="/cabinet/study-plan" element={<CabinetStudyPlan />} />
-                                    <Route path="/cabinet/simulations" element={<CabinetSimulations />} />
-                                    <Route path="/cabinet/editor" element={<CabinetEditor />} />
-                                    <Route path="/cabinet/certificates" element={<CabinetCertificates />} />
-                                    <Route path="/cabinet/data" element={<CabinetData />} />
-                                    <Route path="/cabinet/marketplace" element={<CabinetMarketplace />} />
-                                    <Route path="/teacher" element={<TeacherOverview />} />
-                                    <Route path="/teacher/dashboard" element={<TeacherDashboard />} />
-                                    <Route path="/teacher/video" element={<TeacherVideo />} />
-                                    <Route path="/teacher/quiz" element={<TeacherQuiz />} />
-                                    <Route path="/teacher/pricing" element={<TeacherPricing />} />
-                                    <Route path="/teacher/resources" element={<TeacherResources />} />
-                                    <Route path="/teacher/laboratory" element={<TeacherLaboratory />} />
-                                    <Route path="/teacher/students" element={<TeacherStudents />} />
-                                    <Route path="/teacher/earnings" element={<TeacherEarnings />} />
-                                    <Route path="/teacher/analytics" element={<TeacherAnalytics />} />
+                                    <Route path="/cabinet" element={
+                                        <ProtectedRoute>
+                                            <CabinetOverview />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/cabinet/laboratory" element={
+                                        <ProtectedRoute>
+                                            <CabinetLaboratory />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/cabinet/payment" element={
+                                        <ProtectedRoute>
+                                            <CabinetPayment />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/cabinet/library" element={
+                                        <ProtectedRoute>
+                                            <CabinetLibrary />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/cabinet/study-plan" element={
+                                        <ProtectedRoute>
+                                            <CabinetStudyPlan />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/cabinet/simulations" element={
+                                        <ProtectedRoute>
+                                            <CabinetSimulations />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/cabinet/editor" element={
+                                        <ProtectedRoute>
+                                            <CabinetEditor />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/cabinet/certificates" element={
+                                        <ProtectedRoute>
+                                            <CabinetCertificates />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/cabinet/data" element={
+                                        <ProtectedRoute>
+                                            <CabinetData />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/cabinet/marketplace" element={
+                                        <ProtectedRoute>
+                                            <CabinetMarketplace />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/teacher" element={
+                                        <ProtectedRoute>
+                                            <TeacherOverview />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/teacher/dashboard" element={
+                                        <ProtectedRoute>
+                                            <TeacherDashboard />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/teacher/video" element={
+                                        <ProtectedRoute>
+                                            <TeacherVideo />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/teacher/quiz" element={
+                                        <ProtectedRoute>
+                                            <TeacherQuiz />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/teacher/pricing" element={
+                                        <ProtectedRoute>
+                                            <TeacherPricing />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/teacher/resources" element={
+                                        <ProtectedRoute>
+                                            <TeacherResources />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/teacher/laboratory" element={
+                                        <ProtectedRoute>
+                                            <TeacherLaboratory />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/teacher/students" element={
+                                        <ProtectedRoute>
+                                            <TeacherStudents />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/teacher/earnings" element={
+                                        <ProtectedRoute>
+                                            <TeacherEarnings />
+                                        </ProtectedRoute>
+                                    } />
+                                    <Route path="/teacher/analytics" element={
+                                        <ProtectedRoute>
+                                            <TeacherAnalytics />
+                                        </ProtectedRoute>
+                                    } />
                                 </Routes>
                             </Router>
                         </LabProvider>

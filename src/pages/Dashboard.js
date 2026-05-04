@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -8,46 +7,34 @@ import '../styles/dashboard.css';
 
 export default function Dashboard() {
     const { language } = useLanguage();
-    const { user, logout } = useAuth();
+    const { userProfile, firebaseUser, logout } = useAuth();
     const navigate = useNavigate();
-    const [photoUrl, setPhotoUrl] = useState(null);
-
-    useEffect(() => {
-        if (!user) {
-            navigate('/signin');
-        } else if (!user.profileComplete) {
-            navigate('/profile-setup');
-        }
-        const storedPhoto = localStorage.getItem('userPhoto');
-        if (storedPhoto) {
-            setPhotoUrl(storedPhoto);
-        }
-    }, [user, navigate]);
 
     const t = (ruText, enText) => language === 'ru' ? ruText : enText;
 
-    if (!user) return null;
+    if (!userProfile) return null;
 
-    const avatarSrc = photoUrl || user.photoURL;
+    const avatarSrc = userProfile.photoURL || firebaseUser?.photoURL;
+    const displayName = userProfile.fullName || firebaseUser?.displayName || 'User';
+    const role = userProfile.role;
 
     return (
         <div className="dashboard-page">
             <Navbar />
             <div className="dashboard-container">
-                {/* Header */}
                 <div className="dashboard-header">
                     <div className="user-greeting">
                         <div className="user-avatar" onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }}>
                             {avatarSrc ? (
                                 <img src={avatarSrc} alt="Avatar" />
                             ) : (
-                                <span>{user.displayName?.[0] || 'U'}</span>
+                                <span>{displayName[0] || 'U'}</span>
                             )}
                         </div>
                         <div>
-                            <h1>{t('Добро пожаловать,', 'Welcome,')} {user.displayName}!</h1>
+                            <h1>{t('Добро пожаловать,', 'Welcome,')} {displayName}!</h1>
                             <p className="user-role">
-                                {user.role === 'student'
+                                {role === 'student'
                                     ? t('Ученик', 'Student')
                                     : t('Учитель', 'Teacher')
                                 }
@@ -64,8 +51,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Content based on role */}
-                {user.role === 'student' && (
+                {role === 'student' && (
                     <div className="dashboard-content">
                         <div className="dashboard-card">
                             <h2>{t('Мои курсы', 'My Courses')}</h2>
@@ -100,7 +86,7 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                {user.role === 'teacher' && (
+                {role === 'teacher' && (
                     <div className="dashboard-content">
                         <div className="dashboard-card">
                             <h2>{t('Мои курсы', 'My Courses')}</h2>

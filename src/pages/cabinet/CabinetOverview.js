@@ -20,7 +20,7 @@ function getIcon(type, className) {
 
 export default function CabinetOverview() {
     const { language } = useLanguage();
-    const { user } = useAuth();
+    const { userProfile } = useAuth();
 
     const t = (ru, en) => language === 'ru' ? ru : en;
 
@@ -96,7 +96,7 @@ export default function CabinetOverview() {
             <div className="cabinet-header">
                 <div className="cabinet-header-top">
                     <div>
-                        <h1>{t('Добро пожаловать', 'Welcome')}, {user.displayName}!</h1>
+                        <h1>{t('Добро пожаловать', 'Welcome')}, {userProfile?.fullName || 'User'}!</h1>
                         <p className="cabinet-header-subtitle">
                             {t('Все инструменты для эффективного обучения и развития', 'All tools for effective learning and development')}
                         </p>

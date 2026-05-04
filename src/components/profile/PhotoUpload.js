@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function PhotoUpload({ onPhotoChange }) {
-    const { user } = useAuth();
+    const { userProfile, firebaseUser } = useAuth();
     const fileInputRef = useRef(null);
     const [loading, setLoading] = useState(false);
 
@@ -42,8 +42,8 @@ export default function PhotoUpload({ onPhotoChange }) {
         }
     };
 
-    const photoUrl = localStorage.getItem('userPhoto') || user?.photoURL;
-    const initials = user?.displayName?.[0] || user?.email?.[0] || 'U';
+    const photoUrl = localStorage.getItem('userPhoto') || userProfile?.photoURL || firebaseUser?.photoURL;
+    const initials = userProfile?.fullName?.[0] || firebaseUser?.displayName?.[0] || firebaseUser?.email?.[0] || 'U';
 
     return (
         <div className="profile-photo-section">

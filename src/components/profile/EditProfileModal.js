@@ -2,44 +2,41 @@ import { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import SubjectSelector from './SubjectSelector';
-// import { subjects } from '../../data/subjects';
 
 export default function EditProfileModal({ onClose }) {
     const { language } = useLanguage();
-    const { user, updateUser } = useAuth();
-
-    const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    const { userProfile, updateUserProfile } = useAuth();
 
     const [formData, setFormData] = useState({
-        fullName: user?.displayName || '',
-        age: profile.age || '',
-        bio: profile.bio || '',
-        subjects: user?.role === 'teacher'
-            ? (profile.subjectsToTeach || [])
-            : (profile.subjectsToStudy || []),
-        experience: profile.experience || '',
-        coursePrice: profile.coursePrice || '',
-        availability: profile.availability || '',
-        learningGoalMonth: profile.learningGoalMonth || '',
-        learningGoalYear: profile.learningGoalYear || '',
-        teachingGoalsMonth: profile.teachingGoalsMonth || '',
-        teachingGoalsYear: profile.teachingGoalsYear || '',
+        fullName: userProfile?.fullName || '',
+        age: userProfile?.age || '',
+        bio: userProfile?.bio || '',
+        subjects: userProfile?.role === 'teacher'
+            ? (userProfile?.subjectsToTeach || [])
+            : (userProfile?.subjectsToStudy || []),
+        experience: userProfile?.experience || '',
+        coursePrice: userProfile?.coursePrice || '',
+        availability: userProfile?.availability || '',
+        learningGoalMonth: userProfile?.learningGoalMonth || '',
+        learningGoalYear: userProfile?.learningGoalYear || '',
+        teachingGoalsMonth: userProfile?.teachingGoalsMonth || '',
+        teachingGoalsYear: userProfile?.teachingGoalsYear || '',
     });
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const updatedProfile = {
-            ...profile,
             ...formData,
-            profileComplete: true,
-            completedAt: new Date().toISOString(),
-            subjectsToStudy: user?.role === 'student' ? formData.subjects : (profile.subjectsToStudy || []),
-            subjectsToTeach: user?.role === 'teacher' ? formData.subjects : (profile.subjectsToTeach || []),
+            subjectsToStudy: userProfile?.role === 'student' ? formData.subjects : (userProfile?.subjectsToStudy || []),
+            subjectsToTeach: userProfile?.role === 'teacher' ? formData.subjects : (userProfile?.subjectsToTeach || []),
         };
 
-        localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
-        updateUser({ displayName: formData.fullName, profileComplete: true });
-        onClose();
-        window.location.reload();
+        try {
+            await updateUserProfile(updatedProfile);
+            onClose();
+        } catch (error) {
+            console.error('Failed to update profile:', error);
+            alert(language === 'ru' ? 'Ошибка сохранения профиля' : 'Failed to save profile');
+        }
     };
 
     const t = (ru, en) => language === 'ru' ? ru : en;
@@ -95,13 +92,13 @@ export default function EditProfileModal({ onClose }) {
                     <SubjectSelector
                         selected={formData.subjects}
                         onChange={(subs) => setFormData({ ...formData, subjects: subs })}
-                        label={user?.role === 'teacher'
+                        label={userProfile?.role === 'teacher'
                             ? t('Предметы преподавания', 'Teaching Subjects')
                             : t('Предметы изучения', 'Study Subjects')
                         }
                     />
 
-                    {user?.role === 'teacher' && (
+                    {userProfile?.role === 'teacher' && (
                         <>
                             <div className="form-row">
                                 <div className="form-group">
@@ -141,9 +138,9 @@ export default function EditProfileModal({ onClose }) {
                             <label>{t('Цели на месяц', 'Monthly Goals')}</label>
                             <textarea
                                 className="form-textarea"
-                                value={user?.role === 'student' ? formData.learningGoalMonth : formData.teachingGoalsMonth}
+                                value={userProfile?.role === 'student' ? formData.learningGoalMonth : formData.teachingGoalsMonth}
                                 onChange={(e) => {
-                                    if (user?.role === 'student') {
+                                    if (userProfile?.role === 'student') {
                                         setFormData({ ...formData, learningGoalMonth: e.target.value });
                                     } else {
                                         setFormData({ ...formData, teachingGoalsMonth: e.target.value });
@@ -156,9 +153,9 @@ export default function EditProfileModal({ onClose }) {
                             <label>{t('Цели на год', 'Yearly Goals')}</label>
                             <textarea
                                 className="form-textarea"
-                                value={user?.role === 'student' ? formData.learningGoalYear : formData.teachingGoalsYear}
+                                value={userProfile?.role === 'student' ? formData.learningGoalYear : formData.teachingGoalsYear}
                                 onChange={(e) => {
-                                    if (user?.role === 'student') {
+                                    if (userProfile?.role === 'student') {
                                         setFormData({ ...formData, learningGoalYear: e.target.value });
                                     } else {
                                         setFormData({ ...formData, teachingGoalsYear: e.target.value });

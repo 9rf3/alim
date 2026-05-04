@@ -30,7 +30,7 @@ const DEFAULT_TEACHERS = [
 ];
 
 export function LabProvider({ children }) {
-    const { user } = useAuth();
+    const { userProfile } = useAuth();
 
     const [courses, setCourses] = useState(() => {
         const stored = localStorage.getItem('labCourses');
@@ -43,14 +43,14 @@ export function LabProvider({ children }) {
     });
 
     const [subscriptions, setSubscriptions] = useState(() => {
-        if (!user) return { subjects: [], courses: [], teachers: [] };
-        const stored = localStorage.getItem(`labSubs_${user.uid}`);
+        if (!userProfile) return { subjects: [], courses: [], teachers: [] };
+        const stored = localStorage.getItem(`labSubs_${userProfile.uid}`);
         return stored ? JSON.parse(stored) : { subjects: [], courses: [], teachers: [] };
     });
 
     const [notifications, setNotifications] = useState(() => {
-        if (!user) return [];
-        const stored = localStorage.getItem(`labNotifs_${user.uid}`);
+        if (!userProfile) return [];
+        const stored = localStorage.getItem(`labNotifs_${userProfile.uid}`);
         return stored ? JSON.parse(stored) : [];
     });
 
@@ -66,29 +66,29 @@ export function LabProvider({ children }) {
     }, [teachers]);
 
     useEffect(() => {
-        if (!user) return;
-        localStorage.setItem(`labSubs_${user.uid}`, JSON.stringify(subscriptions));
-    }, [subscriptions, user]);
+        if (!userProfile) return;
+        localStorage.setItem(`labSubs_${userProfile.uid}`, JSON.stringify(subscriptions));
+    }, [subscriptions, userProfile]);
 
     useEffect(() => {
-        if (!user) return;
-        localStorage.setItem(`labNotifs_${user.uid}`, JSON.stringify(notifications));
-    }, [notifications, user]);
+        if (!userProfile) return;
+        localStorage.setItem(`labNotifs_${userProfile.uid}`, JSON.stringify(notifications));
+    }, [notifications, userProfile]);
 
     // Sync subjects from userProfile (onboarding) to Lab subscriptions
     // Also watch for profile changes to keep in sync
     useEffect(() => {
-        if (!user) {
+        if (!userProfile) {
             setSubscriptions({ subjects: [], courses: [], teachers: [] });
             setNotifications([]);
             return;
         }
         
         // Read user's selected subjects from profile setup
-        const userProfile = localStorage.getItem('userProfile');
-        if (userProfile) {
+        const storedProfile = localStorage.getItem('userProfile');
+        if (storedProfile) {
             try {
-                const profile = JSON.parse(userProfile);
+                const profile = JSON.parse(storedProfile);
                 const profileSubjects = profile.subjectsToStudy || profile.subjectsToTeach || [];
                 
                 setSubscriptions(prev => {
@@ -112,17 +112,17 @@ export function LabProvider({ children }) {
                 console.error('Error syncing subjects from profile:', e);
             }
         }
-    }, [user, subscriptions]); // Re-run when subscriptions change to keep in sync
+    }, [userProfile, subscriptions]); // Re-run when subscriptions change to keep in sync
 
     // Two-way sync: when Lab subscriptions change, also update userProfile
     useEffect(() => {
-        if (!user || !subscriptions.subjects.length) return;
+        if (!userProfile || !subscriptions.subjects.length) return;
         
-        const userProfile = localStorage.getItem('userProfile');
-        if (userProfile) {
+        const storedProfile = localStorage.getItem('userProfile');
+        if (storedProfile) {
             try {
-                const profile = JSON.parse(userProfile);
-                const isTeacher = user.role === 'teacher';
+                const profile = JSON.parse(storedProfile);
+                const isTeacher = userProfile.role === 'teacher';
                 const field = isTeacher ? 'subjectsToTeach' : 'subjectsToStudy';
                 
                 // Only update if different
@@ -135,7 +135,7 @@ export function LabProvider({ children }) {
                 console.error('Error syncing subjects to profile:', e);
             }
         }
-    }, [subscriptions.subjects, user]);
+    }, [subscriptions.subjects, userProfile]);
 
     const addNotification = useCallback((notif) => {
         const newNotif = {
@@ -148,7 +148,7 @@ export function LabProvider({ children }) {
     }, []);
 
     const subscribeSubject = useCallback((subjectId) => {
-        if (!user) return;
+        if (!userProfile) return;
         setSubscriptions(prev => {
             if (prev.subjects.includes(subjectId)) return prev;
             return { ...prev, subjects: [...prev.subjects, subjectId] };
@@ -159,7 +159,7 @@ export function LabProvider({ children }) {
             message: `${getSubjectName(subjectId)} has been added to your learning subjects.`,
             linkTo: `/labs?subject=${subjectId}`
         });
-    }, [user, addNotification]);
+    }, [userProfile, addNotification]);
 
     const unsubscribeSubject = useCallback((subjectId) => {
         setSubscriptions(prev => ({
@@ -169,7 +169,7 @@ export function LabProvider({ children }) {
     }, []);
 
     const subscribeCourse = useCallback((courseId) => {
-        if (!user) return;
+        if (!userProfile) return;
         setSubscriptions(prev => {
             if (prev.courses.includes(courseId)) return prev;
             const course = courses.find(c => c.id === courseId);
@@ -186,7 +186,7 @@ export function LabProvider({ children }) {
             message: `You've enrolled in "${course?.title}". Happy learning!`,
             linkTo: `/labs?course=${courseId}`
         });
-    }, [user, courses, addNotification]);
+    }, [userProfile, courses, addNotification]);
 
     const unsubscribeCourse = useCallback((courseId) => {
         setSubscriptions(prev => ({
@@ -196,7 +196,7 @@ export function LabProvider({ children }) {
     }, []);
 
     const followTeacher = useCallback((teacherId) => {
-        if (!user) return;
+        if (!userProfile) return;
         setSubscriptions(prev => {
             if (prev.teachers.includes(teacherId)) return prev;
             return { ...prev, teachers: [...prev.teachers, teacherId] };
@@ -208,7 +208,7 @@ export function LabProvider({ children }) {
             message: `You're now following ${teacher?.name}. You'll receive updates about new courses and lessons.`,
             linkTo: `/labs?teacher=${teacherId}`
         });
-    }, [user, teachers, addNotification]);
+    }, [userProfile, teachers, addNotification]);
 
     const unfollowTeacher = useCallback((teacherId) => {
         setSubscriptions(prev => ({
