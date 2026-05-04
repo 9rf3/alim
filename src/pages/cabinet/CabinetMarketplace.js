@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import CabinetLayout from '../../components/cabinet/CabinetLayout';
@@ -7,7 +7,7 @@ import { getMarketplaceListings, getListingsByUser, createMarketplaceListing, up
 export default function CabinetMarketplace() {
     const { language } = useLanguage();
     const { userProfile } = useAuth();
-    const t = (ru, en) => language === 'ru' ? ru : en;
+    const t = useCallback((ru, en) => language === 'ru' ? ru : en, [language]);
     const [activeTab, setActiveTab] = useState('buy');
 
     const [listings, setListings] = useState([]);

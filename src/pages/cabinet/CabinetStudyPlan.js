@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import CabinetLayout from '../../components/cabinet/CabinetLayout';
@@ -7,7 +7,6 @@ import {
     getStudyPlansByUser,
     createTask,
     toggleTaskComplete,
-    getTasksByPlan,
     deleteTask,
     createSimpleTask,
     toggleSimpleTask,
@@ -17,7 +16,7 @@ import {
 export default function CabinetStudyPlan() {
     const { language } = useLanguage();
     const { userProfile } = useAuth();
-    const t = (ru, en) => language === 'ru' ? ru : en;
+    const t = useCallback((ru, en) => language === 'ru' ? ru : en, [language]);
     const [planType, setPlanType] = useState('simple');
 
     const [plans, setPlans] = useState([]);
@@ -82,7 +81,7 @@ export default function CabinetStudyPlan() {
 
         loadData();
         return () => { isMounted = false; };
-    }, [userProfile?.uid, t]);
+    }, [userProfile?.uid, t, selectedPlanId]);
 
     const handleCreatePlan = async () => {
         if (!userProfile?.uid || !newPlanTitle.trim()) return;

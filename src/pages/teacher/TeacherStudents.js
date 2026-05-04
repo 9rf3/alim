@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import TeacherLayout from '../../components/teacher/TeacherLayout';
@@ -7,7 +7,7 @@ import { getTeacherStats, getReviewsByTeacher } from '../../services/firestore';
 export default function TeacherStudents() {
     const { userProfile } = useAuth();
     const { language } = useLanguage();
-    const t = (ru, en) => language === 'ru' ? ru : en;
+    const t = useCallback((ru, en) => language === 'ru' ? ru : en, [language]);
     const [activeTab, setActiveTab] = useState('enrolled');
 
     const [stats, setStats] = useState(null);
@@ -39,7 +39,7 @@ export default function TeacherStudents() {
 
         loadData();
         return () => { isMounted = false; };
-    }, [userProfile?.uid]);
+    }, [userProfile?.uid, t]);
 
     const tabs = [
         { id: 'enrolled', label: t('Зачисленные', 'Enrolled') },

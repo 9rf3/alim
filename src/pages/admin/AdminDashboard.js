@@ -17,14 +17,10 @@ export default function AdminDashboard() {
     const [globalSearch, setGlobalSearch] = useState('');
 
     useEffect(() => {
-        console.log('AUTH USER:', userProfile);
-        console.log('ROLE:', userProfile?.role);
-        console.log('IS ADMIN:', isAdmin);
-
         if (!loading && !isAdmin) {
             navigate('/a/ctrl', { replace: true });
         }
-    }, [loading, isAdmin, navigate]);
+    }, [loading, isAdmin, navigate, userProfile]);
 
     if (loading || !isAdmin) {
         return (

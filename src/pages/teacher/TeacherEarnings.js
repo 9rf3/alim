@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import TeacherLayout from '../../components/teacher/TeacherLayout';
@@ -7,7 +7,7 @@ import { getTeacherStats } from '../../services/firestore';
 export default function TeacherEarnings() {
     const { userProfile } = useAuth();
     const { language } = useLanguage();
-    const t = (ru, en) => language === 'ru' ? ru : en;
+    const t = useCallback((ru, en) => language === 'ru' ? ru : en, [language]);
 
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);

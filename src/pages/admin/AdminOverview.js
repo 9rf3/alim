@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getUserStats, getAllCourses, getAllVideos, getAllQuizzes, getAllResources, getAllReviews, getAllUsers } from '../../services/firestore';
 
 export default function AdminOverview({ onNavigate }) {
@@ -19,11 +19,7 @@ export default function AdminOverview({ onNavigate }) {
     const [recentUsers, setRecentUsers] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        loadData();
-    }, []);
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         setLoading(true);
         try {
             const [userStats, courses, videos, quizzes, resources, reviews, users] = await Promise.all([
@@ -59,7 +55,11 @@ export default function AdminOverview({ onNavigate }) {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        loadData();
+    }, [loadData]);
 
     const toTimestamp = (ts) => {
         if (!ts) return 0;
