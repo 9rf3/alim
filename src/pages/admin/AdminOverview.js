@@ -1,32 +1,91 @@
-import { useState, useEffect } from 'react'; //useMemo
+import { useState, useEffect } from 'react';
+import { getUserStats, getAllCourses, getAllVideos, getAllQuizzes, getAllResources, getAllReviews, getAllUsers } from '../../services/firestore';
 
 export default function AdminOverview({ onNavigate }) {
     const [stats, setStats] = useState({
-        totalUsers: 0,
+        total: 0,
+        active: 0,
         teachers: 0,
         students: 0,
-        reviews: 0,
-        subjects: 0,
+        banned: 0,
     });
+    const [contentStats, setContentStats] = useState({
+        courses: 0,
+        videos: 0,
+        quizzes: 0,
+        resources: 0,
+        reviews: 0,
+    });
+    const [recentUsers, setRecentUsers] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const profile = localStorage.getItem('userProfile');
-        const authUser = localStorage.getItem('authUser');
-        const reviews = JSON.parse(localStorage.getItem('teacherReviews') || '[]');
-        const subjects = JSON.parse(localStorage.getItem('adminSubjects') || '[]');
-
-        const users = [];
-        if (authUser) users.push(JSON.parse(authUser));
-        if (profile) users.push({ ...JSON.parse(authUser || '{}'), ...JSON.parse(profile) });
-
-        setStats({
-            totalUsers: Math.max(users.length, 1),
-            teachers: users.filter(u => u.role === 'teacher').length || 1,
-            students: users.filter(u => u.role === 'student').length || 1,
-            reviews: reviews.length,
-            subjects: subjects.length || 20,
-        });
+        loadData();
     }, []);
+
+    const loadData = async () => {
+        setLoading(true);
+        try {
+            const [userStats, courses, videos, quizzes, resources, reviews, users] = await Promise.all([
+                getUserStats(),
+                getAllCourses(),
+                getAllVideos(),
+                getAllQuizzes(),
+                getAllResources(),
+                getAllReviews(),
+                getAllUsers(),
+            ]);
+
+            setStats(userStats);
+            setContentStats({
+                courses: courses.length,
+                videos: videos.length,
+                quizzes: quizzes.length,
+                resources: resources.length,
+                reviews: reviews.length,
+            });
+
+            const sorted = users
+                .filter(u => u.status !== 'deleted')
+                .sort((a, b) => {
+                    const ta = toTimestamp(a.createdAt);
+                    const tb = toTimestamp(b.createdAt);
+                    return tb - ta;
+                })
+                .slice(0, 5);
+            setRecentUsers(sorted);
+        } catch (err) {
+            console.error('[AdminOverview] Error loading data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toTimestamp = (ts) => {
+        if (!ts) return 0;
+        if (ts.toDate) return ts.toDate().getTime();
+        if (ts instanceof Date) return ts.getTime();
+        if (typeof ts === 'number') return ts;
+        return 0;
+    };
+
+    const formatDate = (ts) => {
+        if (!ts) return 'N/A';
+        try {
+            const date = ts.toDate ? ts.toDate() : new Date(ts);
+            return date.toLocaleDateString();
+        } catch {
+            return 'N/A';
+        }
+    };
+
+    if (loading) {
+        return (
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                Loading dashboard...
+            </div>
+        );
+    }
 
     return (
         <div>
@@ -41,9 +100,8 @@ export default function AdminOverview({ onNavigate }) {
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                             </svg>
                         </div>
-                        <span className="admin-stat-change up">+12%</span>
                     </div>
-                    <div className="admin-stat-value">{stats.totalUsers}</div>
+                    <div className="admin-stat-value">{stats.total}</div>
                     <div className="admin-stat-label">Total Users</div>
                 </div>
 
@@ -55,7 +113,6 @@ export default function AdminOverview({ onNavigate }) {
                                 <circle cx="9" cy="7" r="4"/>
                             </svg>
                         </div>
-                        <span className="admin-stat-change up">+5%</span>
                     </div>
                     <div className="admin-stat-value">{stats.teachers}</div>
                     <div className="admin-stat-label">Teachers</div>
@@ -69,7 +126,6 @@ export default function AdminOverview({ onNavigate }) {
                                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                             </svg>
                         </div>
-                        <span className="admin-stat-change up">+18%</span>
                     </div>
                     <div className="admin-stat-value">{stats.students}</div>
                     <div className="admin-stat-label">Students</div>
@@ -82,10 +138,9 @@ export default function AdminOverview({ onNavigate }) {
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                             </svg>
                         </div>
-                        <span className="admin-stat-change up">+8%</span>
                     </div>
-                    <div className="admin-stat-value">{stats.reviews}</div>
-                    <div className="admin-stat-label">Reviews</div>
+                    <div className="admin-stat-value">{stats.banned}</div>
+                    <div className="admin-stat-label">Banned</div>
                 </div>
             </div>
 
@@ -93,23 +148,33 @@ export default function AdminOverview({ onNavigate }) {
                 <div className="analytics-card">
                     <div className="analytics-card-title">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
                         </svg>
-                        Popular Subjects
+                        Content Overview
                     </div>
-                    <div className="popular-subjects-list">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {[
-                            { name: 'Mathematics', count: 45, icon: '📐' },
-                            { name: 'Programming', count: 38, icon: '💻' },
-                            { name: 'English', count: 32, icon: '📖' },
-                            { name: 'Physics', count: 28, icon: '⚛️' },
-                            { name: 'Chemistry', count: 24, icon: '🧪' },
-                        ].map((subject, i) => (
-                            <div key={subject.name} className="popular-subject-item">
-                                <div className="popular-subject-rank">{i + 1}</div>
-                                <span style={{ fontSize: 18 }}>{subject.icon}</span>
-                                <div className="popular-subject-name">{subject.name}</div>
-                                <div className="popular-subject-count">{subject.count} users</div>
+                            { label: 'Courses', count: contentStats.courses, color: '#8B5CF6' },
+                            { label: 'Videos', count: contentStats.videos, color: '#EF4444' },
+                            { label: 'Quizzes', count: contentStats.quizzes, color: '#3B82F6' },
+                            { label: 'Resources', count: contentStats.resources, color: '#10B981' },
+                            { label: 'Reviews', count: contentStats.reviews, color: '#F59E0B' },
+                        ].map(item => (
+                            <div key={item.label} style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                padding: '10px 12px',
+                                background: 'var(--bg-tertiary)',
+                                borderRadius: '8px',
+                            }}>
+                                <span style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{item.label}</span>
+                                <span style={{
+                                    fontSize: '14px',
+                                    fontWeight: '700',
+                                    color: item.color,
+                                }}>{item.count}</span>
                             </div>
                         ))}
                     </div>
@@ -118,73 +183,62 @@ export default function AdminOverview({ onNavigate }) {
                 <div className="analytics-card">
                     <div className="analytics-card-title">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                            <circle cx="9" cy="7" r="4"/>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
                         </svg>
-                        Top Teachers
+                        Recent Users
                     </div>
-                    <div className="top-teachers-list">
-                        {[
-                            { name: 'Dr. Sarah Chen', subjects: 'Mathematics, Physics', rating: 4.9 },
-                            { name: 'Prof. Alex Rivera', subjects: 'Programming, Design', rating: 4.8 },
-                            { name: 'Maria Johnson', subjects: 'English, Literature', rating: 4.7 },
-                        ].map((teacher, i) => (
-                            <div key={teacher.name} className="top-teacher-item">
-                                <div className="top-teacher-avatar">{teacher.name[0]}</div>
-                                <div className="top-teacher-info">
-                                    <div className="top-teacher-name">{teacher.name}</div>
-                                    <div className="top-teacher-subjects">{teacher.subjects}</div>
-                                </div>
-                                <div className="top-teacher-rating">
-                                    <svg viewBox="0 0 24 24" fill="currentColor">
-                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                                    </svg>
-                                    {teacher.rating}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <div className="admin-table-container">
-                <div className="admin-table-header">
-                    <div className="admin-table-title">Recent Activity</div>
-                </div>
-                <table className="admin-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Action</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {[
-                            { user: 'John Doe', action: 'Completed registration', time: '2 min ago', status: 'active' },
-                            { user: 'Jane Smith', action: 'Updated profile', time: '15 min ago', status: 'active' },
-                            { user: 'Mike Wilson', action: 'Submitted review', time: '1 hour ago', status: 'active' },
-                            { user: 'Sarah Lee', action: 'Enrolled in course', time: '3 hours ago', status: 'active' },
-                        ].map((activity, i) => (
-                            <tr key={i}>
-                                <td>
-                                    <div className="admin-user-cell">
-                                        <div className="admin-user-cell-avatar">{activity.user[0]}</div>
-                                        <div className="admin-user-cell-info">
-                                            <div className="admin-user-cell-name">{activity.user}</div>
+                    {recentUsers.length === 0 ? (
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '14px' }}>
+                            No users registered yet
+                        </div>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            {recentUsers.map(user => (
+                                <div key={user.id} style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    padding: '10px 12px',
+                                    background: 'var(--bg-tertiary)',
+                                    borderRadius: '8px',
+                                }}>
+                                    <div style={{
+                                        width: '36px',
+                                        height: '36px',
+                                        borderRadius: '50%',
+                                        background: 'var(--accent-gradient)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '14px',
+                                        fontWeight: '700',
+                                        color: '#fff',
+                                        flexShrink: 0,
+                                        overflow: 'hidden',
+                                    }}>
+                                        {user.photoURL ? (
+                                            <img src={user.photoURL} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        ) : (
+                                            (user.fullName?.[0] || user.email?.[0] || 'U').toUpperCase()
+                                        )}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {user.fullName || 'No name'}
+                                        </div>
+                                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
+                                            {user.role || 'No role'} • {formatDate(user.createdAt)}
                                         </div>
                                     </div>
-                                </td>
-                                <td>{activity.action}</td>
-                                <td style={{ color: '#64748B' }}>{activity.time}</td>
-                                <td><span className={`admin-status-badge ${activity.status}`}>{activity.status}</span></td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                    <span className={`admin-status-badge ${user.status || 'active'}`} style={{ fontSize: '11px', padding: '2px 8px' }}>
+                                        {user.status || 'active'}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

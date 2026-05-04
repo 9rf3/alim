@@ -75,7 +75,7 @@ export default function Navbar() {
     };
 
     const photoUrl = localStorage.getItem('userPhoto') || userProfile?.photoURL || firebaseUser?.photoURL;
-    const isAdmin = firebaseUser?.email === 'admin@alimlab.com';
+    const isAdminUser = userProfile?.role === 'admin';
 
     const pathname = location.pathname;
     const isAuthPage = ['/signin', '/profile-setup', '/dashboard', '/profile', '/cabinet', '/cabinet/laboratory', '/cabinet/payment', '/cabinet/library', '/cabinet/study-plan', '/cabinet/simulations', '/cabinet/editor', '/cabinet/certificates', '/cabinet/data', '/cabinet/marketplace', '/teacher', '/teacher/dashboard', '/teacher/video', '/teacher/quiz', '/teacher/pricing', '/teacher/resources', '/teacher/laboratory', '/teacher/students', '/teacher/earnings', '/teacher/analytics'].some(p => pathname.startsWith(p));
@@ -303,6 +303,18 @@ export default function Navbar() {
                                                 </svg>
                                                 {t('Dashboard')}
                                             </Link>
+                                            {userProfile?.role === 'admin' && (
+                                                <>
+                                                    <div className="auth-dropdown-divider"></div>
+                                                    <Link to="/a/ctrl" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)} style={{ color: '#EF4444' }}>
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <circle cx="12" cy="12" r="3"/>
+                                                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                                        </svg>
+                                                        Admin Panel
+                                                    </Link>
+                                                </>
+                                            )}
                                             <div className="auth-dropdown-divider"></div>
                                             <button className="auth-dropdown-item logout-item" onClick={handleLogout}>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -496,8 +508,8 @@ export default function Navbar() {
                                     </svg>
                                     <span>{t('nav.dashboard', 'Dashboard')}</span>
                                 </Link>
-                                {isAdmin && (
-                                     <Link to="/admin" className="mobile-menu-item" onClick={handleMobileNavClick}>
+                                {isAdminUser && (
+                                     <Link to="/a/ctrl" className="mobile-menu-item" onClick={handleMobileNavClick}>
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <circle cx="12" cy="12" r="3"/>
                                             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>

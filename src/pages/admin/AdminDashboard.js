@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useAdmin } from '../../contexts/AdminContext';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import AdminOverview from './AdminOverview';
 import AdminUsers from './AdminUsers';
@@ -10,15 +10,28 @@ import '../../styles/main.css';
 import '../../styles/admin.css';
 
 export default function AdminDashboard() {
-    const { adminAuth, logout } = useAdmin();
+    const { userProfile, logout, isAdmin, loading } = useAuth();
     const navigate = useNavigate();
     const [activeSection, setActiveSection] = useState('overview');
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [globalSearch, setGlobalSearch] = useState('');
 
-    if (!adminAuth.isAuthenticated) {
-        navigate('/admin');
-        return null;
+    useEffect(() => {
+        console.log('AUTH USER:', userProfile);
+        console.log('ROLE:', userProfile?.role);
+        console.log('IS ADMIN:', isAdmin);
+
+        if (!loading && !isAdmin) {
+            navigate('/a/ctrl', { replace: true });
+        }
+    }, [loading, isAdmin, navigate]);
+
+    if (loading || !isAdmin) {
+        return (
+            <div className="loading-container">
+                <div className="loading-spinner"></div>
+            </div>
+        );
     }
 
     const sections = [
@@ -37,7 +50,7 @@ export default function AdminDashboard() {
                 <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
             </svg>
-        ), badge: '12' },
+        )},
         { id: 'subjects', label: 'Subjects', icon: (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
@@ -48,7 +61,7 @@ export default function AdminDashboard() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
-        ), badge: '3' },
+        )},
         { id: 'config', label: 'Settings', icon: (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="3"/>
@@ -57,8 +70,8 @@ export default function AdminDashboard() {
         )},
     ];
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         navigate('/admin');
     };
 
@@ -81,18 +94,14 @@ export default function AdminDashboard() {
 
     return (
         <div className="admin-dashboard">
-            {/* Sidebar Overlay */}
             {sidebarOpen && (
                 <div
                     className="admin-sidebar-overlay"
                     onClick={() => setSidebarOpen(false)}
-                    style={{
-                        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99
-                    }}
+                    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 99 }}
                 />
             )}
 
-            {/* Sidebar */}
             <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
                 <div className="admin-sidebar-header">
                     <div className="admin-sidebar-logo">
@@ -117,7 +126,6 @@ export default function AdminDashboard() {
                             >
                                 {section.icon}
                                 {section.label}
-                                {section.badge && <span className="nav-badge">{section.badge}</span>}
                             </button>
                         ))}
                     </div>
@@ -132,7 +140,6 @@ export default function AdminDashboard() {
                             >
                                 {section.icon}
                                 {section.label}
-                                {section.badge && <span className="nav-badge">{section.badge}</span>}
                             </button>
                         ))}
                     </div>
@@ -154,10 +161,16 @@ export default function AdminDashboard() {
 
                 <div className="admin-sidebar-footer">
                     <div className="admin-user-info">
-                        <div className="admin-user-avatar">A</div>
+                        <div className="admin-user-avatar">
+                            {userProfile?.photoURL ? (
+                                <img src={userProfile.photoURL} alt="" style={{ width: '100%', height: '100%', borderRadius: '50%' }} />
+                            ) : (
+                                (userProfile?.fullName?.[0] || userProfile?.email?.[0] || 'A').toUpperCase()
+                            )}
+                        </div>
                         <div className="admin-user-details">
-                            <div className="admin-user-name">Administrator</div>
-                            <div className="admin-user-role">Super Admin</div>
+                            <div className="admin-user-name">{userProfile?.fullName || 'Admin'}</div>
+                            <div className="admin-user-role">Administrator</div>
                         </div>
                     </div>
                     <button className="admin-logout-btn" onClick={handleLogout}>
@@ -171,7 +184,6 @@ export default function AdminDashboard() {
                 </div>
             </aside>
 
-            {/* Main Content */}
             <main className="admin-main">
                 <header className="admin-topbar">
                     <div className="admin-topbar-left">
@@ -194,7 +206,7 @@ export default function AdminDashboard() {
                             </svg>
                             <input
                                 type="text"
-                                placeholder="Search anything..."
+                                placeholder="Search users, subjects..."
                                 value={globalSearch}
                                 onChange={(e) => setGlobalSearch(e.target.value)}
                             />

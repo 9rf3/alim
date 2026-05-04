@@ -1,6 +1,9 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
 import TeacherLayout from '../../components/teacher/TeacherLayout';
 import { Link } from 'react-router-dom';
+import { getTeacherStats } from '../../services/firestore';
 
 function getIcon(type, className) {
     const icons = {
@@ -18,8 +21,32 @@ function getIcon(type, className) {
 }
 
 export default function TeacherOverview() {
+    const { userProfile } = useAuth();
     const { language } = useLanguage();
     const t = (ru, en) => language === 'ru' ? ru : en;
+
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!userProfile?.uid) return;
+        let isMounted = true;
+
+        const loadStats = async () => {
+            try {
+                const teacherStats = await getTeacherStats(userProfile.uid);
+                if (!isMounted) return;
+                setStats(teacherStats);
+            } catch (err) {
+                console.error('[TeacherOverview] Error loading stats:', err);
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        loadStats();
+        return () => { isMounted = false; };
+    }, [userProfile?.uid]);
 
     const featureCards = [
         {
@@ -28,7 +55,7 @@ export default function TeacherOverview() {
             title: t('Видео система', 'Video System'),
             description: t('Загружайте уроки, создавайте курсы и плейлисты', 'Upload lessons, create courses and playlists'),
             path: '/teacher/video',
-            stat: t('0 видео', '0 videos'),
+            stat: stats ? `${stats.videos} ${t('видео', 'videos')}` : t('0 видео', '0 videos'),
         },
         {
             icon: 'clipboard',
@@ -36,7 +63,7 @@ export default function TeacherOverview() {
             title: t('Инструменты квизов', 'Quiz Tools'),
             description: t('Создавайте тесты с автопроверкой и AI-помощником', 'Create quizzes with auto-grading and AI helper'),
             path: '/teacher/quiz',
-            stat: t('0 квизов', '0 quizzes'),
+            stat: stats ? `${stats.quizzes} ${t('квизов', 'quizzes')}` : t('0 квизов', '0 quizzes'),
         },
         {
             icon: 'chart',
@@ -52,7 +79,7 @@ export default function TeacherOverview() {
             title: t('Управление ценами', 'Pricing Control'),
             description: t('Устанавливайте цены, скидки и акции', 'Set prices, discounts, and promotions'),
             path: '/teacher/pricing',
-            stat: t('0 курсов', '0 courses'),
+            stat: stats ? `${stats.courses} ${t('курсов', 'courses')}` : t('0 курсов', '0 courses'),
         },
         {
             icon: 'folder',
@@ -60,7 +87,7 @@ export default function TeacherOverview() {
             title: t('Магазин ресурсов', 'Resource Store'),
             description: t('Продавайте PDF, рабочие тетради и материалы', 'Sell PDFs, workbooks, and materials'),
             path: '/teacher/resources',
-            stat: t('0 ресурсов', '0 resources'),
+            stat: stats ? `${stats.resources} ${t('ресурсов', 'resources')}` : t('0 ресурсов', '0 resources'),
         },
         {
             icon: 'flask',
@@ -76,7 +103,7 @@ export default function TeacherOverview() {
             title: t('Ученики', 'Students'),
             description: t('Управляйте студентами, подписчиками и покупателями', 'Manage students, followers, and buyers'),
             path: '/teacher/students',
-            stat: t('0 учеников', '0 students'),
+            stat: stats ? `${stats.students} ${t('учеников', 'students')}` : t('0 учеников', '0 students'),
         },
         {
             icon: 'wallet',
@@ -84,7 +111,7 @@ export default function TeacherOverview() {
             title: t('Доходы', 'Earnings'),
             description: t('Отслеживайте заработок и транзакции', 'Track earnings and transactions'),
             path: '/teacher/earnings',
-            stat: '$0',
+            stat: stats ? `$${stats.courses * 29.99 || 0}` : '$0',
         },
     ];
 
@@ -113,7 +140,7 @@ export default function TeacherOverview() {
             <div className="teacher-stats-row">
                 <div className="teacher-stat-card">
                     <div className="teacher-stat-label">{t('Ученики', 'Students')}</div>
-                    <div className="teacher-stat-value">0</div>
+                    <div className="teacher-stat-value">{loading ? '...' : stats?.students || 0}</div>
                     <div className="teacher-stat-change">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
                         {t('Начните преподавать', 'Start teaching')}
@@ -121,23 +148,23 @@ export default function TeacherOverview() {
                 </div>
                 <div className="teacher-stat-card">
                     <div className="teacher-stat-label">{t('Курсы', 'Courses')}</div>
-                    <div className="teacher-stat-value">0</div>
+                    <div className="teacher-stat-value">{loading ? '...' : stats?.courses || 0}</div>
                     <div className="teacher-stat-change">
                         {t('Создано', 'Created')}
                     </div>
                 </div>
                 <div className="teacher-stat-card">
                     <div className="teacher-stat-label">{t('Доход', 'Revenue')}</div>
-                    <div className="teacher-stat-value">$0</div>
+                    <div className="teacher-stat-value">${loading ? '...' : (stats?.courses * 29.99 || 0)}</div>
                     <div className="teacher-stat-change">
                         {t('За всё время', 'All time')}
                     </div>
                 </div>
                 <div className="teacher-stat-card">
                     <div className="teacher-stat-label">{t('Рейтинг', 'Rating')}</div>
-                    <div className="teacher-stat-value">—</div>
+                    <div className="teacher-stat-value">{loading ? '...' : (stats?.rating || '—')}</div>
                     <div className="teacher-stat-change">
-                        {t('Ожидает отзывов', 'Awaiting reviews')}
+                        {stats?.reviews > 0 ? `${stats.reviews} ${t('отзывов', 'reviews')}` : t('Ожидает отзывов', 'Awaiting reviews')}
                     </div>
                 </div>
             </div>

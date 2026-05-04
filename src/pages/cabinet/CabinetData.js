@@ -1,26 +1,55 @@
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import CabinetLayout from '../../components/cabinet/CabinetLayout';
+import { getStudentStats, getProgressByUser, getQuizAttemptsByUser } from '../../services/firestore';
 
 export default function CabinetData() {
     const { language } = useLanguage();
     const { userProfile } = useAuth();
     const t = (ru, en) => language === 'ru' ? ru : en;
 
-    const stats = [
-        { label: t('Всего уроков', 'Total Lessons'), value: '0' },
-        { label: t('Часы обучения', 'Study Hours'), value: '0' },
-        { label: t('Завершённые курсы', 'Completed Courses'), value: '0' },
-        { label: t('Средний балл', 'Average Score'), value: '—' },
-        { label: t('Дней подряд', 'Day Streak'), value: '0' },
-        { label: t('Сертификаты', 'Certificates'), value: '0' },
-    ];
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
-    const subjects = [
-        { name: t('Химия', 'Chemistry'), progress: 0, color: '#3B82F6' },
-        { name: t('Физика', 'Physics'), progress: 0, color: '#8B5CF6' },
-        { name: t('Математика', 'Mathematics'), progress: 0, color: '#10B981' },
-    ];
+    useEffect(() => {
+        if (!userProfile?.uid) return;
+        let isMounted = true;
+
+        const fetchData = async () => {
+            try {
+                const data = await getStudentStats(userProfile.uid);
+                if (!isMounted) return;
+                setStats(data);
+            } catch (err) {
+                console.error('[CabinetData] Error loading stats:', err);
+                if (!isMounted) return;
+                setError(err.message || t('Ошибка загрузки', 'Error loading data'));
+            } finally {
+                if (isMounted) setLoading(false);
+            }
+        };
+
+        fetchData();
+        return () => { isMounted = false; };
+    }, [userProfile?.uid, t]);
+
+    if (loading) {
+        return (
+            <CabinetLayout>
+                <div className="cabinet-header">
+                    <h1>{t('Мои данные', 'My Data')}</h1>
+                </div>
+                <div className="cabinet-empty">
+                    <p>{t('Загрузка...', 'Loading...')}</p>
+                </div>
+            </CabinetLayout>
+        );
+    }
+
+    const studyHours = Math.round((stats?.videosWatched || 0) * 0.5 * 10) / 10;
+    const subjectCount = userProfile?.subjects?.length || 0;
 
     return (
         <CabinetLayout>
@@ -35,48 +64,54 @@ export default function CabinetData() {
                 </div>
             </div>
 
+            {error && (
+                <div className="cabinet-empty" style={{ border: '1px solid #EF4444', background: 'rgba(239,68,68,0.1)', marginBottom: '16px' }}>
+                    <p style={{ color: '#EF4444' }}>{error}</p>
+                </div>
+            )}
+
             <div className="cabinet-grid cabinet-grid-3" style={{ marginBottom: '32px' }}>
-                {stats.map((stat, idx) => (
-                    <div key={idx} className="cabinet-stat-card">
-                        <div className="cabinet-stat-label">{stat.label}</div>
-                        <div className="cabinet-stat-value">{stat.value}</div>
-                    </div>
-                ))}
+                <div className="cabinet-stat-card">
+                    <div className="cabinet-stat-label">{t('Курсы', 'Courses')}</div>
+                    <div className="cabinet-stat-value">{stats?.courses || 0}</div>
+                </div>
+                <div className="cabinet-stat-card">
+                    <div className="cabinet-stat-label">{t('Часы обучения', 'Study Hours')}</div>
+                    <div className="cabinet-stat-value">{studyHours}</div>
+                </div>
+                <div className="cabinet-stat-card">
+                    <div className="cabinet-stat-label">{t('Средний балл', 'Average Score')}</div>
+                    <div className="cabinet-stat-value">{stats?.avgScore ? `${stats.avgScore}%` : '—'}</div>
+                </div>
+                <div className="cabinet-stat-card">
+                    <div className="cabinet-stat-label">{t('Сертификаты', 'Certificates')}</div>
+                    <div className="cabinet-stat-value">{stats?.certificates || 0}</div>
+                </div>
+                <div className="cabinet-stat-card">
+                    <div className="cabinet-stat-label">{t('Тесты', 'Quizzes')}</div>
+                    <div className="cabinet-stat-value">{stats?.quizAttempts || 0}</div>
+                </div>
+                <div className="cabinet-stat-card">
+                    <div className="cabinet-stat-label">{t('Задачи', 'Tasks')}</div>
+                    <div className="cabinet-stat-value">{stats?.tasksCompleted || 0}/{stats?.totalTasks || 0}</div>
+                </div>
             </div>
 
-            <div className="cabinet-grid cabinet-grid-2" style={{ marginBottom: '32px' }}>
-                <div className="cabinet-card">
-                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '20px' }}>
-                        {t('Прогресс по предметам', 'Subject Progress')}
-                    </h3>
-                    {subjects.map((subject, idx) => (
-                        <div key={idx} style={{ marginBottom: '16px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                                <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--text-primary)' }}>{subject.name}</span>
-                                <span style={{ fontSize: '13px', fontWeight: '600', color: subject.color }}>{subject.progress}%</span>
-                            </div>
-                            <div className="cabinet-progress-bar">
-                                <div className="cabinet-progress-fill" style={{ width: `${subject.progress}%`, background: subject.color }}></div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="cabinet-card">
-                    <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '20px' }}>
-                        {t('Активность', 'Activity')}
-                    </h3>
-                    <div style={{
-                        height: '200px',
-                        background: 'var(--bg-tertiary)',
-                        borderRadius: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'var(--text-muted)',
-                        fontSize: '14px',
-                    }}>
-                        {t('График активности появится здесь', 'Activity chart will appear here')}
+            <div className="cabinet-card" style={{ marginBottom: '32px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '20px' }}>
+                    {t('Прогресс обучения', 'Learning Progress')}
+                </h3>
+                <div className="cabinet-progress">
+                    <div className="cabinet-progress-header">
+                        <span className="cabinet-progress-label">{t('Задач выполнено', 'Tasks completed')}</span>
+                        <span className="cabinet-progress-value">
+                            {stats?.totalTasks > 0 ? Math.round((stats.tasksCompleted / stats.totalTasks) * 100) : 0}%
+                        </span>
+                    </div>
+                    <div className="cabinet-progress-bar">
+                        <div className="cabinet-progress-fill" style={{
+                            width: `${stats?.totalTasks > 0 ? Math.round((stats.tasksCompleted / stats.totalTasks) * 100) : 0}%`,
+                        }}></div>
                     </div>
                 </div>
             </div>
@@ -97,12 +132,14 @@ export default function CabinetData() {
                     <div>
                         <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>{t('Роль', 'Role')}</div>
                         <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                            {userProfile?.role === 'student' ? t('Ученик', 'Student') : t('Учитель', 'Teacher')}
+                            {userProfile?.role === 'student' ? t('Ученик', 'Student') : userProfile?.role === 'teacher' ? t('Учитель', 'Teacher') : t('Не выбрано', 'Not set')}
                         </div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>{t('Подписка', 'Subscription')}</div>
-                        <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>{t('Бесплатный', 'Free')}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '4px' }}>{t('Предметы', 'Subjects')}</div>
+                        <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>
+                            {subjectCount > 0 ? userProfile.subjects.join(', ') : t('Не выбрано', 'Not set')}
+                        </div>
                     </div>
                 </div>
             </div>

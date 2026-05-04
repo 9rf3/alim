@@ -1,7 +1,14 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import {
+    onAuthStateChanged,
+    signInWithPopup,
+    signInWithEmailAndPassword,
+    createUserWithEmailAndPassword,
+    signOut,
+} from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../firebase';
+import { logUserAction } from '../services/firestore';
 
 const AuthContext = createContext();
 
@@ -9,40 +16,29 @@ export function AuthProvider({ children }) {
     const [firebaseUser, setFirebaseUser] = useState(null);
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isBanned, setIsBanned] = useState(false);
 
     const fetchUserProfile = useCallback(async (uid) => {
         try {
-            console.log('[Auth] Fetching profile for uid:', uid);
             const userRef = doc(db, 'users', uid);
             const userSnap = await getDoc(userRef);
 
             if (userSnap.exists()) {
-                console.log('[Auth] Existing profile found');
                 const data = userSnap.data();
                 setUserProfile(data);
                 return data;
             }
-            console.log('[Auth] No existing profile found');
             return null;
         } catch (error) {
-            console.error('[Auth] FULL FIRESTORE READ ERROR:', error);
-            console.error('[Auth] Error code:', error.code);
-            console.error('[Auth] Error message:', error.message);
+            console.error('[Auth] Profile fetch error:', error.code, error.message);
             return null;
         }
     }, []);
 
     const createNewUserDocument = useCallback(async (firebaseUser) => {
         if (!firebaseUser || !firebaseUser.uid) {
-            console.error('[Auth] Cannot create user: firebaseUser is missing or has no uid');
             throw new Error('Cannot create user profile: missing user ID');
         }
-
-        console.log('[Auth] Creating new user document:');
-        console.log('[Auth] - uid:', firebaseUser.uid);
-        console.log('[Auth] - email:', firebaseUser.email);
-        console.log('[Auth] - displayName:', firebaseUser.displayName);
-        console.log('[Auth] - photoURL:', firebaseUser.photoURL);
 
         const newUserDoc = {
             uid: firebaseUser.uid,
@@ -53,65 +49,59 @@ export function AuthProvider({ children }) {
             fullName: firebaseUser.displayName || '',
             age: null,
             subjects: [],
+            status: 'active',
             profileCompleted: false,
             onboardingCompleted: false,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
         };
 
-        console.log('[Auth] Payload:', JSON.stringify(newUserDoc, null, 2));
-
         try {
             const userRef = doc(db, 'users', firebaseUser.uid);
-            console.log('[Auth] Writing to path: users/' + firebaseUser.uid);
-
             await setDoc(userRef, newUserDoc);
-
-            console.log('[Auth] User document created successfully');
+            await logUserAction(firebaseUser.uid, 'register', {
+                email: firebaseUser.email,
+                provider: firebaseUser.providerData?.[0]?.providerId || 'unknown',
+            });
             setUserProfile(newUserDoc);
             return newUserDoc;
         } catch (error) {
-            console.error('[Auth] FULL FIRESTORE WRITE ERROR:', error);
-            console.error('[Auth] Error code:', error.code);
-            console.error('[Auth] Error message:', error.message);
-            console.error('[Auth] Error name:', error.name);
-
             if (error.code === 'permission-denied') {
-                throw new Error('Firestore permission denied. Please check your Firestore security rules. Set rules to allow read/write for authenticated users.');
+                throw new Error('Firestore permission denied. Check your security rules.');
             }
-
-            if (error.code === 'unavailable') {
-                throw new Error('Firestore service unavailable. Check your network connection.');
-            }
-
-            throw new Error(error.message || 'Failed to create user profile in database');
+            throw new Error(error.message || 'Failed to create user profile');
         }
     }, []);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
             if (firebaseUser) {
-                console.log('[Auth] Auth state changed: user authenticated');
-                console.log('[Auth] User uid:', firebaseUser.uid);
-                console.log('[Auth] User email:', firebaseUser.email);
-
                 setFirebaseUser(firebaseUser);
 
                 const existingProfile = await fetchUserProfile(firebaseUser.uid);
 
                 if (!existingProfile) {
-                    console.log('[Auth] No existing profile, creating new document...');
                     try {
                         await createNewUserDocument(firebaseUser);
                     } catch (error) {
                         console.error('[Auth] Failed to create user document:', error);
-                        console.error('[Auth] Full error:', error);
                     }
                 } else {
-                    console.log('[Auth] Using existing profile');
+                    if (existingProfile.status === 'banned') {
+                        setIsBanned(true);
+                        await signOut(auth);
+                        setFirebaseUser(null);
+                        setUserProfile(null);
+                    } else if (existingProfile.status === 'deleted') {
+                        await signOut(auth);
+                        setFirebaseUser(null);
+                        setUserProfile(null);
+                    } else {
+                        setIsBanned(false);
+                        await logUserAction(firebaseUser.uid, 'login');
+                    }
                 }
             } else {
-                console.log('[Auth] Auth state changed: user signed out');
                 setFirebaseUser(null);
                 setUserProfile(null);
             }
@@ -121,27 +111,28 @@ export function AuthProvider({ children }) {
         return () => unsubscribe();
     }, [fetchUserProfile, createNewUserDocument]);
 
-    const login = async () => {
-        try {
-            const result = await signInWithPopup(auth, googleProvider);
-            console.log('[Auth] Login successful:', result.user.uid);
-            return result.user;
-        } catch (error) {
-            console.error('[Auth] FULL LOGIN ERROR:', error);
-            console.error('[Auth] Error code:', error.code);
-            throw error;
-        }
+    const loginWithGoogle = async () => {
+        const result = await signInWithPopup(auth, googleProvider);
+        return result.user;
+    };
+
+    const loginWithEmail = async (email, password) => {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        return result.user;
+    };
+
+    const registerWithEmail = async (email, password) => {
+        const result = await createUserWithEmailAndPassword(auth, email, password);
+        return result.user;
     };
 
     const logout = async () => {
-        try {
-            await signOut(auth);
-            setFirebaseUser(null);
-            setUserProfile(null);
-        } catch (error) {
-            console.error('[Auth] Logout error:', error);
-            throw error;
+        if (firebaseUser) {
+            await logUserAction(firebaseUser.uid, 'logout');
         }
+        await signOut(auth);
+        setFirebaseUser(null);
+        setUserProfile(null);
     };
 
     const updateUserProfile = async (data) => {
@@ -149,24 +140,15 @@ export function AuthProvider({ children }) {
 
         try {
             const userRef = doc(db, 'users', firebaseUser.uid);
-            const updateData = {
-                ...data,
-                updatedAt: serverTimestamp(),
-            };
+            const updateData = { ...data, updatedAt: serverTimestamp() };
             await updateDoc(userRef, updateData);
-
             setUserProfile((prev) => ({ ...prev, ...updateData }));
             return true;
         } catch (error) {
-            console.error('[Auth] FULL UPDATE ERROR:', error);
-            console.error('[Auth] Error code:', error.code);
-            console.error('[Auth] Error message:', error.message);
-
             if (error.code === 'permission-denied') {
                 throw new Error('Firestore permission denied. Check your security rules.');
             }
-
-            throw new Error(error.message || 'Failed to save profile to database');
+            throw new Error(error.message || 'Failed to save profile');
         }
     };
 
@@ -182,19 +164,13 @@ export function AuthProvider({ children }) {
                 updatedAt: serverTimestamp(),
             };
             await updateDoc(userRef, updateData);
-
             setUserProfile((prev) => ({ ...prev, ...updateData }));
             return true;
         } catch (error) {
-            console.error('[Auth] FULL ONBOARDING ERROR:', error);
-            console.error('[Auth] Error code:', error.code);
-            console.error('[Auth] Error message:', error.message);
-
             if (error.code === 'permission-denied') {
                 throw new Error('Firestore permission denied. Check your security rules.');
             }
-
-            throw new Error(error.message || 'Failed to save profile to database');
+            throw new Error(error.message || 'Failed to save profile');
         }
     };
 
@@ -202,9 +178,13 @@ export function AuthProvider({ children }) {
         firebaseUser,
         userProfile,
         loading,
+        isBanned,
         isAuthenticated: !!firebaseUser,
+        isAdmin: userProfile?.role === 'admin',
         isOnboardingComplete: userProfile?.onboardingCompleted === true,
-        login,
+        loginWithGoogle,
+        loginWithEmail,
+        registerWithEmail,
         logout,
         updateUserProfile,
         completeOnboarding,

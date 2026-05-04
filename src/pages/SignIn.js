@@ -6,7 +6,7 @@ import '../styles/main.css';
 
 export default function SignIn() {
     const { language } = useLanguage();
-    const { login, loading, isAuthenticated, isOnboardingComplete } = useAuth();
+    const { loginWithGoogle, loading, isAuthenticated, isOnboardingComplete } = useAuth();
     const navigate = useNavigate();
     const [termsChecked, setTermsChecked] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
@@ -62,7 +62,7 @@ export default function SignIn() {
         setGoogleLoading(true);
 
         try {
-            await login();
+            await loginWithGoogle();
         } catch (error) {
             console.error('Login error:', error);
             setGoogleLoading(false);
