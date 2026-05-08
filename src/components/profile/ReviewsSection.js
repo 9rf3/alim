@@ -1,82 +1,59 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
-
-const REVIEWS_KEY = 'teacherReviews';
-
-const sampleReviews = [
-    {
-        id: 1,
-        author: 'Alex M.',
-        avatar: 'A',
-        rating: 5,
-        text: 'Excellent teacher! The explanations were clear and the course material was very well structured. Highly recommended.',
-        date: '2026-04-15',
-    },
-    {
-        id: 2,
-        author: 'Sarah K.',
-        avatar: 'S',
-        rating: 4,
-        text: 'Great content and very helpful. Would love to see more advanced topics covered in future courses.',
-        date: '2026-04-10',
-    },
-    {
-        id: 3,
-        author: 'David L.',
-        avatar: 'D',
-        rating: 5,
-        text: 'One of the best courses I have taken. The teacher is very knowledgeable and patient.',
-        date: '2026-03-28',
-    },
-];
+import { createReview, getReviewsByTeacher } from '../../services/firestore';
 
 export default function ReviewsSection() {
     const { language } = useLanguage();
-    const { userProfile } = useAuth();
+    const { userProfile, firebaseUser } = useAuth();
     const [reviews, setReviews] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [newRating, setNewRating] = useState(0);
     const [newText, setNewText] = useState('');
     const [hoverRating, setHoverRating] = useState(0);
+    const [submitting, setSubmitting] = useState(false);
+
+    const uid = userProfile?.uid || firebaseUser?.uid;
 
     useEffect(() => {
-        const stored = localStorage.getItem(REVIEWS_KEY);
-        if (stored) {
-            setReviews(JSON.parse(stored));
-        } else {
-            setReviews(sampleReviews);
-            localStorage.setItem(REVIEWS_KEY, JSON.stringify(sampleReviews));
+        if (!uid) return;
+        setLoading(true);
+        getReviewsByTeacher(uid).then(data => {
+            setReviews(data || []);
+            setLoading(false);
+        }).catch(() => setLoading(false));
+    }, [uid]);
+
+    const handleSubmit = async () => {
+        if (newRating === 0 || !newText.trim() || !uid) return;
+        setSubmitting(true);
+        try {
+            await createReview(uid, {
+                reviewerId: uid,
+                reviewerName: userProfile?.fullName || 'Anonymous',
+                rating: newRating,
+                comment: newText.trim(),
+            });
+            const updated = await getReviewsByTeacher(uid);
+            setReviews(updated || []);
+            setNewRating(0);
+            setNewText('');
+        } catch (e) {
+            console.error('Failed to submit review:', e);
+        } finally {
+            setSubmitting(false);
         }
-    }, []);
-
-    const handleSubmit = () => {
-        if (newRating === 0 || !newText.trim()) return;
-
-        const review = {
-            id: Date.now(),
-            author: userProfile?.fullName || 'Anonymous',
-            avatar: userProfile?.fullName?.[0] || 'A',
-            rating: newRating,
-            text: newText.trim(),
-            date: new Date().toISOString().split('T')[0],
-        };
-
-        const updated = [review, ...reviews];
-        setReviews(updated);
-        localStorage.setItem(REVIEWS_KEY, JSON.stringify(updated));
-        setNewRating(0);
-        setNewText('');
     };
 
     const average = reviews.length > 0
-        ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-        : '0.0';
+        ? (reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length).toFixed(1)
+        : null;
 
     const breakdown = [5, 4, 3, 2, 1].map(star => ({
         star,
-        count: reviews.filter(r => r.rating === star).length,
+        count: reviews.filter(r => (r.rating || 0) === star).length,
         percentage: reviews.length > 0
-            ? (reviews.filter(r => r.rating === star).length / reviews.length) * 100
+            ? (reviews.filter(r => (r.rating || 0) === star).length / reviews.length) * 100
             : 0,
     }));
 
@@ -89,45 +66,90 @@ export default function ReviewsSection() {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                     </svg>
-                    {t('Отзывы и рейтинг', 'Reviews & Rating')}
-                </div>
-                <div className="profile-section-subtitle">
-                    {t('Мнения студентов о преподавателе', 'Student opinions about the teacher')}
+                    {t('Отзывы', 'Reviews')}
                 </div>
 
-                <div className="reviews-summary">
-                    <div className="reviews-average">
-                        <div className="reviews-score">{average}</div>
-                        <div className="reviews-count">{reviews.length} {t('отзывов', 'reviews')}</div>
-                        <div className="reviews-stars">
-                            {[1, 2, 3, 4, 5].map(star => (
-                                <svg
-                                    key={star}
-                                    className={`star ${star <= Math.round(parseFloat(average)) ? '' : 'empty'}`}
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                >
-                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                                </svg>
+                {loading ? (
+                    <div className="profile-section-subtitle">{t('Загрузка...', 'Loading...')}</div>
+                ) : reviews.length === 0 ? (
+                    <div className="reviews-empty" style={{ textAlign: 'center', padding: '40px 20px' }}>
+                        <div style={{ fontSize: '40px', marginBottom: '12px', opacity: 0.3 }}>💬</div>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+                            {t('Отзывов пока нет', 'No reviews yet')}
+                        </p>
+                    </div>
+                ) : (
+                    <>
+                        <div className="reviews-summary">
+                            <div className="reviews-average">
+                                <div className="reviews-score">{average}</div>
+                                <div className="reviews-count">{reviews.length} {t('отзывов', 'reviews')}</div>
+                                <div className="reviews-stars">
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <svg
+                                            key={star}
+                                            className={`star ${star <= Math.round(parseFloat(average || '0')) ? '' : 'empty'}`}
+                                            viewBox="0 0 24 24" fill="currentColor"
+                                        >
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                        </svg>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="reviews-breakdown">
+                                {breakdown.map(({ star, count, percentage }) => (
+                                    <div key={star} className="review-bar-row">
+                                        <span className="review-bar-label">{star}</span>
+                                        <div className="review-bar-track">
+                                            <div className="review-bar-fill" style={{ width: `${percentage}%` }} />
+                                        </div>
+                                        <span className="review-bar-count">{count}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="reviews-list" style={{ marginTop: '24px' }}>
+                            {reviews.map(review => (
+                                <div key={review.id} className="review-item">
+                                    <div className="review-header">
+                                        <div className="review-author">
+                                            <div className="review-avatar">
+                                                {review.reviewerName?.[0] || '?'}
+                                            </div>
+                                            <div className="review-author-info">
+                                                <span className="review-author-name">{review.reviewerName || t('Аноним', 'Anonymous')}</span>
+                                                <span className="review-date">
+                                                    {review.createdAt?.toDate
+                                                        ? review.createdAt.toDate().toLocaleDateString()
+                                                        : review.createdAt
+                                                            ? new Date(review.createdAt).toLocaleDateString()
+                                                            : ''}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="review-rating">
+                                            {[1, 2, 3, 4, 5].map(star => (
+                                                <svg
+                                                    key={star}
+                                                    className={`star ${star <= (review.rating || 0) ? '' : 'empty'}`}
+                                                    viewBox="0 0 24 24" fill="currentColor"
+                                                >
+                                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                                </svg>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <p className="review-text">{review.comment}</p>
+                                </div>
                             ))}
                         </div>
-                    </div>
+                    </>
+                )}
 
-                    <div className="reviews-breakdown">
-                        {breakdown.map(({ star, count, percentage }) => (
-                            <div key={star} className="review-bar-row">
-                                <span className="review-bar-label">{star}</span>
-                                <div className="review-bar-track">
-                                    <div className="review-bar-fill" style={{ width: `${percentage}%` }} />
-                                </div>
-                                <span className="review-bar-count">{count}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {userProfile && userProfile.role === 'student' && (
-                    <div className="review-form">
+                {userProfile?.role === 'student' && (
+                    <div className="review-form" style={{ marginTop: '24px' }}>
                         <div className="review-form-title">
                             {t('Оставить отзыв', 'Leave a Review')}
                         </div>
@@ -155,48 +177,12 @@ export default function ReviewsSection() {
                         <button
                             className="review-submit-btn"
                             onClick={handleSubmit}
-                            disabled={newRating === 0 || !newText.trim()}
+                            disabled={newRating === 0 || !newText.trim() || submitting}
                         >
-                            {t('Отправить отзыв', 'Submit Review')}
+                            {submitting ? t('Отправка...', 'Sending...') : t('Отправить отзыв', 'Submit Review')}
                         </button>
                     </div>
                 )}
-
-                <div className="reviews-list">
-                    {reviews.length === 0 ? (
-                        <div className="reviews-empty">
-                            <div className="icon">💬</div>
-                            <p>{t('Пока нет отзывов. Будьте первым!', 'No reviews yet. Be the first!')}</p>
-                        </div>
-                    ) : (
-                        reviews.map(review => (
-                            <div key={review.id} className="review-item">
-                                <div className="review-header">
-                                    <div className="review-author">
-                                        <div className="review-avatar">{review.avatar}</div>
-                                        <div className="review-author-info">
-                                            <span className="review-author-name">{review.author}</span>
-                                            <span className="review-date">{review.date}</span>
-                                        </div>
-                                    </div>
-                                    <div className="review-rating">
-                                        {[1, 2, 3, 4, 5].map(star => (
-                                            <svg
-                                                key={star}
-                                                className={`star ${star <= review.rating ? '' : 'empty'}`}
-                                                viewBox="0 0 24 24"
-                                                fill="currentColor"
-                                            >
-                                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                                            </svg>
-                                        ))}
-                                    </div>
-                                </div>
-                                <p className="review-text">{review.text}</p>
-                            </div>
-                        ))
-                    )}
-                </div>
             </div>
         </div>
     );

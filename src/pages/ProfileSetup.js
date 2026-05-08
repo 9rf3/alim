@@ -105,7 +105,7 @@ export default function ProfileSetup() {
             }
 
             await completeOnboarding(profileData);
-            navigate('/dashboard');
+            navigate(role === 'teacher' ? '/teacher' : '/cabinet');
         } catch (err) {
             console.error('Profile save error:', err);
             setError(language === 'ru' ? 'Ошибка сохранения профиля. Попробуйте снова.' : 'Failed to save profile. Please try again.');

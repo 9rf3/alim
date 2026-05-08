@@ -2,6 +2,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Timer from '../components/Timer';
 import '../styles/main.css';
 import '../styles/dashboard.css';
 
@@ -21,6 +22,7 @@ export default function Dashboard() {
     return (
         <div className="dashboard-page">
             <Navbar />
+            <Timer />
             <div className="dashboard-container">
                 <div className="dashboard-header">
                     <div className="user-greeting">

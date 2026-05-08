@@ -67,14 +67,19 @@ export default function EditProfileModal({ onClose }) {
                         </div>
                         <div className="form-group">
                             <label>{t('Возраст', 'Age')}</label>
-                            <input
-                                type="number"
+                            <select
                                 className="form-input"
                                 value={formData.age}
                                 onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                                min="13"
-                                max="120"
-                            />
+                            >
+                                <option value="">{t('— Выберите —', '— Select —')}</option>
+                                <option value="10–16">10–16</option>
+                                <option value="16–20">16–20</option>
+                                <option value="20–28">20–28</option>
+                                <option value="28–35">28–35</option>
+                                <option value="35–50">35–50</option>
+                                <option value="50+">50+</option>
+                            </select>
                         </div>
                     </div>
 

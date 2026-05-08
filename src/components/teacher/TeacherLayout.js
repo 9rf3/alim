@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
-import Navbar from '../../components/Navbar';
+import { useTheme } from '../../contexts/ThemeContext';
+import Timer from '../../components/Timer';
 import '../../styles/teacher.css';
 
 const navSections = [
@@ -11,7 +12,7 @@ const navSections = [
         labelEn: 'Main',
         items: [
             { id: 'overview', path: '/teacher', icon: 'grid', label: 'Обзор', labelEn: 'Overview' },
-            { id: 'dashboard', path: '/teacher/dashboard', icon: 'chart', label: 'Dashboard', labelEn: 'Dashboard' },
+            { id: 'profile', path: '/profile', icon: 'user', label: 'Профиль', labelEn: 'Profile' },
         ]
     },
     {
@@ -45,6 +46,7 @@ const navSections = [
 function getIcon(type, className) {
     const icons = {
         grid: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
+        user: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
         chart: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
         video: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>,
         clipboard: <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>,
@@ -59,8 +61,10 @@ function getIcon(type, className) {
 }
 
 export default function TeacherLayout({ children }) {
-    const { userProfile, isAuthenticated, isOnboardingComplete, loading } = useAuth();
-    const { language } = useLanguage();
+    const { userProfile, isAuthenticated, isOnboardingComplete, loading, logout } = useAuth();
+    console.log("ROLE:", userProfile?.role);
+    const { language, changeLanguage } = useLanguage();
+    const { toggleTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -80,13 +84,29 @@ export default function TeacherLayout({ children }) {
 
     const photoUrl = localStorage.getItem('userPhoto') || userProfile?.photoURL;
 
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
+
     return (
         <div className="teacher-page">
-            <Navbar />
+            <Timer />
 
             <div className={`teacher-sidebar-overlay ${sidebarOpen ? 'active' : ''}`} onClick={() => setSidebarOpen(false)}></div>
 
             <aside className={`teacher-sidebar ${sidebarOpen ? 'open' : ''}`}>
+                <div className="teacher-sidebar-header">
+                    <Link to="/teacher" className="teacher-sidebar-logo">
+                        <svg className="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 3L7 17C7 18.6569 8.34315 20 10 20H14C15.6569 20 17 18.6569 17 17L15 3" strokeLinecap="round"/>
+                            <path d="M6 8H18" strokeLinecap="round"/>
+                            <path d="M7 3H17" strokeLinecap="round"/>
+                        </svg>
+                        <span className="teacher-sidebar-logo-text">Alim-lab</span>
+                    </Link>
+                </div>
+
                 <div className="teacher-user-header">
                     <div className="teacher-user-info">
                         <div className="teacher-user-avatar">
@@ -132,6 +152,41 @@ export default function TeacherLayout({ children }) {
                         </div>
                     ))}
                 </nav>
+
+                <div className="teacher-sidebar-footer">
+                    {userProfile?.role === 'admin' && (
+                        <Link to="/a/ctrl/dashboard" className="teacher-sidebar-btn admin-link">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                            </svg>
+                            {language === 'ru' ? 'Админ панель' : 'Admin Panel'}
+                        </Link>
+                    )}
+                    <button className="teacher-sidebar-btn" onClick={toggleTheme}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="5"/>
+                            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+                        </svg>
+                        {language === 'ru' ? 'Тема' : 'Theme'}
+                    </button>
+                    <button className="teacher-sidebar-btn" onClick={() => changeLanguage(language === 'ru' ? 'en' : 'ru')}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                        </svg>
+                        {language === 'ru' ? 'English' : 'Русский'}
+                    </button>
+                    <button className="teacher-sidebar-btn logout" onClick={handleLogout}>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        {language === 'ru' ? 'Выйти' : 'Log out'}
+                    </button>
+                </div>
             </aside>
 
             <main className="teacher-main">

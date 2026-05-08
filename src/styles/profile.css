@@ -585,6 +585,11 @@
     background: var(--bg-tertiary);
 }
 
+.modal-form select.form-input {
+    appearance: auto;
+    cursor: pointer;
+}
+
 .modal-form .form-textarea {
     resize: vertical;
     min-height: 80px;

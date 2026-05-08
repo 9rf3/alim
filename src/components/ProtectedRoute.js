@@ -23,8 +23,12 @@ export function ProtectedRoute({ children, requireOnboarding = true }) {
     return children;
 }
 
+function getCabinetRoute(role) {
+    return role === 'teacher' ? '/teacher' : '/cabinet';
+}
+
 export function OnboardingRoute({ children }) {
-    const { isAuthenticated, isOnboardingComplete, loading } = useAuth();
+    const { isAuthenticated, isOnboardingComplete, userProfile, loading } = useAuth();
 
     if (loading) {
         return (
@@ -39,14 +43,14 @@ export function OnboardingRoute({ children }) {
     }
 
     if (isOnboardingComplete) {
-        return <Navigate to="/dashboard" replace />;
+        return <Navigate to={getCabinetRoute(userProfile?.role)} replace />;
     }
 
     return children;
 }
 
 export function PublicRoute({ children }) {
-    const { isAuthenticated, isOnboardingComplete, loading } = useAuth();
+    const { isAuthenticated, isOnboardingComplete, userProfile, loading } = useAuth();
 
     if (loading) {
         return (
@@ -58,7 +62,7 @@ export function PublicRoute({ children }) {
 
     if (isAuthenticated) {
         if (isOnboardingComplete) {
-            return <Navigate to="/dashboard" replace />;
+            return <Navigate to={getCabinetRoute(userProfile?.role)} replace />;
         }
         return <Navigate to="/profile-setup" replace />;
     }

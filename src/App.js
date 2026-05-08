@@ -9,9 +9,9 @@ import Home from './pages/Home';
 import Demo from './pages/Demo';
 import SignIn from './pages/SignIn';
 import ProfileSetup from './pages/ProfileSetup';
-import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Laboratories from './pages/Laboratories';
+import TermsOfService from './pages/TermsOfService';
 import BannedPage from './pages/Banned';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
@@ -56,11 +56,6 @@ function App() {
                                         <ProfileSetup />
                                     </OnboardingRoute>
                                 } />
-                                <Route path="/dashboard" element={
-                                    <ProtectedRoute>
-                                        <Dashboard />
-                                    </ProtectedRoute>
-                                } />
                                 <Route path="/profile" element={
                                     <ProtectedRoute>
                                         <Profile />
@@ -71,6 +66,7 @@ function App() {
                                         <Laboratories />
                                     </ProtectedRoute>
                                 } />
+                                <Route path="/terms" element={<TermsOfService />} />
                                 <Route path="/banned" element={<BannedPage />} />
                                 <Route path="/a/ctrl" element={<AdminLogin />} />
                                 <Route path="/a/ctrl/dashboard" element={

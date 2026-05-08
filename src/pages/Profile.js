@@ -1,26 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useLab } from '../contexts/LabContext';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Timer from '../components/Timer';
 import PhotoUpload from '../components/profile/PhotoUpload';
 import EditProfileModal from '../components/profile/EditProfileModal';
 import GoalsPlanner from '../components/profile/GoalsPlanner';
 import ActivityHeatmap from '../components/profile/ActivityHeatmap';
 import ReviewsSection from '../components/profile/ReviewsSection';
 import { subjects } from '../data/subjects';
+import { getStudentStats, getTeacherStats } from '../services/firestore';
 import '../styles/main.css';
 import '../styles/profile.css';
 
 export default function Profile() {
     const { language } = useLanguage();
     const { userProfile, firebaseUser } = useAuth();
-    const { getSubscribedCourses, getSubscribedTeachers, subscriptions, getSubjectName, getSubjectIcon, getSubjectColor } = useLab();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('overview');
     const [showEditModal, setShowEditModal] = useState(false);
     const [photoUrl, setPhotoUrl] = useState(null);
+    const [stats, setStats] = useState(null);
 
     useEffect(() => {
         if (!userProfile) {
@@ -33,6 +34,12 @@ export default function Profile() {
         }
     }, [userProfile, navigate]);
 
+    useEffect(() => {
+        if (!userProfile) return;
+        const fn = userProfile.role === 'teacher' ? getTeacherStats : getStudentStats;
+        fn(userProfile.uid || firebaseUser?.uid).then(setStats).catch(() => {});
+    }, [userProfile, firebaseUser]);
+
     if (!userProfile) return null;
 
     const t = (ru, en) => language === 'ru' ? ru : en;
@@ -44,33 +51,24 @@ export default function Profile() {
         ? (userProfile.subjectsToTeach || [])
         : (userProfile.subjectsToStudy || []);
 
-    const completionItems = [
+    const completionFields = [
         !!displayName,
         !!userProfile.age,
         !!userProfile.bio,
         profileSubjects.length > 0,
-        !!userProfile.learningGoalMonth || !!userProfile.teachingGoalsMonth,
-        !!userProfile.learningGoalYear || !!userProfile.teachingGoalsYear,
+        role === 'teacher' ? !!userProfile.teachingGoalsMonth : !!userProfile.learningGoalMonth,
+        role === 'teacher' ? !!userProfile.teachingGoalsYear : !!userProfile.learningGoalYear,
         role === 'teacher' ? !!userProfile.coursePrice : true,
         role === 'teacher' ? !!userProfile.experience : true,
-    ].filter(Boolean).length;
-
-    const completionPercent = Math.round((completionItems / completionItems.length) * 100);
-
-    const subscribedCourses = getSubscribedCourses();
-    const subscribedTeachers = getSubscribedTeachers();
+    ];
+    const filledCount = completionFields.filter(Boolean).length;
+    const completionPercent = Math.round((filledCount / completionFields.length) * 100);
 
     const tabs = [
         { id: 'overview', label: t('Обзор', 'Overview'), icon: (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
-            </svg>
-        )},
-        { id: 'lab', label: t('Лаборатория', 'Lab'), icon: (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M9 3L7 17C7 18.6569 8.34315 20 10 20H14C15.6569 20 17 18.6569 17 17L15 3"/>
-                <path d="M6 8H18"/>
             </svg>
         )},
         { id: 'goals', label: t('Цели', 'Goals'), icon: (
@@ -96,118 +94,6 @@ export default function Profile() {
 
     const renderContent = () => {
         switch (activeTab) {
-            case 'lab':
-                return (
-                    <>
-                        <div className="profile-stats-row">
-                            <div className="stat-card">
-                                <div className="stat-card-icon blue">📚</div>
-                                <div className="stat-card-value">{subscriptions.subjects.length}</div>
-                                <div className="stat-card-label">{t('Предметов', 'Subjects')}</div>
-                            </div>
-                            <div className="stat-card">
-                                <div className="stat-card-icon purple">🎓</div>
-                                <div className="stat-card-value">{subscribedCourses.length}</div>
-                                <div className="stat-card-label">{t('Курсов', 'Courses')}</div>
-                            </div>
-                            <div className="stat-card">
-                                <div className="stat-card-icon green">👨‍🏫</div>
-                                <div className="stat-card-value">{subscribedTeachers.length}</div>
-                                <div className="stat-card-label">{t('Учителей', 'Teachers')}</div>
-                            </div>
-                        </div>
-
-                        {subscriptions.subjects.length > 0 && (
-                            <div className="profile-section">
-                                <div className="profile-section-title">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-                                    </svg>
-                                    {t('Мои предметы', 'My Subjects')}
-                                </div>
-                                <div className="subjects-grid">
-                                    {subscriptions.subjects.map(id => {
-                                        const subject = subjects.find(s => s.id === id);
-                                        if (!subject) return null;
-                                        return (
-                                            <div key={id} className="subject-badge" style={{ borderColor: subject.color }}>
-                                                <span className="subject-badge-icon">{subject.icon}</span>
-                                                <span>{language === 'ru' ? subject.ru : subject.en}</span>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
-
-                        {subscribedCourses.length > 0 && (
-                            <div className="profile-section">
-                                <div className="profile-section-title">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                                        <line x1="8" y1="21" x2="16" y2="21"/>
-                                        <line x1="12" y1="17" x2="12" y2="21"/>
-                                    </svg>
-                                    {t('Мои курсы', 'My Courses')}
-                                </div>
-                                <div className="lab-courses-list">
-                                    {subscribedCourses.map(course => (
-                                        <div key={course.id} className="lab-course-row">
-                                            <div className="lab-course-icon" style={{ background: getSubjectColor(course.subject) }}>
-                                                {getSubjectIcon(course.subject)}
-                                            </div>
-                                            <div className="lab-course-info">
-                                                <div className="lab-course-name">{course.title}</div>
-                                                <div className="lab-course-meta">{course.teacherName} · {course.lessons} lessons</div>
-                                            </div>
-                                            <button className="lab-course-btn" onClick={() => navigate('/labs')}>
-                                                {t('Открыть', 'Open')}
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {subscribedTeachers.length > 0 && (
-                            <div className="profile-section">
-                                <div className="profile-section-title">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                                        <circle cx="12" cy="7" r="4"/>
-                                    </svg>
-                                    {t('Мои учителя', 'My Teachers')}
-                                </div>
-                                <div className="lab-teachers-list">
-                                    {subscribedTeachers.map(teacher => (
-                                        <div key={teacher.id} className="lab-teacher-row">
-                                            <div className="lab-teacher-avatar-small">{teacher.name[0]}</div>
-                                            <div className="lab-teacher-info">
-                                                <div className="lab-teacher-name">{teacher.name}</div>
-                                                <div className="lab-teacher-subject">{getSubjectIcon(teacher.subject)} {getSubjectName(teacher.subject)}</div>
-                                            </div>
-                                            <button className="lab-teacher-btn" onClick={() => navigate('/labs?teacher=' + teacher.id)}>
-                                                {t('Профиль', 'Profile')}
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {subscriptions.subjects.length === 0 && subscribedCourses.length === 0 && subscribedTeachers.length === 0 && (
-                            <div className="profile-section labs-empty-state">
-                                <div className="labs-empty-icon">🧪</div>
-                                <h3>{t('Пока пусто', 'Nothing yet')}</h3>
-                                <p>{t('Начните изучать предметы и курсы в Лаборатории', 'Start exploring subjects and courses in the Lab')}</p>
-                                <button className="profile-btn primary" onClick={() => navigate('/labs')}>
-                                    {t('Перейти в Лабораторию', 'Go to Lab')}
-                                </button>
-                            </div>
-                        )}
-                    </>
-                );
             case 'goals':
                 return <GoalsPlanner />;
             case 'reviews':
@@ -234,9 +120,9 @@ export default function Profile() {
                                 <div className="stat-card-label">{t('Возраст', 'Age')}</div>
                             </div>
                             <div className="stat-card">
-                                <div className="stat-card-icon orange">⭐</div>
-                                <div className="stat-card-value">4.8</div>
-                                <div className="stat-card-label">{t('Рейтинг', 'Rating')}</div>
+                                <div className="stat-card-icon orange">⚡</div>
+                                <div className="stat-card-value">{stats ? stats.quizAttempts : '—'}</div>
+                                <div className="stat-card-label">{t('Тесты', 'Quizzes')}</div>
                             </div>
                         </div>
 
@@ -255,10 +141,10 @@ export default function Profile() {
 
                             {role === 'teacher' && userProfile.experience && (
                                 <div style={{ marginTop: 16 }}>
-                                    <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 6 }}>
+                                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>
                                         {t('Опыт преподавания', 'Teaching Experience')}
                                     </div>
-                                    <div style={{ fontSize: 15, color: '#cbd5e1' }}>
+                                    <div style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
                                         {userProfile.experience}
                                     </div>
                                 </div>
@@ -266,10 +152,10 @@ export default function Profile() {
 
                             {role === 'teacher' && userProfile.availability && (
                                 <div style={{ marginTop: 16 }}>
-                                    <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 6 }}>
+                                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>
                                         {t('Доступность', 'Availability')}
                                     </div>
-                                    <div style={{ fontSize: 15, color: '#cbd5e1' }}>
+                                    <div style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
                                         {userProfile.availability}
                                     </div>
                                 </div>
@@ -277,10 +163,10 @@ export default function Profile() {
 
                             {role === 'teacher' && userProfile.coursePrice && (
                                 <div style={{ marginTop: 16 }}>
-                                    <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 6 }}>
+                                    <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>
                                         {t('Стоимость курсов', 'Course Pricing')}
                                     </div>
-                                    <div style={{ fontSize: 15, color: '#cbd5e1' }}>
+                                    <div style={{ fontSize: 15, color: 'var(--text-secondary)' }}>
                                         {userProfile.coursePrice}
                                     </div>
                                 </div>
@@ -367,6 +253,7 @@ export default function Profile() {
     return (
         <div className="profile-page">
             <Navbar />
+            <Timer />
 
             <div className="profile-container">
                 <div className="profile-header">
@@ -399,7 +286,7 @@ export default function Profile() {
                                             <line x1="8" y1="2" x2="8" y2="6"/>
                                             <line x1="3" y1="10" x2="21" y2="10"/>
                                         </svg>
-                                        {userProfile.age} {t('лет', 'years old')}
+                                        {userProfile.age} {t('лет', 'yrs')}
                                     </div>
                                 )}
                             </div>
@@ -412,14 +299,14 @@ export default function Profile() {
                                     </svg>
                                     {t('Редактировать', 'Edit Profile')}
                                 </button>
-                                <button className="profile-btn secondary" onClick={() => navigate('/dashboard')}>
+                                <button className="profile-btn secondary" onClick={() => navigate('/cabinet')}>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <rect x="3" y="3" width="7" height="7"/>
                                         <rect x="14" y="3" width="7" height="7"/>
                                         <rect x="14" y="14" width="7" height="7"/>
                                         <rect x="3" y="14" width="7" height="7"/>
                                     </svg>
-                                    {t('Дашборд', 'Dashboard')}
+                                    {t('Кабинет', 'Cabinet')}
                                 </button>
                             </div>
 

@@ -1,120 +1,87 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
-
-const STORAGE_KEY = 'userActivity';
-
-function generateSampleActivity() {
-    const data = {};
-    const today = new Date();
-    for (let i = 0; i < 365; i++) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const key = date.toISOString().split('T')[0];
-        const rand = Math.random();
-        if (rand > 0.7) {
-            data[key] = Math.floor(rand * 5) + 1;
-        } else {
-            data[key] = 0;
-        }
-    }
-    return data;
-}
+import { getStudentStats, getTeacherStats } from '../../services/firestore';
 
 export default function ActivityHeatmap() {
     const { language } = useLanguage();
-    const { userProfile } = useAuth();
-    const [activity, setActivity] = useState({});
+    const { userProfile, firebaseUser } = useAuth();
+    const [stats, setStats] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    const uid = userProfile?.uid || firebaseUser?.uid;
 
     useEffect(() => {
-        let data = {};
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            data = JSON.parse(stored);
-        } else {
-            data = generateSampleActivity();
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        }
-        setActivity(data);
-    }, []);
-
-    useEffect(() => {
-        if (userProfile) {
-            logActivity();
-        }
-    }, [userProfile]);
-
-    const logActivity = () => {
-        const today = new Date().toISOString().split('T')[0];
-        setActivity(prev => {
-            const updated = { ...prev };
-            updated[today] = (updated[today] || 0) + 1;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-            return updated;
-        });
-    };
-
-    const heatmapData = useMemo(() => {
-        const weeks = [];
-        const today = new Date();
-        let currentWeek = [];
-
-        for (let i = 364; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            const key = date.toISOString().split('T')[0];
-            const count = activity[key] || 0;
-            currentWeek.push({ date: key, count, day: date.getDay() });
-
-            if (currentWeek.length === 7) {
-                weeks.push(currentWeek);
-                currentWeek = [];
-            }
-        }
-
-        if (currentWeek.length > 0) {
-            weeks.push(currentWeek);
-        }
-
-        return weeks;
-    }, [activity]);
-
-    const stats = useMemo(() => {
-        const values = Object.values(activity);
-        const total = values.reduce((a, b) => a + b, 0);
-        const activeDays = values.filter(v => v > 0).length;
-        const maxDay = Math.max(...values, 0);
-        let streak = 0;
-        let currentStreak = 0;
-        const today = new Date();
-
-        for (let i = 0; i < 365; i++) {
-            const date = new Date(today);
-            date.setDate(date.getDate() - i);
-            const key = date.toISOString().split('T')[0];
-            if (activity[key] > 0) {
-                currentStreak++;
-                streak = Math.max(streak, currentStreak);
-            } else {
-                if (i === 0) continue;
-                currentStreak = 0;
-            }
-        }
-
-        return { total, activeDays, maxDay, streak };
-    }, [activity]);
-
-    const getLevel = (count) => {
-        if (count === 0) return 0;
-        if (count <= 2) return 1;
-        if (count <= 4) return 2;
-        if (count <= 6) return 3;
-        return 4;
-    };
-
-    // const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        if (!uid) return;
+        setLoading(true);
+        const fn = userProfile?.role === 'teacher' ? getTeacherStats : getStudentStats;
+        fn(uid).then(data => {
+            setStats(data);
+            setLoading(false);
+        }).catch(() => setLoading(false));
+    }, [uid, userProfile?.role]);
 
     const t = (ru, en) => language === 'ru' ? ru : en;
+
+    if (loading) {
+        return (
+            <div className="profile-section">
+                <div className="profile-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    {t('Активность', 'Activity')}
+                </div>
+                <div className="profile-section-subtitle">{t('Загрузка...', 'Loading...')}</div>
+            </div>
+        );
+    }
+
+    if (!stats) {
+        return (
+            <div className="profile-section">
+                <div className="profile-section-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    {t('Активность', 'Activity')}
+                </div>
+                <div className="profile-section-subtitle">
+                    {t('Нет данных об активности', 'No activity recorded')}
+                </div>
+            </div>
+        );
+    }
+
+    const isTeacher = userProfile?.role === 'teacher';
+
+    const activityItems = isTeacher
+        ? [
+            { label: t('Курсы', 'Courses'), value: stats.courses, icon: '📚' },
+            { label: t('Видео', 'Videos'), value: stats.videos, icon: '🎬' },
+            { label: t('Тесты', 'Quizzes'), value: stats.quizzes, icon: '📝' },
+            { label: t('Ресурсы', 'Resources'), value: stats.resources, icon: '📎' },
+            { label: t('Студенты', 'Students'), value: stats.students, icon: '👨‍🎓' },
+            { label: t('Отзывы', 'Reviews'), value: stats.reviews, icon: '⭐' },
+        ]
+        : [
+            { label: t('Тесты пройдено', 'Quizzes Done'), value: stats.quizAttempts, icon: '📝' },
+            { label: t('Средний балл', 'Avg Score'), value: stats.avgScore ? `${stats.avgScore}%` : '—', icon: '🎯' },
+            { label: t('Сертификаты', 'Certificates'), value: stats.certificates, icon: '🏆' },
+            { label: t('Заметки', 'Notes'), value: stats.notes, icon: '📓' },
+            { label: t('Задач выполнено', 'Tasks Done'), value: stats.tasksCompleted, icon: '✅' },
+            { label: t('Видео просмотрено', 'Videos Watched'), value: stats.videosWatched, icon: '🎬' },
+        ];
+
+    const hasActivity = activityItems.some(item =>
+        typeof item.value === 'number' ? item.value > 0 : item.value !== '—'
+    );
 
     return (
         <div className="profile-section">
@@ -128,57 +95,27 @@ export default function ActivityHeatmap() {
                 {t('Активность', 'Activity')}
             </div>
             <div className="profile-section-subtitle">
-                {t('Ваша активность за последний год', 'Your activity over the past year')}
+                {t('Статистика вашей активности', 'Your activity statistics')}
             </div>
 
-            <div className="heatmap-container">
-                <div className="heatmap-header">
-                    <div></div>
-                    <div className="heatmap-legend">
-                        <span>{t('Меньше', 'Less')}</span>
-                        <div className="heatmap-legend-cell" style={{ background: 'rgba(255,255,255,0.04)' }} />
-                        <div className="heatmap-legend-cell" style={{ background: 'rgba(16, 185, 129, 0.2)' }} />
-                        <div className="heatmap-legend-cell" style={{ background: 'rgba(16, 185, 129, 0.4)' }} />
-                        <div className="heatmap-legend-cell" style={{ background: 'rgba(16, 185, 129, 0.6)' }} />
-                        <div className="heatmap-legend-cell" style={{ background: 'rgba(16, 185, 129, 0.85)' }} />
-                        <span>{t('Больше', 'More')}</span>
-                    </div>
+            {!hasActivity ? (
+                <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+                    <div style={{ fontSize: '40px', marginBottom: '12px', opacity: 0.3 }}>📊</div>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+                        {t('Нет активности', 'No activity yet')}
+                    </p>
                 </div>
-
-                <div className="heatmap-grid">
-                    {heatmapData.map((week, wi) =>
-                        week.map((day, di) => (
-                            <div
-                                key={`${wi}-${di}`}
-                                className={`heatmap-cell level-${getLevel(day.count)}`}
-                            >
-                                <div className="tooltip">
-                                    {day.count} {t('активностей', 'activities')} — {day.date}
-                                </div>
-                            </div>
-                        ))
-                    )}
+            ) : (
+                <div className="heatmap-stats">
+                    {activityItems.map((item, i) => (
+                        <div key={i} className="heatmap-stat">
+                            <div style={{ fontSize: '24px', marginBottom: '4px' }}>{item.icon}</div>
+                            <div className="heatmap-stat-value">{item.value}</div>
+                            <div className="heatmap-stat-label">{item.label}</div>
+                        </div>
+                    ))}
                 </div>
-            </div>
-
-            <div className="heatmap-stats">
-                <div className="heatmap-stat">
-                    <div className="heatmap-stat-value">{stats.total}</div>
-                    <div className="heatmap-stat-label">{t('Всего активностей', 'Total Activities')}</div>
-                </div>
-                <div className="heatmap-stat">
-                    <div className="heatmap-stat-value">{stats.activeDays}</div>
-                    <div className="heatmap-stat-label">{t('Активных дней', 'Active Days')}</div>
-                </div>
-                <div className="heatmap-stat">
-                    <div className="heatmap-stat-value">{stats.streak}</div>
-                    <div className="heatmap-stat-label">{t('Макс. серия (дни)', 'Best Streak (days)')}</div>
-                </div>
-                <div className="heatmap-stat">
-                    <div className="heatmap-stat-value">{stats.maxDay}</div>
-                    <div className="heatmap-stat-label">{t('Лучший день', 'Best Day')}</div>
-                </div>
-            </div>
+            )}
         </div>
     );
 }

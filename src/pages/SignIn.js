@@ -6,21 +6,11 @@ import '../styles/main.css';
 
 export default function SignIn() {
     const { language } = useLanguage();
-    const { loginWithGoogle, loading, isAuthenticated, isOnboardingComplete } = useAuth();
+    const { loginWithGoogle, loading } = useAuth();
     const navigate = useNavigate();
     const [termsChecked, setTermsChecked] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const termsWrapperRef = useRef(null);
-
-    useEffect(() => {
-        if (!loading && isAuthenticated) {
-            if (isOnboardingComplete) {
-                navigate('/dashboard', { replace: true });
-            } else {
-                navigate('/profile-setup', { replace: true });
-            }
-        }
-    }, [isAuthenticated, isOnboardingComplete, loading, navigate]);
 
     useEffect(() => {
         const container = document.getElementById('particles');
@@ -142,8 +132,8 @@ export default function SignIn() {
                     />
                     <span className="terms-checkbox-label">
                         {t(
-                            <>Я согласен с <a href="/legal" target="_blank">условиями использования</a> и <a href="/legal" target="_blank">политикой конфиденциальности</a></>,
-                            <>I agree to <a href="/legal" target="_blank">Terms of Service</a> and <a href="/legal" target="_blank">Privacy Policy</a></>
+                            <>Я согласен с <a href="/terms" target="_blank">условиями использования</a> и <a href="/terms" target="_blank">политикой конфиденциальности</a></>,
+                            <>I agree to <a href="/terms" target="_blank">Terms of Service</a> and <a href="/terms" target="_blank">Privacy Policy</a></>
                         )}
                     </span>
                 </label>

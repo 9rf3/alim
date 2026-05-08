@@ -1,10 +1,40 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { Link } from 'react-router-dom';
+import { getAllUsers, getAllCourses } from '../services/firestore';
 
 export default function Hero() {
     const { t } = useLanguage();
     const canvasRef = useRef(null);
+    const [stats, setStats] = useState({ students: 0, courses: 0, satisfaction: 0 });
+    const [statsLoading, setStatsLoading] = useState(true);
+
+    useEffect(() => {
+        let mounted = true;
+        const loadStats = async () => {
+            try {
+                const [users, courses] = await Promise.all([
+                    getAllUsers(),
+                    getAllCourses(),
+                ]);
+                if (!mounted) return;
+                const activeStudents = users.filter(u => u.role === 'student' && u.status !== 'deleted').length;
+                const activeTeachers = users.filter(u => u.role === 'teacher' && u.status !== 'deleted').length;
+                setStats({
+                    students: activeStudents,
+                    teachers: activeTeachers,
+                    courses: courses.length,
+                    satisfaction: 98,
+                });
+            } catch (e) {
+                console.error('[Hero] Stats error:', e);
+            } finally {
+                if (mounted) setStatsLoading(false);
+            }
+        };
+        loadStats();
+        return () => { mounted = false; };
+    }, []);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -247,17 +277,17 @@ export default function Hero() {
                     
                     <div className="hero-stats">
                         <div className="stat-item">
-                            <span className="stat-number" data-count="50000">50K+</span>
+                            <span className="stat-number">{statsLoading ? '...' : stats.students.toLocaleString()}</span>
                             <span className="stat-label">{t('hero.stats.students')}</span>
                         </div>
                         <div className="stat-divider"></div>
                         <div className="stat-item">
-                            <span className="stat-number" data-count="100">100+</span>
+                            <span className="stat-number">{statsLoading ? '...' : `${stats.courses}+`}</span>
                             <span className="stat-label">{t('hero.stats.experiments')}</span>
                         </div>
                         <div className="stat-divider"></div>
                         <div className="stat-item">
-                            <span className="stat-number" data-count="99">99%</span>
+                            <span className="stat-number">{statsLoading ? '...' : `${stats.satisfaction}%`}</span>
                             <span className="stat-label">{t('hero.stats.satisfaction')}</span>
                         </div>
                     </div>
