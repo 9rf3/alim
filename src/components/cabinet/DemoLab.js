@@ -103,7 +103,7 @@ export default function DemoLab() {
         const isDark = theme === 'dark';
         const bodyWidth = 160, bodyHeight = 180, neckWidth = 45, neckHeight = 90, rimWidth = 55, rimHeight = 8;
         const bottomY = cy + bodyHeight / 2, bodyTopY = cy - bodyHeight / 4;
-        const neckBottomY = cy - bodyHeight / 2 - 10, neckTopY = cy - bodyHeight / 2 - neckHeight + 20, rimY = neckTopY;
+        const neckBottomY = cy - bodyHeight / 2 - 10, neckTopY = cy - bodyHeight / 2 - neckHeight + 20;
 
         const lc = liquidColorRef.current, tlc = targetLiquidColorRef.current;
         lc.r += (tlc.r - lc.r) * 0.03; lc.g += (tlc.g - lc.g) * 0.03; lc.b += (tlc.b - lc.b) * 0.03;

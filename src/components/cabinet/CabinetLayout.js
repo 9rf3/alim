@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import Timer from '../../components/Timer';
 import '../../styles/cabinet.css';
@@ -9,43 +8,38 @@ import '../../styles/cabinet.css';
 const navSections = [
     {
         label: 'Главное',
-        labelEn: 'Main',
         items: [
-            { id: 'overview', path: '/cabinet', icon: 'grid', label: 'Обзор', labelEn: 'Overview' },
-            { id: 'profile', path: '/cabinet/profile', icon: 'user', label: 'Профиль', labelEn: 'Profile' },
+            { id: 'overview', path: '/cabinet', icon: 'grid', label: 'Обзор' },
+            { id: 'profile', path: '/cabinet/profile', icon: 'user', label: 'Профиль' },
         ]
     },
     {
         label: 'Обучение',
-        labelEn: 'Learning',
         items: [
-            { id: 'laboratory', path: '/cabinet/laboratory', icon: 'flask', label: 'Лаборатория', labelEn: 'Laboratory' },
-            { id: 'library', path: '/cabinet/library', icon: 'book', label: 'Библиотека', labelEn: 'Library' },
-            { id: 'simulations', path: '/cabinet/simulations', icon: 'atom', label: 'Симуляции', labelEn: 'Simulations' },
-            { id: 'editor', path: '/cabinet/editor', icon: 'edit', label: 'Редактор', labelEn: 'Editor' },
+            { id: 'laboratory', path: '/cabinet/laboratory', icon: 'flask', label: 'Лаборатория' },
+            { id: 'library', path: '/cabinet/library', icon: 'book', label: 'Библиотека' },
+            { id: 'simulations', path: '/cabinet/simulations', icon: 'atom', label: 'Симуляции' },
+            { id: 'editor', path: '/cabinet/editor', icon: 'edit', label: 'Редактор' },
         ]
     },
     {
         label: 'Планирование',
-        labelEn: 'Planning',
         items: [
-            { id: 'studyplan', path: '/cabinet/study-plan', icon: 'calendar', label: 'Учебный план', labelEn: 'Study Plan' },
+            { id: 'studyplan', path: '/cabinet/study-plan', icon: 'calendar', label: 'Учебный план' },
         ]
     },
     {
         label: 'Прогресс',
-        labelEn: 'Progress',
         items: [
-            { id: 'certificates', path: '/cabinet/certificates', icon: 'award', label: 'Сертификаты', labelEn: 'Certificates' },
-            { id: 'data', path: '/cabinet/data', icon: 'chart', label: 'Мои данные', labelEn: 'My Data' },
+            { id: 'certificates', path: '/cabinet/certificates', icon: 'award', label: 'Сертификаты' },
+            { id: 'data', path: '/cabinet/data', icon: 'chart', label: 'Мои данные' },
         ]
     },
     {
         label: 'Маркетплейс',
-        labelEn: 'Marketplace',
         items: [
-            { id: 'payment', path: '/cabinet/payment', icon: 'credit-card', label: 'Подписка', labelEn: 'Subscription' },
-            { id: 'marketplace', path: '/cabinet/marketplace', icon: 'shopping', label: 'Торговля', labelEn: 'Trading' },
+            { id: 'payment', path: '/cabinet/payment', icon: 'credit-card', label: 'Подписка' },
+            { id: 'marketplace', path: '/cabinet/marketplace', icon: 'shopping', label: 'Торговля' },
         ]
     }
 ];
@@ -69,8 +63,6 @@ function getIcon(type, className) {
 
 export default function CabinetLayout({ children }) {
     const { isAuthenticated, isOnboardingComplete, loading, userProfile, logout } = useAuth();
-    console.log("ROLE:", userProfile?.role);
-    const { language, changeLanguage } = useLanguage();
     const { toggleTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
@@ -126,10 +118,7 @@ export default function CabinetLayout({ children }) {
                             <div className="cabinet-user-name">{userProfile?.fullName || 'User'}</div>
                             <div className="cabinet-user-role">
                                 <span className="role-badge">
-                                    {userProfile?.role === 'student'
-                                        ? (language === 'ru' ? 'Ученик' : 'Student')
-                                        : (language === 'ru' ? 'Учитель' : 'Teacher')
-                                    }
+                                    {userProfile?.role === 'student' ? 'Ученик' : 'Учитель'}
                                 </span>
                             </div>
                         </div>
@@ -140,7 +129,7 @@ export default function CabinetLayout({ children }) {
                     {navSections.map((section, sIdx) => (
                         <div key={sIdx} className="cabinet-nav-section">
                             <div className="cabinet-nav-label">
-                                {language === 'ru' ? section.label : section.labelEn}
+                                {section.label}
                             </div>
                             {section.items.map((item) => {
                                 const isActive = location.pathname === item.path;
@@ -154,7 +143,7 @@ export default function CabinetLayout({ children }) {
                                         <span className="cabinet-nav-icon">
                                             {getIcon(item.icon, 'cabinet-nav-icon')}
                                         </span>
-                                        {language === 'ru' ? item.label : item.labelEn}
+                                        {item.label}
                                     </Link>
                                 );
                             })}
@@ -169,7 +158,7 @@ export default function CabinetLayout({ children }) {
                                 <circle cx="12" cy="12" r="3"/>
                                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                             </svg>
-                            {language === 'ru' ? 'Админ панель' : 'Admin Panel'}
+                            Админ панель
                         </Link>
                     )}
                     <button className="cabinet-sidebar-btn" onClick={toggleTheme}>
@@ -177,15 +166,7 @@ export default function CabinetLayout({ children }) {
                             <circle cx="12" cy="12" r="5"/>
                             <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
                         </svg>
-                        {language === 'ru' ? 'Тема' : 'Theme'}
-                    </button>
-                    <button className="cabinet-sidebar-btn" onClick={() => changeLanguage(language === 'ru' ? 'en' : 'ru')}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="2" y1="12" x2="22" y2="12"/>
-                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                        </svg>
-                        {language === 'ru' ? 'English' : 'Русский'}
+                        Тема
                     </button>
                     <button className="cabinet-sidebar-btn logout" onClick={handleLogout}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -193,7 +174,7 @@ export default function CabinetLayout({ children }) {
                             <polyline points="16 17 21 12 16 7"/>
                             <line x1="21" y1="12" x2="9" y2="12"/>
                         </svg>
-                        {language === 'ru' ? 'Выйти' : 'Log out'}
+                        Выйти
                     </button>
                 </div>
             </aside>

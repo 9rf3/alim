@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { useLanguage } from '../../contexts/LanguageContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import Timer from '../../components/Timer';
 import '../../styles/teacher.css';
@@ -9,36 +8,32 @@ import '../../styles/teacher.css';
 const navSections = [
     {
         label: 'Главное',
-        labelEn: 'Main',
         items: [
-            { id: 'overview', path: '/teacher', icon: 'grid', label: 'Обзор', labelEn: 'Overview' },
-            { id: 'profile', path: '/cabinet/profile', icon: 'user', label: 'Профиль', labelEn: 'Profile' },
+            { id: 'overview', path: '/teacher', icon: 'grid', label: 'Обзор' },
+            { id: 'profile', path: '/cabinet/profile', icon: 'user', label: 'Профиль' },
         ]
     },
     {
         label: 'Контент',
-        labelEn: 'Content',
         items: [
-            { id: 'video', path: '/teacher/video', icon: 'video', label: 'Видео', labelEn: 'Video' },
-            { id: 'quiz', path: '/teacher/quiz', icon: 'clipboard', label: 'Квизы', labelEn: 'Quizzes' },
-            { id: 'resources', path: '/teacher/resources', icon: 'folder', label: 'Ресурсы', labelEn: 'Resources' },
+            { id: 'video', path: '/teacher/video', icon: 'video', label: 'Видео' },
+            { id: 'quiz', path: '/teacher/quiz', icon: 'clipboard', label: 'Квизы' },
+            { id: 'resources', path: '/teacher/resources', icon: 'folder', label: 'Ресурсы' },
         ]
     },
     {
         label: 'Бизнес',
-        labelEn: 'Business',
         items: [
-            { id: 'pricing', path: '/teacher/pricing', icon: 'dollar', label: 'Цены', labelEn: 'Pricing' },
-            { id: 'earnings', path: '/teacher/earnings', icon: 'wallet', label: 'Доходы', labelEn: 'Earnings' },
-            { id: 'laboratory', path: '/teacher/laboratory', icon: 'flask', label: 'Лаборатория', labelEn: 'Laboratory' },
+            { id: 'pricing', path: '/teacher/pricing', icon: 'dollar', label: 'Цены' },
+            { id: 'earnings', path: '/teacher/earnings', icon: 'wallet', label: 'Доходы' },
+            { id: 'laboratory', path: '/teacher/laboratory', icon: 'flask', label: 'Лаборатория' },
         ]
     },
     {
         label: 'Управление',
-        labelEn: 'Management',
         items: [
-            { id: 'students', path: '/teacher/students', icon: 'users', label: 'Ученики', labelEn: 'Students' },
-            { id: 'analytics', path: '/teacher/analytics', icon: 'analytics', label: 'Аналитика', labelEn: 'Analytics' },
+            { id: 'students', path: '/teacher/students', icon: 'users', label: 'Ученики' },
+            { id: 'analytics', path: '/teacher/analytics', icon: 'analytics', label: 'Аналитика' },
         ]
     }
 ];
@@ -62,8 +57,6 @@ function getIcon(type, className) {
 
 export default function TeacherLayout({ children }) {
     const { userProfile, isAuthenticated, isOnboardingComplete, loading, logout } = useAuth();
-    console.log("ROLE:", userProfile?.role);
-    const { language, changeLanguage } = useLanguage();
     const { toggleTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
@@ -120,7 +113,7 @@ export default function TeacherLayout({ children }) {
                             <div className="teacher-user-name">{userProfile?.fullName || 'User'}</div>
                             <div className="teacher-user-role">
                                 <span className="teacher-role-badge">
-                                    {language === 'ru' ? 'Учитель' : 'Teacher'}
+                                    Учитель
                                 </span>
                             </div>
                         </div>
@@ -131,7 +124,7 @@ export default function TeacherLayout({ children }) {
                     {navSections.map((section, sIdx) => (
                         <div key={sIdx} className="teacher-nav-section">
                             <div className="teacher-nav-label">
-                                {language === 'ru' ? section.label : section.labelEn}
+                                {section.label}
                             </div>
                             {section.items.map((item) => {
                                 const isActive = location.pathname === item.path;
@@ -145,7 +138,7 @@ export default function TeacherLayout({ children }) {
                                         <span className="teacher-nav-icon">
                                             {getIcon(item.icon, 'teacher-nav-icon')}
                                         </span>
-                                        {language === 'ru' ? item.label : item.labelEn}
+                                        {item.label}
                                     </Link>
                                 );
                             })}
@@ -160,7 +153,7 @@ export default function TeacherLayout({ children }) {
                                 <circle cx="12" cy="12" r="3"/>
                                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                             </svg>
-                            {language === 'ru' ? 'Админ панель' : 'Admin Panel'}
+                            Админ панель
                         </Link>
                     )}
                     <button className="teacher-sidebar-btn" onClick={toggleTheme}>
@@ -168,15 +161,7 @@ export default function TeacherLayout({ children }) {
                             <circle cx="12" cy="12" r="5"/>
                             <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
                         </svg>
-                        {language === 'ru' ? 'Тема' : 'Theme'}
-                    </button>
-                    <button className="teacher-sidebar-btn" onClick={() => changeLanguage(language === 'ru' ? 'en' : 'ru')}>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <circle cx="12" cy="12" r="10"/>
-                            <line x1="2" y1="12" x2="22" y2="12"/>
-                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                        </svg>
-                        {language === 'ru' ? 'English' : 'Русский'}
+                        Тема
                     </button>
                     <button className="teacher-sidebar-btn logout" onClick={handleLogout}>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -184,7 +169,7 @@ export default function TeacherLayout({ children }) {
                             <polyline points="16 17 21 12 16 7"/>
                             <line x1="21" y1="12" x2="9" y2="12"/>
                         </svg>
-                        {language === 'ru' ? 'Выйти' : 'Log out'}
+                        Выйти
                     </button>
                 </div>
             </aside>
