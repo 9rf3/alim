@@ -78,20 +78,17 @@ export default function Navbar() {
     const isAdminUser = userProfile?.role === 'admin';
 
     const pathname = location.pathname;
-    const isAuthPage = ['/signin', '/profile-setup', '/profile', '/cabinet', '/cabinet/laboratory', '/cabinet/payment', '/cabinet/library', '/cabinet/study-plan', '/cabinet/simulations', '/cabinet/editor', '/cabinet/certificates', '/cabinet/data', '/cabinet/marketplace', '/teacher', '/teacher/dashboard', '/teacher/video', '/teacher/quiz', '/teacher/pricing', '/teacher/resources', '/teacher/laboratory', '/teacher/students', '/teacher/earnings', '/teacher/analytics'].some(p => pathname.startsWith(p));
 
-    const navLinks = isAuthPage
+    const navLinks = firebaseUser
         ? [
-            ...(userProfile?.role === 'teacher'
-                ? [{ href: '/teacher', label: 'Cabinet', active: pathname.startsWith('/teacher') }]
-                : [{ href: '/cabinet', label: 'Cabinet', active: pathname.startsWith('/cabinet') }]
-            ),
-            { href: '/profile', label: 'Profile', active: pathname === '/profile' },
+            { href: userProfile?.role === 'teacher' ? '/teacher' : '/cabinet', label: 'Cabinet', active: pathname.startsWith('/cabinet') || pathname.startsWith('/teacher') },
+            { href: '/cabinet/laboratory', label: t('nav.labs'), active: pathname === '/cabinet/laboratory' },
+            { href: '/cabinet/profile', label: 'Profile', active: pathname === '/cabinet/profile' },
         ]
         : [
             { href: '/', label: t('nav.home'), active: pathname === '/' },
-            { href: '/labs', label: t('nav.labs'), active: pathname === '/labs' },
-            { href: '/demo', label: t('nav.demo'), active: pathname === '/demo' },
+            { href: '/signin', label: t('nav.labs'), active: false },
+            { href: '/signin', label: t('nav.demo'), active: false },
         ];
 
     const handleMobileSearch = (e) => {
@@ -288,7 +285,7 @@ export default function Navbar() {
                                                     Cabinet
                                                 </Link>
                                             )}
-                                            <Link to="/profile" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
+                                            <Link to="/cabinet/profile" className="auth-dropdown-item" onClick={() => setDropdownOpen(false)}>
                                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                                                     <circle cx="12" cy="7" r="4"/>
@@ -403,7 +400,7 @@ export default function Navbar() {
                                 <div className="mobile-menu-section mobile-notif-section">
                                     <button
                                         className="mobile-menu-item mobile-notif-btn"
-                                        onClick={() => { navigate('/labs'); closeMobileMenu(); }}
+                                        onClick={() => { navigate('/cabinet/laboratory'); closeMobileMenu(); }}
                                     >
                                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
@@ -474,7 +471,7 @@ export default function Navbar() {
                                         <div className="mobile-user-email">{firebaseUser?.email}</div>
                                     </div>
                                 </div>
-                                <Link to="/profile" className="mobile-menu-item" onClick={handleMobileNavClick}>
+                                <Link to="/cabinet/profile" className="mobile-menu-item" onClick={handleMobileNavClick}>
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                                         <circle cx="12" cy="7" r="4"/>

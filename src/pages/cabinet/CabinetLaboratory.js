@@ -2,17 +2,18 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import CabinetLayout from '../../components/cabinet/CabinetLayout';
+import DemoLab from '../../components/cabinet/DemoLab';
 import { getPublishedProjects, getProjectsByStudent, orderProject } from '../../services/firestore';
+import '../../styles/demo.css';
 
 export default function CabinetLaboratory() {
     const { language } = useLanguage();
     const { userProfile } = useAuth();
     const t = useCallback((ru, en) => language === 'ru' ? ru : en, [language]);
-    const [activeTab, setActiveTab] = useState('projects');
+    const [activeTab, setActiveTab] = useState('lab');
 
     const [publishedProjects, setPublishedProjects] = useState([]);
     const [myProjects, setMyProjects] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [ordering, setOrdering] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
@@ -34,8 +35,6 @@ export default function CabinetLaboratory() {
                 console.error('[CabinetLaboratory] Error:', err);
                 if (!isMounted) return;
                 setError(err.message || t('Ошибка загрузки проектов', 'Error loading projects'));
-            } finally {
-                if (isMounted) setLoading(false);
             }
         };
 
@@ -60,22 +59,10 @@ export default function CabinetLaboratory() {
     };
 
     const tabs = [
+        { id: 'lab', label: t('Лаборатория', 'Lab') },
         { id: 'projects', label: t('Мои проекты', 'My Projects') },
         { id: 'catalog', label: t('Каталог', 'Catalog') },
     ];
-
-    if (loading) {
-        return (
-            <CabinetLayout>
-                <div className="cabinet-header">
-                    <h1>{t('Лаборатория', 'Laboratory')}</h1>
-                </div>
-                <div className="cabinet-empty">
-                    <p>{t('Загрузка...', 'Loading...')}</p>
-                </div>
-            </CabinetLayout>
-        );
-    }
 
     return (
         <CabinetLayout>
@@ -84,7 +71,7 @@ export default function CabinetLaboratory() {
                     <div>
                         <h1>{t('Лаборатория', 'Laboratory')}</h1>
                         <p className="cabinet-header-subtitle">
-                            {t('Заказывайте проекты и отслеживайте выполнение', 'Order projects and track completion')}
+                            {t('Экспериментируйте с элементами и заказывайте проекты', 'Experiment with elements and order projects')}
                         </p>
                     </div>
                 </div>
@@ -101,27 +88,19 @@ export default function CabinetLaboratory() {
                 </div>
             )}
 
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '16px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '16px', flexWrap: 'wrap' }}>
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        style={{
-                            padding: '8px 16px',
-                            background: activeTab === tab.id ? 'var(--accent-gradient)' : 'transparent',
-                            border: 'none',
-                            borderRadius: '8px',
-                            color: activeTab === tab.id ? '#fff' : 'var(--text-secondary)',
-                            fontSize: '13px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            fontFamily: 'inherit',
-                        }}
+                        className={`cabinet-tab ${activeTab === tab.id ? 'active' : ''}`}
                     >
                         {tab.label}
                     </button>
                 ))}
             </div>
+
+            {activeTab === 'lab' && <DemoLab />}
 
             {activeTab === 'projects' && (
                 <div className="cabinet-card">
@@ -144,25 +123,17 @@ export default function CabinetLaboratory() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {myProjects.map((project) => (
                                 <div key={project.id} style={{
-                                    padding: '16px',
-                                    background: 'var(--bg-tertiary)',
-                                    borderRadius: '8px',
-                                    border: '1px solid var(--glass-border)',
+                                    padding: '16px', background: 'var(--bg-tertiary)', borderRadius: '8px', border: '1px solid var(--glass-border)',
                                 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <div>
-                                            <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '14px' }}>
-                                                {project.title}
-                                            </div>
+                                            <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '14px' }}>{project.title}</div>
                                             <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                                                 {project.subject} • {project.price > 0 ? `$${project.price.toFixed(2)}` : t('Бесплатно', 'Free')}
                                             </div>
                                         </div>
                                         <span style={{
-                                            padding: '4px 10px',
-                                            borderRadius: '6px',
-                                            fontSize: '12px',
-                                            fontWeight: '600',
+                                            padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '600',
                                             background: project.status === 'in_progress' ? 'rgba(59, 130, 246, 0.15)' : project.status === 'completed' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
                                             color: project.status === 'in_progress' ? '#3B82F6' : project.status === 'completed' ? '#10B981' : '#F59E0B',
                                         }}>
@@ -170,9 +141,7 @@ export default function CabinetLaboratory() {
                                         </span>
                                     </div>
                                     {project.description && (
-                                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px', marginBottom: 0 }}>
-                                            {project.description}
-                                        </p>
+                                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '8px', marginBottom: 0 }}>{project.description}</p>
                                     )}
                                 </div>
                             ))}
@@ -197,28 +166,15 @@ export default function CabinetLaboratory() {
                         <div className="cabinet-grid cabinet-grid-3">
                             {publishedProjects.map((project) => (
                                 <div key={project.id} className="cabinet-card">
-                                    <h4 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>
-                                        {project.title}
-                                    </h4>
-                                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                                        {project.subject}
-                                    </p>
-                                    {project.description && (
-                                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                                            {project.description}
-                                        </p>
-                                    )}
+                                    <h4 style={{ fontSize: '15px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>{project.title}</h4>
+                                    <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>{project.subject}</p>
+                                    {project.description && <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>{project.description}</p>}
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                                         <span style={{ fontSize: '20px', fontWeight: '800', color: 'var(--accent-primary)' }}>
                                             {project.price > 0 ? `$${project.price.toFixed(2)}` : t('Бесплатно', 'Free')}
                                         </span>
                                     </div>
-                                    <button
-                                        className="cabinet-btn"
-                                        style={{ width: '100%', justifyContent: 'center' }}
-                                        onClick={() => handleOrder(project)}
-                                        disabled={ordering === project.id}
-                                    >
+                                    <button className="cabinet-btn" style={{ width: '100%', justifyContent: 'center' }} onClick={() => handleOrder(project)} disabled={ordering === project.id}>
                                         {ordering === project.id ? t('Заказ...', 'Ordering...') : t('Заказать', 'Order')}
                                     </button>
                                 </div>

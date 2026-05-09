@@ -12,7 +12,7 @@ const navSections = [
         labelEn: 'Main',
         items: [
             { id: 'overview', path: '/cabinet', icon: 'grid', label: 'Обзор', labelEn: 'Overview' },
-            { id: 'profile', path: '/profile', icon: 'user', label: 'Профиль', labelEn: 'Profile' },
+            { id: 'profile', path: '/cabinet/profile', icon: 'user', label: 'Профиль', labelEn: 'Profile' },
         ]
     },
     {

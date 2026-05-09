@@ -6,6 +6,9 @@ import AdminUsers from './AdminUsers';
 import AdminSubjects from './AdminSubjects';
 import AdminReviews from './AdminReviews';
 import AdminConfig from './AdminConfig';
+import AdminAnalytics from './AdminAnalytics';
+import AdminLogs from './AdminLogs';
+import AdminSubscriptions from './AdminSubscriptions';
 import '../../styles/main.css';
 import '../../styles/admin.css';
 
@@ -58,6 +61,25 @@ export default function AdminDashboard() {
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
             </svg>
         )},
+        { id: 'analytics', label: 'Analytics', icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                <path d="M22 12h-4l-3 9-6-18-3 9H2"/>
+            </svg>
+        )},
+        { id: 'logs', label: 'Logs', icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+        )},
+        { id: 'subscriptions', label: 'Subscriptions', icon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+        )},
         { id: 'config', label: 'Settings', icon: (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="3"/>
@@ -79,6 +101,12 @@ export default function AdminDashboard() {
                 return <AdminSubjects globalSearch={globalSearch} />;
             case 'reviews':
                 return <AdminReviews />;
+            case 'analytics':
+                return <AdminAnalytics />;
+            case 'logs':
+                return <AdminLogs />;
+            case 'subscriptions':
+                return <AdminSubscriptions />;
             case 'config':
                 return <AdminConfig />;
             default:
@@ -141,8 +169,22 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="admin-nav-section">
+                        <div className="admin-nav-section-title">Monitoring</div>
+                        {sections.slice(4, 7).map(section => (
+                            <button
+                                key={section.id}
+                                className={`admin-nav-item ${activeSection === section.id ? 'active' : ''}`}
+                                onClick={() => { setActiveSection(section.id); setSidebarOpen(false); }}
+                            >
+                                {section.icon}
+                                {section.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="admin-nav-section">
                         <div className="admin-nav-section-title">System</div>
-                        {sections.slice(4).map(section => (
+                        {sections.slice(7).map(section => (
                             <button
                                 key={section.id}
                                 className={`admin-nav-item ${activeSection === section.id ? 'active' : ''}`}

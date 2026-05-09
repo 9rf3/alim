@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { getUserStats, getAllCourses, getAllVideos, getAllQuizzes, getAllResources, getAllReviews, getAllUsers } from '../../services/firestore';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { getUserStats, getAllCourses, getAllVideos, getAllQuizzes, getAllResources, getAllReviews, getAllUsers, getLogsRealtime } from '../../services/firestore';
 
 export default function AdminOverview({ onNavigate }) {
     const [stats, setStats] = useState({
@@ -18,6 +18,9 @@ export default function AdminOverview({ onNavigate }) {
     });
     const [recentUsers, setRecentUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [liveLogCount, setLiveLogCount] = useState(0);
+    const [liveRegistrations, setLiveRegistrations] = useState(0);
+    const logUnsubRef = useRef(null);
 
     const loadData = useCallback(async () => {
         setLoading(true);
@@ -59,6 +62,27 @@ export default function AdminOverview({ onNavigate }) {
 
     useEffect(() => {
         loadData();
+
+        logUnsubRef.current = getLogsRealtime((logs) => {
+            const today = new Date().toISOString().slice(0, 10);
+            let todayCount = 0;
+            let regCount = 0;
+            logs.forEach(l => {
+                try {
+                    const lt = l.timestamp?.toDate ? l.timestamp.toDate() : new Date(l.timestamp);
+                    if (lt.toISOString().slice(0, 10) === today) {
+                        todayCount++;
+                        if (l.action === 'register') regCount++;
+                    }
+                } catch {}
+            });
+            setLiveLogCount(todayCount);
+            setLiveRegistrations(regCount);
+        });
+
+        return () => {
+            if (logUnsubRef.current) logUnsubRef.current();
+        };
     }, [loadData]);
 
     const toTimestamp = (ts) => {
@@ -100,6 +124,10 @@ export default function AdminOverview({ onNavigate }) {
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                             </svg>
                         </div>
+                        <span style={{ fontSize: 10, color: '#10B981', display: 'flex', alignItems: 'center', gap: 4 }}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10B981', display: 'inline-block' }}></span>
+                            LIVE
+                        </span>
                     </div>
                     <div className="admin-stat-value">{stats.total}</div>
                     <div className="admin-stat-label">Total Users</div>
@@ -126,6 +154,9 @@ export default function AdminOverview({ onNavigate }) {
                                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                             </svg>
                         </div>
+                        <span style={{ fontSize: 10, color: '#10B981' }}>
+                            +{liveLogCount} today
+                        </span>
                     </div>
                     <div className="admin-stat-value">{stats.students}</div>
                     <div className="admin-stat-label">Students</div>
@@ -138,6 +169,9 @@ export default function AdminOverview({ onNavigate }) {
                                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                             </svg>
                         </div>
+                        <span style={{ fontSize: 10, color: '#10B981' }}>
+                            +{liveRegistrations} today
+                        </span>
                     </div>
                     <div className="admin-stat-value">{stats.banned}</div>
                     <div className="admin-stat-label">Banned</div>

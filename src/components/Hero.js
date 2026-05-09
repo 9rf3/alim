@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import { getAllUsers, getAllCourses } from '../services/firestore';
 
 export default function Hero() {
     const { t } = useLanguage();
+    const { firebaseUser } = useAuth();
     const canvasRef = useRef(null);
     const [stats, setStats] = useState({ students: 0, courses: 0, satisfaction: 0 });
     const [statsLoading, setStatsLoading] = useState(true);
@@ -266,7 +268,7 @@ export default function Hero() {
                                 <path d="M5 12h14M12 5l7 7-7 7"/>
                             </svg>
                         </Link>
-                        <Link to="/demo" className="btn-secondary">
+                        <Link to={firebaseUser ? '/cabinet/laboratory' : '/signin'} className="btn-secondary">
                             <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <circle cx="12" cy="12" r="10"/>
                                 <polygon points="10 8 16 12 10 16" fill="currentColor"/>

@@ -8,6 +8,9 @@ import {
     deleteDoc,
     query,
     where,
+    orderBy,
+    limit,
+    onSnapshot,
     serverTimestamp,
     addDoc,
 } from 'firebase/firestore';
@@ -456,20 +459,28 @@ export async function getSubscriptionsByUser(userId) {
     return safeQuery(COLLECTIONS.SUBSCRIPTIONS, 'userId', userId, 'createdAt', 'desc');
 }
 
-export async function createSubscription(userId, subscriptionData) {
-    return createDocument(COLLECTIONS.SUBSCRIPTIONS, {
+export async function createSubscription(userId, subscriptionData, logMetadata = {}) {
+    const result = await createDocument(COLLECTIONS.SUBSCRIPTIONS, {
         ...subscriptionData,
         userId,
         status: 'active',
         startedAt: serverTimestamp(),
     });
+    await logUserAction(userId, 'subscribe', {
+        subscriptionId: result.id,
+        plan: subscriptionData.plan || subscriptionData.type || 'standard',
+        amount: subscriptionData.amount || 0,
+        ...logMetadata,
+    });
+    return result;
 }
 
 export async function cancelSubscription(subscriptionId) {
-    return updateDocument(COLLECTIONS.SUBSCRIPTIONS, subscriptionId, {
+    const result = await updateDocument(COLLECTIONS.SUBSCRIPTIONS, subscriptionId, {
         status: 'cancelled',
         cancelledAt: serverTimestamp(),
     });
+    return result;
 }
 
 export async function subscribeToCourse(userId, courseId) {
@@ -717,6 +728,174 @@ export async function getTeacherStats(teacherId) {
         rating: Math.round(avgRating * 10) / 10,
         reviews: reviews.length,
     };
+}
+
+/* ================================================================
+    LOGS — Real-time with onSnapshot
+    ================================================================ */
+
+export function getLogsRealtime(callback, maxLogs = 200) {
+    try {
+        const colRef = collection(db, 'logs');
+        const q = query(colRef, orderBy('timestamp', 'desc'), limit(maxLogs));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const logs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            callback(logs);
+        }, (error) => {
+            console.error('[Firestore] logs onSnapshot error:', error.code, error.message);
+        });
+        return unsubscribe;
+    } catch (error) {
+        console.error('[Firestore] getLogsRealtime error:', error);
+        return () => {};
+    }
+}
+
+export async function getAllLogs(maxLogs = 500) {
+    try {
+        const colRef = collection(db, 'logs');
+        const q = query(colRef, orderBy('timestamp', 'desc'), limit(maxLogs));
+        const snap = await getDocs(q);
+        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch (error) {
+        console.error('[Firestore] getAllLogs error:', error.code, error.message);
+        return [];
+    }
+}
+
+/* ================================================================
+    SUBSCRIPTIONS — Admin
+    ================================================================ */
+
+export async function getAllSubscriptions() {
+    try {
+        const colRef = collection(db, COLLECTIONS.SUBSCRIPTIONS);
+        const snap = await getDocs(colRef);
+        let results = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        results.sort((a, b) => {
+            const ta = toTimestamp(a.createdAt);
+            const tb = toTimestamp(b.createdAt);
+            return tb - ta;
+        });
+        return results;
+    } catch (error) {
+        console.error('[Firestore] getAllSubscriptions error:', error.code, error.message);
+        return [];
+    }
+}
+
+export function getSubscriptionsRealtime(callback) {
+    try {
+        const colRef = collection(db, COLLECTIONS.SUBSCRIPTIONS);
+        const q = query(colRef, orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const subs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+            callback(subs);
+        }, (error) => {
+            console.error('[Firestore] subscriptions onSnapshot error:', error);
+        });
+        return unsubscribe;
+    } catch (error) {
+        console.error('[Firestore] getSubscriptionsRealtime error:', error);
+        return () => {};
+    }
+}
+
+/* ================================================================
+    ANALYTICS
+    ================================================================ */
+
+export async function getAnalyticsData() {
+    try {
+        const [allUsers, allLogs, allSubs] = await Promise.all([
+            getAllUsers(),
+            getAllLogs(1000),
+            getAllSubscriptions(),
+        ]);
+
+        const now = Date.now();
+        const day = 86400000;
+        const week = 7 * day;
+        const month = 30 * day;
+
+        const toMs = (ts) => {
+            if (!ts) return 0;
+            if (ts.toDate) return ts.toDate().getTime();
+            if (ts instanceof Date) return ts.getTime();
+            if (typeof ts === 'number') return ts;
+            return new Date(ts).getTime();
+        };
+
+        const registrations = allUsers.filter(u => {
+            const t = toMs(u.createdAt);
+            return t > now - month;
+        });
+
+        const registrationsByDay = {};
+        registrations.forEach(u => {
+            const d = new Date(toMs(u.createdAt)).toISOString().slice(0, 10);
+            registrationsByDay[d] = (registrationsByDay[d] || 0) + 1;
+        });
+
+        const logActions = {};
+        allLogs.forEach(l => {
+            const action = l.action || 'unknown';
+            logActions[action] = (logActions[action] || 0) + 1;
+        });
+
+        const logsByDay = {};
+        const recentLogs = allLogs.filter(l => toMs(l.timestamp) > now - month);
+        recentLogs.forEach(l => {
+            const d = new Date(toMs(l.timestamp)).toISOString().slice(0, 10);
+            logsByDay[d] = (logsByDay[d] || 0) + 1;
+        });
+
+        const activeUsers = new Set();
+        allLogs.forEach(l => {
+            if (l.userId && toMs(l.timestamp) > now - week) {
+                activeUsers.add(l.userId);
+            }
+        });
+
+        const subscriptionsByPlan = {};
+        const subscriptionsByStatus = {};
+        allSubs.forEach(s => {
+            const plan = s.plan || s.type || 'standard';
+            subscriptionsByPlan[plan] = (subscriptionsByPlan[plan] || 0) + 1;
+            const status = s.status || 'active';
+            subscriptionsByStatus[status] = (subscriptionsByStatus[status] || 0) + 1;
+        });
+
+        const recentRegistrations = Object.entries(registrationsByDay)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .slice(-30);
+
+        const recentActivity = Object.entries(logsByDay)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .slice(-30);
+
+        return {
+            totalUsers: allUsers.length,
+            activeUsers: activeUsers.size,
+            totalLogs: allLogs.length,
+            totalSubscriptions: allSubs.length,
+            newUsersThisMonth: registrations.length,
+            registrationsByDay: recentRegistrations,
+            logsByDay: recentActivity,
+            logActions,
+            subscriptionsByPlan,
+            subscriptionsByStatus,
+            userRoleDistribution: {
+                teachers: allUsers.filter(u => u.role === 'teacher').length,
+                students: allUsers.filter(u => u.role === 'student').length,
+                admins: allUsers.filter(u => u.role === 'admin').length,
+                unassigned: allUsers.filter(u => !u.role).length,
+            },
+        };
+    } catch (error) {
+        console.error('[Firestore] getAnalyticsData error:', error);
+        return null;
+    }
 }
 
 export async function getStudentStats(userId) {

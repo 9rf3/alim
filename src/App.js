@@ -6,16 +6,14 @@ import { LabProvider } from './contexts/LabContext';
 import { ProtectedRoute, OnboardingRoute, PublicRoute } from './components/ProtectedRoute';
 import { AdminRoute } from './components/AdminRoute';
 import Home from './pages/Home';
-import Demo from './pages/Demo';
 import SignIn from './pages/SignIn';
 import ProfileSetup from './pages/ProfileSetup';
-import Profile from './pages/Profile';
-import Laboratories from './pages/Laboratories';
 import TermsOfService from './pages/TermsOfService';
 import BannedPage from './pages/Banned';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import CabinetOverview from './pages/cabinet/CabinetOverview';
+import CabinetProfile from './pages/cabinet/CabinetProfile';
 import CabinetLaboratory from './pages/cabinet/CabinetLaboratory';
 import CabinetPayment from './pages/cabinet/CabinetPayment';
 import CabinetLibrary from './pages/cabinet/CabinetLibrary';
@@ -45,7 +43,6 @@ function App() {
                         <Router>
                             <Routes>
                                 <Route path="/" element={<Home />} />
-                                <Route path="/demo" element={<Demo />} />
                                 <Route path="/signin" element={
                                     <PublicRoute>
                                         <SignIn />
@@ -55,16 +52,6 @@ function App() {
                                     <OnboardingRoute>
                                         <ProfileSetup />
                                     </OnboardingRoute>
-                                } />
-                                <Route path="/profile" element={
-                                    <ProtectedRoute>
-                                        <Profile />
-                                    </ProtectedRoute>
-                                } />
-                                <Route path="/labs" element={
-                                    <ProtectedRoute>
-                                        <Laboratories />
-                                    </ProtectedRoute>
                                 } />
                                 <Route path="/terms" element={<TermsOfService />} />
                                 <Route path="/banned" element={<BannedPage />} />
@@ -77,6 +64,11 @@ function App() {
                                 <Route path="/cabinet" element={
                                     <ProtectedRoute>
                                         <CabinetOverview />
+                                    </ProtectedRoute>
+                                } />
+                                <Route path="/cabinet/profile" element={
+                                    <ProtectedRoute>
+                                        <CabinetProfile />
                                     </ProtectedRoute>
                                 } />
                                 <Route path="/cabinet/laboratory" element={

@@ -72,7 +72,7 @@ export default function SignIn() {
     };
 
     const continueWithoutSignIn = () => {
-        navigate('/demo');
+        navigate('/');
     };
 
     const t = (ruText, enText) => language === 'ru' ? ruText : enText;

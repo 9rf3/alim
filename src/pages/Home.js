@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import Timer from '../components/Timer';
@@ -7,11 +8,20 @@ import About from '../components/About';
 import Contact from '../components/Contact';
 import Footer from '../components/Footer';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/main.css';
 
 export default function Home() {
     const { language } = useLanguage();
+    const { isAuthenticated, loading } = useAuth();
+    const navigate = useNavigate();
     const [searchOpen, setSearchOpen] = useState(false);
+
+    useEffect(() => {
+        if (!loading && isAuthenticated) {
+            navigate('/cabinet', { replace: true });
+        }
+    }, [isAuthenticated, loading, navigate]);
     
     useEffect(() => {
         // Initialize theme from localStorage
