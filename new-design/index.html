@@ -1,653 +1,206 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Alim-lab — Learning Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alim-lab Dashboard</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<div class="app">
-
-  <!-- ====== LEFT SIDEBAR ====== -->
-  <aside class="sidebar" id="sidebar">
-    <div class="sidebar-inner">
-
-      <div class="logo">
-        <div class="logo-icon">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <rect x="2" y="2" width="32" height="32" rx="10" fill="url(#logoBg)"/>
-            <path d="M18 8c-4 0-8 3-8 8s4 8 8 8 8-3 8-8-4-8-8-8z" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.3"/>
-            <path d="M18 12l-6 12h12L18 12z" fill="#fff" opacity="0.9"/>
-            <path d="M18 16l-3 6h6l-3-6z" fill="#fff" opacity="0.5"/>
-            <circle cx="18" cy="14" r="2" fill="#fff" opacity="0.2"/>
-            <defs>
-              <linearGradient id="logoBg" x1="0" y1="0" x2="36" y2="36">
-                <stop stop-color="#7B2FF7"/>
-                <stop offset="1" stop-color="#00D4FF"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-        <span class="logo-text">Alim-lab</span>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-icon">⌬</span><strong>Alim-lab</strong></div>
+    <div class="profile-mini">
+      <div class="avatar"></div>
+      <div>
+        <strong>Кщщщ</strong>
+        <span class="pill">Ученик</span>
+        <small>Уровень 7</small>
       </div>
-
-      <!-- User Card -->
-      <div class="user-card">
-        <div class="user-card-avatar">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" alt="User">
-          <span class="user-card-online"></span>
-        </div>
-        <div class="user-card-info">
-          <h4>Alex Rivera</h4>
-          <span>Level 12 • Apprentice</span>
-        </div>
-      </div>
-
-      <!-- XP Bar -->
-      <div class="xp-section">
-        <div class="xp-header">
-          <span class="xp-label">XP Progress</span>
-          <span class="xp-count">2,450 / 5,000</span>
-        </div>
-        <div class="xp-track">
-          <div class="xp-fill" style="--xp-w:49%"></div>
-        </div>
-      </div>
-
-      <!-- Navigation -->
-      <nav class="nav">
-        <a href="#" class="nav-item active">
-          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
-          <span>Dashboard</span>
-          <span class="nav-arrow">›</span>
-        </a>
-        <a href="#" class="nav-item">
-          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          <span>My Courses</span>
-          <span class="nav-badge">6</span>
-        </a>
-        <a href="#" class="nav-item">
-          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          <span>Tasks</span>
-          <span class="nav-badge warn">3</span>
-        </a>
-        <a href="#" class="nav-item">
-          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M12 2v2m0 8v2m8-6h-2M6 10H4"/></svg>
-          <span>Achievements</span>
-          <span class="nav-badge done">12</span>
-        </a>
-        <a href="#" class="nav-item">
-          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          <span>Messages</span>
-        </a>
-        <a href="#" class="nav-item">
-          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          <span>Settings</span>
-        </a>
-      </nav>
-
-      <!-- Subscription CTA -->
-      <div class="sub-cta">
-        <div class="sub-cta-glow"></div>
-        <div class="sub-cta-stars">✨⭐🌟</div>
-        <h4>Upgrade to Pro</h4>
-        <p>Unlock unlimited courses, AI mentoring & advanced analytics.</p>
-        <button class="sub-cta-btn">Upgrade Now →</button>
-      </div>
-
+      <div class="xp"><span style="--w:65%"></span></div>
+      <small>650 / 1000 XP</small>
+    </div>
+    <nav class="nav">
+      <button class="active" data-page="home"><span>⌂</span>Главная</button>
+      <button data-page="subjects"><span>▣</span>Мои предметы</button>
+      <button data-page="tasks"><span>☑</span>Задания</button>
+      <button data-page="library"><span>▤</span>Библиотека</button>
+      <button data-page="simulations"><span>◉</span>Симуляции</button>
+      <button data-page="laboratory"><span>⚗</span>Лаборатория</button>
+      <button data-page="profile"><span>♕</span>Достижения</button>
+      <button data-page="notes"><span>▢</span>Мои заметки</button>
+      <button data-page="stats"><span>▥</span>Статистика</button>
+      <button data-page="assistant"><span>☻</span>AI-помощник</button>
+    </nav>
+    <div class="quick">
+      <p>БЫСТРЫЕ ДЕЙСТВИЯ</p>
+      <button>○ Создать проект <span>›</span></button>
+      <button>◌ Задать вопрос AI <span>›</span></button>
+      <button>☞ Пройти тест <span>›</span></button>
+    </div>
+    <div class="subscribe glass">
+      <h3>Прокачай свои знания! 🚀</h3>
+      <p>Откройте полный доступ ко всем курсам и возможностям</p>
+      <button class="primary">Оформить подписку</button>
     </div>
   </aside>
 
-  <!-- ====== MAIN LAYOUT ====== -->
-  <div class="main-area">
-
-    <!-- ====== HEADER ====== -->
-    <header class="header">
-      <div class="header-inner">
-        <div class="header-left">
-          <button class="menu-btn" id="menuBtn" aria-label="Toggle menu">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-          <div class="greeting">
-            <h1>Good morning Alex <span>☀️</span></h1>
-            <p>Let's continue your learning journey</p>
-          </div>
-        </div>
-        <div class="header-right">
-          <div class="search-wrap">
-            <svg class="search-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" placeholder="Search courses, topics...">
-            <span class="search-hint">⌘K</span>
-          </div>
-          <button class="notif-btn" id="notifBtn">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            <span class="notif-badge">3</span>
-          </button>
-          <div class="profile-mini">
-            <div class="profile-mini-avatar">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" alt="User">
-            </div>
-            <div class="profile-mini-info">
-              <span class="profile-mini-name">Alex Rivera</span>
-              <span class="profile-mini-role">Student</span>
-            </div>
-            <svg class="profile-mini-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-        </div>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <h1 id="page-title">Привет, Кщщщ! 👋</h1>
+        <p id="page-subtitle">Готов к новым знаниям сегодня?</p>
+      </div>
+      <div class="top-actions">
+        <label class="search"><span>⌕</span><input placeholder="Поиск"></label>
+        <button class="icon-btn">♧<b>3</b></button>
+        <button class="user-chip"><span class="avatar small"></span><strong>Кщщщ</strong><em>Ученик</em><span>⌄</span></button>
       </div>
     </header>
 
-    <!-- ====== CONTENT ====== -->
-    <main class="content">
+    <section class="page active" id="home">
+      <div class="content-grid">
+        <div class="center-col">
+          <section class="hero glass">
+            <div class="rocket">
+              <div class="rocket-body"></div><div class="flame"></div>
+            </div>
+            <div class="hero-copy">
+              <h2>Продолжай обучение! 🚀</h2>
+              <p>Ты на 60% ближе к своей цели на этой неделе.</p>
+              <button class="primary">Продолжить обучение</button>
+            </div>
+            <div class="week-card mini-panel">
+              <span>Твой прогресс на этой неделе</span>
+              <strong>60%</strong>
+              <div class="meter"><i style="--w:62%"></i></div>
+              <div class="days"><b>✓</b><b>✓</b><b>✓</b><span>○</span><span>○</span><span>○</span><span>○</span></div>
+            </div>
+            <div class="streak mini-panel">
+              <span>Серия дней 🔥</span><strong>7</strong><small>Отличная работа!</small>
+              <svg viewBox="0 0 180 62"><polyline points="0,48 22,34 45,40 70,27 94,33 120,16 145,22 174,5"/></svg>
+            </div>
+          </section>
 
-      <!-- ROW 1: Hero Card -->
-      <section class="hero-card-wrap">
-        <div class="hero-card">
-          <div class="hero-bg-ambient"></div>
-          <div class="hero-inner">
-            <div class="hero-main">
-              <div class="hero-rocket-col">
-                <div class="rocket-container">
-                  <div class="rocket-glow-ring"></div>
-                  <svg class="rocket-svg" width="130" height="150" viewBox="0 0 130 150" fill="none">
-                    <path d="M65 8L78 60L65 142L52 60L65 8Z" fill="url(#rGrad)" opacity="0.95"/>
-                    <ellipse cx="65" cy="60" rx="22" ry="10" fill="#fff" opacity="0.15"/>
-                    <path d="M40 78L65 65L90 78" stroke="#00D4FF" stroke-width="2.5" opacity="0.5"/>
-                    <path d="M45 96L65 80L85 96" stroke="#7B2FF7" stroke-width="2.5" opacity="0.35"/>
-                    <circle cx="65" cy="48" r="14" fill="#fff" opacity="0.12"/>
-                    <circle cx="65" cy="48" r="6" fill="#fff" opacity="0.08"/>
-                    <path d="M55 125L60 140L65 130L70 140L75 125" stroke="#00D4FF" stroke-width="1.5" opacity="0.4"/>
-                    <defs>
-                      <linearGradient id="rGrad" x1="52" y1="8" x2="78" y2="142">
-                        <stop stop-color="#7B2FF7"/>
-                        <stop offset="1" stop-color="#00D4FF"/>
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                  <div class="rparticle rp1"></div>
-                  <div class="rparticle rp2"></div>
-                  <div class="rparticle rp3"></div>
-                  <div class="rparticle rp4"></div>
-                </div>
-              </div>
-              <div class="hero-text-col">
-                <span class="hero-tag">🔥 New</span>
-                <h2>Продолжай обучение! 🚀</h2>
-                <p>Neural networks, deep learning, and AI — all in one comprehensive track designed for future innovators.</p>
-                <div class="hero-stats-row">
-                  <span class="hero-stat-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    24 hours
-                  </span>
-                  <span class="hero-stat-item">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    4.9 (128)
-                  </span>
-                </div>
-                <button class="hero-cta">Continue Learning →</button>
-              </div>
-            </div>
-            <div class="hero-side">
-              <div class="hero-widget weekly-widget">
-                <div class="ww-header">
-                  <span class="ww-title">📊 Weekly Progress</span>
-                  <span class="ww-more">⋯</span>
-                </div>
-                <div class="ww-circles">
-                  <div class="ww-circle" style="--pct:75;--clr:#7B2FF7">
-                    <svg viewBox="0 0 36 36">
-                      <path class="ww-track" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831"/>
-                      <path class="ww-fill" stroke="var(--clr)" stroke-dasharray="75 100" d="M18 2.0845a15.9155 15.9155 0 0 1 0 31.831a15.9155 15.9155 0 0 1 0-31.831"/>
-                    </svg>
-                    <span>75%</span>
-                  </div>
-                  <div class="ww-labels">
-                    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span class="active">S</span>
-                  </div>
-                </div>
-              </div>
-              <div class="hero-widget streak-widget">
-                <div class="ww-header">
-                  <span class="ww-title">🔥 Streak</span>
-                  <span class="ww-more">⋯</span>
-                </div>
-                <div class="streak-big">12</div>
-                <div class="streak-chart">
-                  <svg viewBox="0 0 140 40" preserveAspectRatio="none">
-                    <path d="M0 35 Q 10 30 20 32 T 40 22 T 60 25 T 80 12 T 100 18 T 120 8 T 140 12" stroke="#7B2FF7" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-                    <circle cx="20" cy="32" r="3" fill="#7B2FF7" opacity="0.6"/>
-                    <circle cx="40" cy="22" r="3" fill="#7B2FF7" opacity="0.6"/>
-                    <circle cx="60" cy="25" r="3" fill="#7B2FF7" opacity="0.6"/>
-                    <circle cx="80" cy="12" r="3" fill="#7B2FF7" opacity="0.8"/>
-                    <circle cx="100" cy="18" r="3" fill="#7B2FF7" opacity="0.8"/>
-                    <circle cx="120" cy="8" r="4" fill="#7B2FF7" stroke="#050816" stroke-width="2"/>
-                    <circle cx="140" cy="12" r="3" fill="#7B2FF7" opacity="0.6"/>
-                  </svg>
-                </div>
-                <div class="streak-footer">
-                  <span class="streak-label">days</span>
-                  <span class="streak-badge">Best: 21</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+          <h2 class="section-title">Что будем изучать?</h2>
+          <section class="subject-grid">
+            <article class="subject glass blue"><h3>Математика</h3><p>Алгебра, геометрия и многое другое</p><strong>75%</strong><span class="big-icon">▦</span><div class="meter"><i style="--w:75%"></i></div></article>
+            <article class="subject glass purple"><h3>Физика</h3><p>Механика, электричество и магнетизм</p><strong>40%</strong><span class="big-icon">⚛</span><div class="meter"><i style="--w:40%"></i></div></article>
+            <article class="subject glass green"><h3>Химия</h3><p>Изучай вещества и реакции</p><strong>20%</strong><span class="big-icon">⚗</span><div class="meter"><i style="--w:20%"></i></div></article>
+            <article class="subject glass orange"><h3>Программирование</h3><p>Python, алгоритмы и структуры данных</p><strong>60%</strong><span class="big-icon">&lt;/&gt;</span><div class="meter"><i style="--w:60%"></i></div></article>
+          </section>
 
-      <!-- ROW 2: Subject Cards -->
-      <section class="subjects-wrap">
-        <h2 class="section-title">📚 Your Subjects</h2>
-        <div class="subjects-grid">
-          <div class="subject-card" style="--sub-clr:#3B82F6">
-            <div class="subj-body">
-              <h3>Mathematics</h3>
-              <p>Calculus, Linear Algebra & Statistics</p>
-              <div class="subj-progress">
-                <div class="subj-bar"><div style="width:72%"></div></div>
-                <span class="subj-pct">72%</span>
-              </div>
-              <div class="subj-meta">
-                <span>12/18 lessons</span>
-                <span>Grade: A-</span>
-              </div>
-            </div>
-            <div class="subj-icon-wrap" style="background:rgba(59,130,246,0.12);color:#3B82F6">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            </div>
-          </div>
-          <div class="subject-card" style="--sub-clr:#7B2FF7">
-            <div class="subj-body">
-              <h3>Physics</h3>
-              <p>Mechanics, Thermodynamics & Quantum</p>
-              <div class="subj-progress">
-                <div class="subj-bar"><div style="width:58%"></div></div>
-                <span class="subj-pct">58%</span>
-              </div>
-              <div class="subj-meta">
-                <span>9/16 lessons</span>
-                <span>Grade: B+</span>
-              </div>
-            </div>
-            <div class="subj-icon-wrap" style="background:rgba(123,47,247,0.12);color:#7B2FF7">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-            </div>
-          </div>
-          <div class="subject-card" style="--sub-clr:#10B981">
-            <div class="subj-body">
-              <h3>Chemistry</h3>
-              <p>Organic, Inorganic & Physical Chem</p>
-              <div class="subj-progress">
-                <div class="subj-bar"><div style="width:45%"></div></div>
-                <span class="subj-pct">45%</span>
-              </div>
-              <div class="subj-meta">
-                <span>7/14 lessons</span>
-                <span>Grade: B</span>
-              </div>
-            </div>
-            <div class="subj-icon-wrap" style="background:rgba(16,185,129,0.12);color:#10B981">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 22h16"/><path d="M6 18l4-12"/><path d="M14 6l4 12"/><path d="M6 6h12"/><path d="M10 6V2h4v4"/><path d="M6 14h10"/><path d="M6 10h12"/></svg>
-            </div>
-          </div>
-          <div class="subject-card" style="--sub-clr:#F59E0B">
-            <div class="subj-body">
-              <h3>Programming</h3>
-              <p>Python, JavaScript & Algorithms</p>
-              <div class="subj-progress">
-                <div class="subj-bar"><div style="width:88%"></div></div>
-                <span class="subj-pct">88%</span>
-              </div>
-              <div class="subj-meta">
-                <span>14/16 lessons</span>
-                <span>Grade: A</span>
-              </div>
-            </div>
-            <div class="subj-icon-wrap" style="background:rgba(245,158,11,0.12);color:#F59E0B">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-            </div>
-          </div>
-        </div>
-      </section>
+          <section class="dash-panels">
+            <article class="glass continue-card">
+              <h3>Продолжить обучение</h3>
+              <div class="lesson-art orb-art"></div>
+              <div><h4>Законы Ньютона</h4><p>Физика • 4 урок из 8</p><div class="meter"><i style="--w:60%"></i></div><button class="primary">Продолжить урок</button></div>
+            </article>
+            <article class="glass task-list">
+              <h3>Сегодняшние задания <small>3/5 выполнено</small></h3>
+              <div class="task done"><span>☑</span><p>Решить уравнения<small>Математика</small></p></div>
+              <div class="task"><span>◉</span><p>Лабораторная работа #3<small>Физика</small></p></div>
+              <div class="task done"><span>☑</span><p>Тест: Химические реакции<small>Химия</small></p></div>
+              <a>Все задания</a>
+            </article>
+            <article class="glass recommendations">
+              <h3>AI-рекомендации</h3>
+              <p>На основе твоего прогресса AI подобрал для тебя:</p>
+              <div class="rec cyan"><span>✦</span><p>Повтори тему: Тригонометрия<small>Улучшите свои результаты</small></p><button>Начать</button></div>
+              <div class="rec amber"><span>✦</span><p>Новый курс: Основы Python<small>Идеально для твоего уровня</small></p><button>Смотреть</button></div>
+              <a>Все рекомендации</a>
+            </article>
+          </section>
 
-      <!-- ROW 3: Continue Learning + Tasks + AI Recommendations -->
-      <section class="triple-row">
-        <div class="card continue-card">
-          <div class="card-hdr">
-            <h3>🚀 Continue Learning</h3>
-            <span class="card-more">⋯</span>
-          </div>
-          <div class="continue-items">
-            <div class="continue-item">
-              <div class="ci-thumb" style="background:linear-gradient(135deg,rgba(123,47,247,0.2),rgba(0,212,255,0.1))">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7B2FF7" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c6 3 10 0 12-2v-5"/></svg>
-              </div>
-              <div class="ci-body">
-                <h4>Neural Networks — Week 4</h4>
-                <p>Backpropagation & Gradient Descent</p>
-                <div class="ci-progress"><div style="width:60%"></div></div>
-              </div>
-              <span class="ci-dur">45m</span>
-            </div>
-            <div class="continue-item">
-              <div class="ci-thumb" style="background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(59,130,246,0.1))">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-              </div>
-              <div class="ci-body">
-                <h4>Quantum Mechanics — Ch. 7</h4>
-                <p>Wave Functions & Probability</p>
-                <div class="ci-progress"><div style="width:35%"></div></div>
-              </div>
-              <span class="ci-dur">30m</span>
-            </div>
-            <div class="continue-item">
-              <div class="ci-thumb" style="background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(255,79,216,0.1))">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-              </div>
-              <div class="ci-body">
-                <h4>Algorithms — DP Mastery</h4>
-                <p>Memoization & Tabulation</p>
-                <div class="ci-progress"><div style="width:80%"></div></div>
-              </div>
-              <span class="ci-dur">1h</span>
-            </div>
-          </div>
-          <button class="continue-all">View All Courses →</button>
+          <section class="glass activity-wide">
+            <div><h3>Твоя активность</h3><p>Как ты учился на этой неделе</p><div class="bars"><i style="--h:45%"></i><i style="--h:62%"></i><i style="--h:88%"></i><i style="--h:57%"></i><i style="--h:92%"></i><i style="--h:55%"></i><i style="--h:28%"></i></div></div>
+            <div><h3>Последние достижения</h3><ul class="clean-list"><li>🏆 Первая лаборатория</li><li>⭐ Неделя успеха</li><li>🔥 Знаток формул</li></ul></div>
+            <div><h3>Недавняя активность</h3><ul class="clean-list"><li>Завершил урок «Законы Ньютона»</li><li>Решил 10 задач по математике</li><li>Получил достижение «Неделя успеха»</li></ul></div>
+          </section>
         </div>
 
-        <div class="card tasks-card-main">
-          <div class="card-hdr">
-            <h3>✅ Today's Tasks</h3>
-            <span class="card-more">⋯</span>
-          </div>
-          <div class="task-list">
-            <label class="task-item">
-              <input type="checkbox" checked>
-              <span class="tick"></span>
-              <span class="task-text done">Calculus assignment</span>
-              <span class="task-sub">Mathematics</span>
-            </label>
-            <label class="task-item">
-              <input type="checkbox">
-              <span class="tick"></span>
-              <span class="task-text">Read physics chapter 8</span>
-              <span class="task-sub">Physics</span>
-              <span class="task-lbl urgent">Urgent</span>
-            </label>
-            <label class="task-item">
-              <input type="checkbox">
-              <span class="tick"></span>
-              <span class="task-text">Review chemistry lab report</span>
-              <span class="task-sub">Chemistry</span>
-            </label>
-            <label class="task-item">
-              <input type="checkbox">
-              <span class="tick"></span>
-              <span class="task-text">Python coding challenge</span>
-              <span class="task-sub">Programming</span>
-              <span class="task-lbl">New</span>
-            </label>
-            <label class="task-item">
-              <input type="checkbox" checked>
-              <span class="tick"></span>
-              <span class="task-text done">Team meeting prep</span>
-              <span class="task-sub">General</span>
-            </label>
-            <label class="task-item">
-              <input type="checkbox">
-              <span class="tick"></span>
-              <span class="task-text">Submit group project draft</span>
-              <span class="task-sub">Physics</span>
-              <span class="task-lbl urgent">Urgent</span>
-            </label>
-          </div>
-          <button class="task-add-btn">+ Add New Task</button>
-        </div>
-
-        <div class="card ai-rec-main">
-          <div class="card-hdr">
-            <h3>🤖 AI Recommendations</h3>
-            <span class="card-more">⋯</span>
-          </div>
-          <div class="ai-rec-list">
-            <div class="ai-rec-card">
-              <div class="ai-rec-icon" style="background:rgba(123,47,247,0.12);color:#7B2FF7">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              </div>
-              <div class="ai-rec-body">
-                <h4>Strengthen Calculus</h4>
-                <p>Review integration techniques based on quiz performance.</p>
-              </div>
-              <button class="ai-rec-go">→</button>
-            </div>
-            <div class="ai-rec-card">
-              <div class="ai-rec-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-              </div>
-              <div class="ai-rec-body">
-                <h4>Try Quantum Module</h4>
-                <p>Students who excelled in Physics explore quantum computing.</p>
-              </div>
-              <button class="ai-rec-go">→</button>
-            </div>
-            <div class="ai-rec-card">
-              <div class="ai-rec-icon" style="background:rgba(245,158,11,0.12);color:#F59E0B">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-              </div>
-              <div class="ai-rec-body">
-                <h4>Daily Coding Challenges</h4>
-                <p>Improve problem-solving speed by 40% with daily practice.</p>
-              </div>
-              <button class="ai-rec-go">→</button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ROW 4: Activity + Achievements + Recent -->
-      <section class="triple-row bottom-row">
-        <div class="card activity-card">
-          <div class="card-hdr">
-            <h3>📈 Activity</h3>
-            <div class="act-tabs">
-              <button class="active">Week</button>
-              <button>Month</button>
-              <button>Year</button>
-            </div>
-          </div>
-          <div class="act-chart">
-            <div class="act-y">
-              <span>100%</span>
-              <span>75%</span>
-              <span>50%</span>
-              <span>25%</span>
-              <span>0%</span>
-            </div>
-            <div class="act-bars">
-              <div class="act-bar" style="--h:40%"><span>M</span></div>
-              <div class="act-bar" style="--h:65%"><span>T</span></div>
-              <div class="act-bar" style="--h:45%"><span>W</span></div>
-              <div class="act-bar" style="--h:80%"><span>T</span></div>
-              <div class="act-bar" style="--h:55%"><span>F</span></div>
-              <div class="act-bar" style="--h:92%"><span>S</span></div>
-              <div class="act-bar active" style="--h:70%"><span>S</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card achievements-card">
-          <div class="card-hdr">
-            <h3>🏆 Achievements</h3>
-            <span class="card-more">⋯</span>
-          </div>
-          <div class="ach-grid">
-            <div class="ach-item unlocked">
-              <div class="ach-icon" style="background:rgba(255,215,0,0.12);color:#FFD700">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              </div>
-              <span>Quick Starter</span>
-            </div>
-            <div class="ach-item unlocked">
-              <div class="ach-icon" style="background:rgba(0,212,255,0.12);color:#00D4FF">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-              </div>
-              <span>Math Whiz</span>
-            </div>
-            <div class="ach-item locked">
-              <div class="ach-icon" style="background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.2)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M12 2v2m0 8v2m8-6h-2M6 10H4"/></svg>
-              </div>
-              <span>Perfect Score</span>
-            </div>
-            <div class="ach-item unlocked">
-              <div class="ach-icon" style="background:rgba(255,79,216,0.12);color:#FF4FD8">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              </div>
-              <span>7-Day Streak</span>
-            </div>
-            <div class="ach-item locked">
-              <div class="ach-icon" style="background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.2)">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              </div>
-              <span>Top Performer</span>
-            </div>
-            <div class="ach-item unlocked">
-              <div class="ach-icon" style="background:rgba(59,130,246,0.12);color:#3B82F6">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-              </div>
-              <span>Code Master</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="card recent-card">
-          <div class="card-hdr">
-            <h3>📝 Recent Activity</h3>
-            <span class="card-more">⋯</span>
-          </div>
-          <div class="recent-list">
-            <div class="recent-item">
-              <div class="ri-dot" style="background:#7B2FF7;box-shadow:0 0 10px rgba(123,47,247,0.5)"></div>
-              <div class="ri-body">
-                <p>Completed <strong>Calculus Quiz</strong> — 92%</p>
-                <span>2 hours ago</span>
-              </div>
-            </div>
-            <div class="recent-item">
-              <div class="ri-dot" style="background:#00D4FF;box-shadow:0 0 10px rgba(0,212,255,0.5)"></div>
-              <div class="ri-body">
-                <p>Watched <strong>Quantum Mechanics</strong> lecture</p>
-                <span>5 hours ago</span>
-              </div>
-            </div>
-            <div class="recent-item">
-              <div class="ri-dot" style="background:#3B82F6;box-shadow:0 0 10px rgba(59,130,246,0.5)"></div>
-              <div class="ri-body">
-                <p>Solved <strong>Dynamic Programming</strong> challenge</p>
-                <span>Yesterday</span>
-              </div>
-            </div>
-            <div class="recent-item">
-              <div class="ri-dot" style="background:#10B981;box-shadow:0 0 10px rgba(16,185,129,0.5)"></div>
-              <div class="ri-body">
-                <p>Submitted <strong>Chemistry Lab Report</strong></p>
-                <span>Yesterday</span>
-              </div>
-            </div>
-            <div class="recent-item">
-              <div class="ri-dot" style="background:#7B2FF7;box-shadow:0 0 10px rgba(123,47,247,0.5)"></div>
-              <div class="ri-body">
-                <p>Started <strong>Neural Networks</strong> course</p>
-                <span>2 days ago</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-    </main>
-  </div>
-
-  <!-- ====== RIGHT SIDEBAR ====== -->
-  <aside class="right-sidebar" id="rightSidebar">
-    <div class="right-sidebar-inner">
-
-      <!-- Tasks Widget -->
-      <div class="rs-widget tasks-widget">
-        <div class="rs-widget-hdr">
-          <h3>📋 Tasks</h3>
-          <span class="rs-widget-count">4 left</span>
-        </div>
-        <div class="rs-task-list">
-          <label class="rs-task">
-            <input type="checkbox">
-            <span class="rs-tick"></span>
-            <span class="rs-task-text">Review math notes</span>
-          </label>
-          <label class="rs-task">
-            <input type="checkbox" checked>
-            <span class="rs-tick"></span>
-            <span class="rs-task-text done">Physics problem set</span>
-          </label>
-          <label class="rs-task">
-            <input type="checkbox">
-            <span class="rs-tick"></span>
-            <span class="rs-task-text">Write lab conclusion</span>
-          </label>
-          <label class="rs-task">
-            <input type="checkbox" checked>
-            <span class="rs-tick"></span>
-            <span class="rs-task-text done">Code review session</span>
-          </label>
-          <label class="rs-task">
-            <input type="checkbox">
-            <span class="rs-tick"></span>
-            <span class="rs-task-text">Prepare presentation</span>
-          </label>
-        </div>
+        <aside class="right-col">
+          <article class="glass side-card"><h3>Твои задачи</h3><div class="goal"><span>○</span><p>Пройти 2 урока</p><b>1/2</b></div><div class="meter orange"><i style="--w:50%"></i></div><div class="goal done"><span>✓</span><p>Решить 5 задач</p><b>5/5</b></div><div class="meter green"><i style="--w:100%"></i></div><div class="goal"><span>○</span><p>Изучить новую тему</p><b>0/1</b></div><a>Все задачи</a></article>
+          <article class="glass ai-card"><h3>AI-помощник <small>● Онлайн</small></h3><div class="bot"><span></span></div><p class="speech">Привет! Я твой AI-помощник. Чем могу помочь?</p><div class="chips"><button>Объясни тему</button><button>Проверь решение</button><button>Подбери задания</button></div><label class="ask"><input placeholder="Напиши свой вопрос..."><button>➤</button></label></article>
+        </aside>
       </div>
+    </section>
 
-      <!-- AI Assistant Widget -->
-      <div class="rs-widget ai-widget">
-        <div class="rs-widget-hdr">
-          <h3>🤖 AI Assistant</h3>
-          <span class="ai-status-badge">● Active</span>
+    <section class="page" id="profile">
+      <div class="profile-layout">
+        <div class="profile-main">
+          <section class="profile-hero glass"><div class="avatar jumbo"></div><div><h2>Кщщщ <span class="pill">Ученик</span></h2><p>⌖ Алматы, Казахстан</p><p>◴ Участник с марта 2024</p></div><div class="rank-row"><b>🔥 12<small>Дней подряд</small></b><b>⭐ 850<small>Всего XP</small></b><b>♕ Топ 12%<small>В рейтинге</small></b></div><div class="level-ring"><span>7</span></div><div class="xp-large"><strong>650</strong> / 1000 XP<div class="meter"><i style="--w:65%"></i></div></div></section>
+          <section class="stats-row"><article class="glass">📘<b>8</b><span>Изучено предметов</span></article><article class="glass">◷<b>45</b><span>Учебных часов</span></article><article class="glass">✓<b>128</b><span>Решено задач</span></article><article class="glass">⚗<b>15</b><span>Лабораторий</span></article></section>
+          <section class="two-col"><article class="glass"><h3>Активность за неделю</h3><div class="bars tall"><i style="--h:20%"></i><i style="--h:48%"></i><i style="--h:68%"></i><i style="--h:92%"></i><i style="--h:70%"></i><i style="--h:61%"></i><i style="--h:45%"></i></div></article><article class="glass favorite"><h3>Любимый предмет</h3><div class="big-icon">⚛</div><h2>Физика</h2><p>Твой прогресс</p><div class="meter"><i style="--w:75%"></i></div><button class="primary">Продолжить изучение</button></article></section>
+          <section class="glass achievements"><h3>Мои достижения</h3><div><span>🔥<b>7 дней подряд</b></span><span>🏆<b>100 задач</b></span><span>⚗<b>Первая лаборатория</b></span><span>⭐<b>Лучший результат</b></span><span>🧠<b>Любознательный</b></span><span>🌼<b>Мастер экспериментов</b></span></div></section>
         </div>
-        <div class="ai-robot">
-          <div class="ai-robot-visual">
-            <div class="robot-head">
-              <div class="robot-eye left"></div>
-              <div class="robot-eye right"></div>
-              <div class="robot-mouth"></div>
-            </div>
-            <div class="robot-glow"></div>
-          </div>
-          <div class="ai-welcome">
-            <p>Hi Alex! I'm your AI tutor. Ask me anything about your courses.</p>
-          </div>
-          <div class="ai-suggestions">
-            <button class="ai-chip">Explain backpropagation</button>
-            <button class="ai-chip">Quiz me on calculus</button>
-            <button class="ai-chip">Help with physics problem</button>
-          </div>
-        </div>
-        <div class="ai-input-bar">
-          <input type="text" placeholder="Type your message...">
-          <button class="ai-send-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </div>
+        <aside class="right-col compact"><article class="glass side-card"><h3>Цели на неделю <small>3/5 выполнено</small></h3><div class="goal">⏱ Учиться 5 часов <b>3.5/5ч</b></div><div class="meter"><i style="--w:70%"></i></div><div class="goal">☑ Решить 10 задач <b>10/10</b></div><div class="meter green"><i style="--w:100%"></i></div><div class="goal">▣ Пройти тест <b>1/2</b></div><div class="meter"><i style="--w:50%"></i></div></article><article class="glass side-card"><h3>Друзья <small>12 друзей</small></h3><div class="friends"><span></span><span></span><span></span><span></span><span></span></div><a>Все друзья</a></article></aside>
       </div>
+    </section>
 
-    </div>
-  </aside>
+    <section class="page catalog" id="laboratory">
+      <div class="catalog-layout">
+        <div>
+          <div class="tabs"><button class="active">Все предметы</button><button>Физика</button><button>Химия</button><button>Математика</button><button>Биология</button><button>Программирование</button></div>
+          <h2 class="section-title">Популярные лаборатории</h2>
+          <div class="lab-grid cards-row">
+            <article class="visual-card glass pendulum"><span>Физика</span><h3>Законы Ньютона</h3><p>Изучите движение тел и силы в интерактивной симуляции</p><div class="meter green"><i style="--w:75%"></i></div><button>Продолжить</button></article>
+            <article class="visual-card glass flasks"><span>Химия</span><h3>Химические реакции</h3><p>Проводите реакции и наблюдайте за результатами</p><div class="meter green"><i style="--w:60%"></i></div><button>Продолжить</button></article>
+            <article class="visual-card glass graph3d"><span>Математика</span><h3>Графики функций</h3><p>Стройте графики и исследуйте их свойства</p><div class="meter"><i style="--w:40%"></i></div><button>Продолжить</button></article>
+            <article class="visual-card glass cell"><span>Биология</span><h3>Строение клетки</h3><p>Изучите структуру клетки в 3D модели</p><div class="meter green"><i style="--w:90%"></i></div><button>Начать</button></article>
+          </div>
+          <h2 class="section-title">Все лаборатории</h2>
+          <div class="list-grid">
+            <article class="glass list-card"><div class="thumb pendulum"></div><div><h3>Маятник</h3><p>Исследуйте колебания маятника и влияние факторов</p><small>◷ 20 мин · Средний · +50 XP</small></div><button>Начать</button></article>
+            <article class="glass list-card"><div class="thumb code-art"></div><div><h3>Сортировка массивов</h3><p>Практикуйтесь в сортировке массивов разными алгоритмами</p><small>◷ 30 мин · Средний · +60 XP</small></div><button>Начать</button></article>
+            <article class="glass list-card"><div class="thumb dna"></div><div><h3>ДНК: структура и функции</h3><p>Изучите структуру ДНК и её роль в жизнедеятельности</p><small>◷ 25 мин · Лёгкий · +40 XP</small></div><button>Начать</button></article>
+            <article class="glass list-card"><div class="thumb prism"></div><div><h3>Преломление света</h3><p>Исследуйте преломление света в разных средах</p><small>◷ 15 мин · Лёгкий · +30 XP</small></div><button>Начать</button></article>
+          </div>
+        </div>
+        <aside class="right-col compact"><article class="glass progress-ring-card"><div class="level-ring small-ring"><span>68%</span></div><p>Проведено экспериментов <b>24</b></p><p>Получено XP <b>1250</b></p><p>Потрачено времени <b>12ч 45м</b></p></article><article class="glass side-card"><h3>Еженедельная цель</h3><p>4/6 завершено</p><div class="meter"><i style="--w:70%"></i></div><small>Осталось: 2 эксперимента</small></article><article class="glass side-card"><h3>Недавняя активность</h3><ul class="clean-list"><li>Законы Ньютона +50 XP</li><li>Строение клетки +40 XP</li><li>Преломление света +30 XP</li></ul></article></aside>
+      </div>
+    </section>
 
-</div>
+    <section class="page catalog" id="library">
+      <div class="catalog-layout">
+        <div>
+          <div class="category-strip"><article class="active">▦<b>Все материалы</b><span>1248</span></article><article>⚛<b>Физика</b><span>185</span></article><article>⚗<b>Химия</b><span>142</span></article><article>π<b>Математика</b><span>210</span></article><article>☘<b>Биология</b><span>98</span></article><article>&lt;/&gt;<b>Программирование</b><span>164</span></article></div>
+          <div class="tabs small-tabs"><button class="active">Все типы</button><button>Книги</button><button>Конспекты</button><button>Видео</button><button>Статьи</button><button>Тесты</button></div>
+          <h2 class="section-title">Недавно добавленные</h2>
+          <div class="cards-row media-row"><article class="media glass prism"><span>Конспект</span><h3>Преломление света</h3><p>Физика</p><small>2 часа назад</small></article><article class="media glass dna"><span>Видео</span><h3>Структура ДНК</h3><p>Биология</p><small>5 часов назад</small></article><article class="media glass code-art"><span>Книга</span><h3>Python для начинающих</h3><p>Программирование</p><small>Вчера</small></article><article class="media glass planet"><span>Презентация</span><h3>Строение Солнечной системы</h3><p>Астрономия</p><small>2 дня назад</small></article></div>
+          <h2 class="section-title">Библиотека по предметам</h2>
+          <div class="subject-grid five"><article class="glass lib-card">⚛<h3>Физика</h3><p>185 материалов</p><ul><li>Книги 45</li><li>Конспекты 68</li><li>Видео 42</li><li>Тесты 30</li></ul><button>Открыть ›</button></article><article class="glass lib-card">⚗<h3>Химия</h3><p>142 материала</p><ul><li>Книги 32</li><li>Конспекты 50</li><li>Видео 36</li><li>Тесты 24</li></ul><button>Открыть ›</button></article><article class="glass lib-card">π<h3>Математика</h3><p>210 материалов</p><ul><li>Книги 60</li><li>Конспекты 80</li><li>Видео 30</li><li>Тесты 30</li></ul><button>Открыть ›</button></article><article class="glass lib-card">☘<h3>Биология</h3><p>98 материалов</p><ul><li>Книги 28</li><li>Конспекты 30</li><li>Видео 40</li><li>Тесты 15</li></ul><button>Открыть ›</button></article><article class="glass lib-card">&lt;/&gt;<h3>Программирование</h3><p>164 материала</p><ul><li>Книги 40</li><li>Конспекты 60</li><li>Видео 45</li><li>Тесты 19</li></ul><button>Открыть ›</button></article></div>
+        </div>
+        <aside class="right-col compact"><article class="glass side-card"><h3>Моё хранилище</h3><p>Использовано 2.4 ГБ из 10 ГБ</p><div class="meter"><i style="--w:24%"></i></div><button class="primary">Увеличить хранилище</button></article><article class="glass side-card"><h3>Недавняя активность</h3><ul class="clean-list"><li>Преломление света</li><li>Структура ДНК</li><li>Python для начинающих</li><li>Тест: Законы Ньютона</li></ul></article><article class="glass side-card"><h3>Импорт материалов</h3><p>Загружай свои файлы и получай к ним доступ с любого устройства</p><button>⇧ Загрузить файл</button></article></aside>
+      </div>
+    </section>
 
-<script src="script.js"></script>
+    <section class="page catalog" id="simulations">
+      <div class="catalog-layout">
+        <div>
+          <label class="search wide"><span>⌕</span><input placeholder="Поиск симуляции..."></label>
+          <div class="tabs small-tabs"><button class="active">Все симуляции</button><button>Физика</button><button>Химия</button><button>Биология</button><button>Математика</button><button>Астрономия</button><button>Инженерия</button></div>
+          <section class="sim-hero glass planet"><div><span class="pill">Популярная симуляция</span><h2>Солнечная система</h2><p>Исследуйте планеты, их орбиты и взаимодействие в реалистичной 3D-модели.</p><button class="primary">▷ Запустить симуляцию</button></div><ul><li>Уровень сложности <b>Средний</b></li><li>Время прохождения <b>25-30 мин</b></li><li>Предмет <b>Астрономия</b></li></ul></section>
+          <h2 class="section-title">Популярные симуляции</h2>
+          <div class="cards-row media-row"><article class="media glass pendulum"><h3>Законы Ньютона</h3><p>Физика</p><small>Средний · 20 мин</small></article><article class="media glass flasks"><h3>Химические реакции</h3><p>Химия</p><small>Лёгкий · 15 мин</small></article><article class="media glass dna"><h3>Структура ДНК</h3><p>Биология</p><small>Средний · 18 мин</small></article><article class="media glass code-art"><h3>Электрические цепи</h3><p>Физика</p><small>Сложный · 25 мин</small></article><article class="media glass graph3d"><h3>Гидродинамика</h3><p>Физика</p><small>Средний · 22 мин</small></article></div>
+          <h2 class="section-title">Категории симуляций</h2>
+          <div class="category-strip slim"><article>⚛<b>Физика</b><span>24 симуляции</span></article><article>⚗<b>Химия</b><span>18 симуляций</span></article><article>☷<b>Биология</b><span>16 симуляций</span></article><article>π<b>Математика</b><span>14 симуляций</span></article><article>⚙<b>Инженерия</b><span>12 симуляций</span></article><article>♄<b>Астрономия</b><span>10 симуляций</span></article></div>
+        </div>
+        <aside class="right-col compact"><article class="glass progress-ring-card"><div class="level-ring small-ring"><span>68%</span></div><p>Пройдено симуляций <b>24 / 35</b></p><p>Получено баллов <b>1250 XP</b></p><p>Проведено времени <b>24ч 45м</b></p></article><article class="glass side-card"><h3>Текущая цель</h3><p>Пройдите 5 симуляций по физике</p><div class="meter"><i style="--w:60%"></i></div><small>Награда: +200 XP</small></article><article class="glass side-card"><h3>Недавние симуляции</h3><ul class="clean-list"><li>Солнечная система ▷</li><li>Законы Ньютона ▷</li><li>Химические реакции ☆</li></ul></article></aside>
+      </div>
+    </section>
+
+    <section class="page empty-page" id="subjects"><div class="glass"><h2>Мои предметы</h2><p>Выбери карточку на главной панели, чтобы продолжить обучение.</p></div></section>
+    <section class="page empty-page" id="tasks"><div class="glass"><h2>Задания</h2><p>Сегодня 3 из 5 заданий уже выполнены.</p></div></section>
+    <section class="page empty-page" id="notes"><div class="glass"><h2>Мои заметки</h2><p>Сохраненные конспекты и быстрые пометки появятся здесь.</p></div></section>
+    <section class="page empty-page" id="stats"><div class="glass"><h2>Статистика</h2><p>Графики активности, XP и прогресса по предметам.</p></div></section>
+    <section class="page empty-page" id="assistant"><div class="glass ai-card standalone"><h2>AI-помощник</h2><div class="bot"><span></span></div><p class="speech">Напиши вопрос, и я помогу разобраться с темой.</p><label class="ask"><input placeholder="Напиши свой вопрос..."><button>➤</button></label></div></section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="active" data-page="home">⌂</button><button data-page="library">▤</button><button data-page="simulations">◉</button><button data-page="laboratory">⚗</button><button data-page="profile">♕</button>
+  </nav>
+  <script src="script.js"></script>
 </body>
 </html>

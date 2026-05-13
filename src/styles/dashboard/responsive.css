@@ -1,0 +1,175 @@
+/* ===========================================
+   FUTURISTIC DASHBOARD — Responsive
+   =========================================== */
+
+@media (max-width: 1400px) {
+    .dash-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dash-grid-main {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .dash-grid-main > .dash-widget-activities:last-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 1200px) {
+    .dash-subjects-row {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+@media (max-width: 1024px) {
+    .dash-greeting-title {
+        font-size: 18px;
+    }
+
+    .dash-header-right {
+        gap: 6px;
+    }
+
+    .dash-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .dash-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-grid-main {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-xp-display {
+        display: none;
+    }
+
+    .dash-achievement-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .dash-actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .dash-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .dash-header-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .dash-greeting-title {
+        font-size: 16px;
+    }
+
+    .dash-greeting-sub {
+        font-size: 12px;
+    }
+
+    .dash-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-stat-card {
+        padding: 16px 18px;
+    }
+
+    .dash-stat-value {
+        font-size: 22px;
+    }
+
+    .dash-subjects-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dash-achievement-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .dash-actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .dash-chart-bars {
+        height: 90px;
+    }
+
+    .dash-search.open .dash-search-input {
+        width: 140px;
+    }
+
+    .dash-notif-dropdown {
+        width: 260px;
+        right: -40px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dash-greeting {
+        gap: 12px;
+    }
+
+    .dash-avatar-ring {
+        width: 42px;
+        height: 42px;
+    }
+
+    .dash-avatar span {
+        font-size: 16px;
+    }
+
+    .dash-greeting-title {
+        font-size: 15px;
+    }
+
+    .dash-subjects-row {
+        grid-template-columns: 1fr;
+    }
+
+    .dash-achievement-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dash-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .dash-icon-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .dash-icon-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .dash-stat-card {
+        padding: 14px 16px;
+    }
+
+    .dash-stat-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .dash-stat-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .dash-stat-value {
+        font-size: 20px;
+    }
+}

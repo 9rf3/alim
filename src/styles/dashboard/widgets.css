@@ -1,0 +1,520 @@
+/* ===========================================
+   FUTURISTIC DASHBOARD — Widgets
+   =========================================== */
+
+.dash-widget {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dash-widget:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow-lg);
+}
+
+.dash-widget-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.dash-widget-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dash-widget-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--accent-primary);
+    flex-shrink: 0;
+}
+
+.dash-ai-icon {
+    color: #8B5CF6;
+}
+
+.dash-widget-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.dash-widget-count {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-tertiary);
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+}
+
+.dash-widget-body {
+    padding: 16px 20px;
+}
+
+.dash-widget-empty {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 20px 0;
+    margin: 0;
+}
+
+.dash-widget-loader {
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+}
+
+.dash-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid var(--bg-tertiary);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: dashSpin 0.7s linear infinite;
+}
+
+@keyframes dashSpin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===========================================
+   TASKS WIDGET
+   =========================================== */
+
+.dash-task-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dash-task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--glass-border);
+    transition: opacity 0.3s;
+}
+
+.dash-task-item:last-child {
+    border-bottom: none;
+}
+
+.dash-task-item.completed {
+    opacity: 0.5;
+}
+
+.dash-task-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--glass-border);
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.25s;
+}
+
+.dash-task-check:hover {
+    border-color: var(--accent-primary);
+    background: rgba(10, 132, 255, 0.1);
+}
+
+.dash-task-check.checked {
+    background: var(--accent-gradient);
+    border-color: transparent;
+}
+
+.dash-task-check.checked svg {
+    width: 12px;
+    height: 12px;
+    color: #fff;
+}
+
+.dash-task-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    flex: 1;
+    min-width: 0;
+}
+
+.dash-task-item.completed .dash-task-text {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+/* ===========================================
+   AI WIDGET
+   =========================================== */
+
+.dash-ai-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    background: rgba(139, 92, 246, 0.15);
+    color: #8B5CF6;
+    border-radius: var(--radius-full);
+}
+
+.dash-ai-messages {
+    padding: 16px 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.dash-ai-messages::-webkit-scrollbar {
+    width: 4px;
+}
+
+.dash-ai-messages::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: var(--radius-full);
+}
+
+.dash-ai-msg {
+    display: flex;
+    gap: 10px;
+    animation: dashMsgIn 0.3s ease;
+}
+
+.dash-ai-msg.user {
+    flex-direction: row-reverse;
+}
+
+@keyframes dashMsgIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dash-ai-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.dash-ai-avatar svg {
+    width: 16px;
+    height: 16px;
+    color: #8B5CF6;
+}
+
+.dash-ai-bubble {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: var(--radius-lg);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.dash-ai-msg.ai .dash-ai-bubble {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border-bottom-left-radius: 4px;
+}
+
+.dash-ai-msg.user .dash-ai-bubble {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+    color: var(--text-primary);
+    border-bottom-right-radius: 4px;
+}
+
+.dash-ai-input-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 20px 16px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.dash-ai-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-primary);
+    outline: none;
+    transition: all 0.2s;
+}
+
+.dash-ai-input:focus {
+    border-color: #8B5CF6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+.dash-ai-input::placeholder {
+    color: var(--text-muted);
+}
+
+.dash-ai-send {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #8B5CF6, #7C3AED);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.25s;
+    flex-shrink: 0;
+}
+
+.dash-ai-send svg {
+    width: 16px;
+    height: 16px;
+}
+
+.dash-ai-send:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+}
+
+/* ===========================================
+   ACTIVITY CHART WIDGET
+   =========================================== */
+
+.dash-chart-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-tertiary);
+    padding: 3px;
+    border-radius: var(--radius-md);
+}
+
+.dash-chart-tab {
+    padding: 4px 10px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.dash-chart-tab.active {
+    background: var(--bg-primary);
+    color: var(--accent-primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.dash-chart-container {
+    padding: 20px;
+}
+
+.dash-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 120px;
+    margin-bottom: 20px;
+}
+
+.dash-chart-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    height: 100%;
+}
+
+.dash-chart-bar-wrap {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.dash-chart-bar {
+    width: 70%;
+    max-width: 32px;
+    background: linear-gradient(180deg, var(--accent-primary), rgba(10, 132, 255, 0.4));
+    border-radius: 4px 4px 0 0;
+    transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    min-height: 4px;
+}
+
+.dash-chart-bar-glow {
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120%;
+    height: 4px;
+    background: var(--accent-primary);
+    border-radius: 50%;
+    filter: blur(3px);
+    opacity: 0.6;
+}
+
+.dash-chart-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.dash-chart-summary {
+    display: flex;
+    gap: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--glass-border);
+}
+
+.dash-chart-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dash-chart-stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.dash-chart-stat-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+/* ===========================================
+   ACHIEVEMENTS WIDGET
+   =========================================== */
+
+.dash-achievement-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 16px 20px;
+}
+
+.dash-achievement-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px;
+    border-radius: var(--radius-lg);
+    background: var(--bg-tertiary);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+
+.dash-achievement-item.unlocked {
+    background: var(--glass-bg);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.dash-achievement-item.locked {
+    opacity: 0.5;
+    filter: grayscale(0.5);
+}
+
+.dash-achievement-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.dash-achievement-name {
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.dash-achievement-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.15), transparent 60%);
+    pointer-events: none;
+    animation: dashAchGlow 3s ease-in-out infinite;
+}
+
+@keyframes dashAchGlow {
+    0%, 100% { opacity: 0.3; transform: translate(-25%, -25%) scale(1); }
+    50% { opacity: 0.6; transform: translate(-25%, -25%) scale(1.1); }
+}
+
+/* ===========================================
+   QUICK ACTIONS WIDGET
+   =========================================== */
+
+.dash-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding: 16px 20px;
+}
+
+.dash-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 8px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.25s;
+}
+
+.dash-action-btn:hover {
+    background: var(--glass-bg);
+    border-color: var(--accent-primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px var(--glow-primary);
+}
+
+.dash-action-icon {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.dash-action-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.dash-action-btn:hover .dash-action-label {
+    color: var(--accent-primary);
+}
