@@ -1,6 +1,6 @@
 // Firebase Auth - Login/Logout Functions
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth, provider } from "./firebase.js";
+import { auth, googleProvider as provider } from "./firebase.js";
 
 // Login with Google
 export async function login() {

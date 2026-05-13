@@ -72,7 +72,7 @@ export default function Navbar() {
         setMobileMenuOpen(false);
     };
 
-    const photoUrl = localStorage.getItem('userPhoto') || userProfile?.photoURL || firebaseUser?.photoURL;
+    const photoUrl = userProfile?.photoURL || firebaseUser?.photoURL;
     const isAdminUser = userProfile?.role === 'admin';
 
     const pathname = location.pathname;

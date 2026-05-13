@@ -76,6 +76,18 @@ export default function ProfileSetup() {
 
     const handleSubmit = async () => {
         setError('');
+
+        if (!formData.fullName.trim()) {
+            setError(language === 'ru' ? 'Введите полное имя' : 'Enter your full name');
+            return;
+        }
+
+        const subjects = role === 'student' ? formData.subjectsToStudy : formData.subjectsToTeach;
+        if (subjects.length === 0) {
+            setError(language === 'ru' ? 'Выберите хотя бы один предмет' : 'Select at least one subject');
+            return;
+        }
+
         setSaving(true);
 
         try {
@@ -83,7 +95,7 @@ export default function ProfileSetup() {
                 role,
                 fullName: formData.fullName,
                 age: formData.age ? parseInt(formData.age) : null,
-                subjects: role === 'student' ? formData.subjectsToStudy : formData.subjectsToTeach,
+                subjects,
             };
 
             if (role === 'student') {

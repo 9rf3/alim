@@ -36,9 +36,9 @@ export default function CabinetCertificates() {
     }, [userProfile?.uid, t]);
 
     const achievementBadges = [
-        { name: t('Первый шаг', 'First Step'), icon: '🎯', description: t('Завершили первый урок', 'Completed first lesson') },
-        { name: t('Химик-любитель', 'Amateur Chemist'), icon: '⚗️', description: t('Прошли курс химии', 'Completed chemistry course') },
-        { name: t('Физик', 'Physicist'), icon: '⚡', description: t('Прошли курс физики', 'Completed physics course') },
+        { name: t('Первый шаг', 'First Step'), icon: '🎯', description: t('Завершите первый урок', 'Complete first lesson') },
+        { name: t('Химик-любитель', 'Amateur Chemist'), icon: '⚗️', description: t('Пройдите курс химии', 'Complete a chemistry course') },
+        { name: t('Физик', 'Physicist'), icon: '⚡', description: t('Пройдите курс физики', 'Complete a physics course') },
     ];
 
     if (loading) {

@@ -55,7 +55,7 @@ export default function TeacherOverview() {
             title: t('Видео система', 'Video System'),
             description: t('Загружайте уроки, создавайте курсы и плейлисты', 'Upload lessons, create courses and playlists'),
             path: '/teacher/video',
-            stat: stats ? `${stats.videos} ${t('видео', 'videos')}` : t('0 видео', '0 videos'),
+            stat: stats ? `${stats.videos} ${t('видео', 'videos')}` : '0',
         },
         {
             icon: 'clipboard',
@@ -63,7 +63,7 @@ export default function TeacherOverview() {
             title: t('Инструменты квизов', 'Quiz Tools'),
             description: t('Создавайте тесты с автопроверкой и AI-помощником', 'Create quizzes with auto-grading and AI helper'),
             path: '/teacher/quiz',
-            stat: stats ? `${stats.quizzes} ${t('квизов', 'quizzes')}` : t('0 квизов', '0 quizzes'),
+            stat: stats ? `${stats.quizzes} ${t('квизов', 'quizzes')}` : '0',
         },
         {
             icon: 'chart',
@@ -79,7 +79,7 @@ export default function TeacherOverview() {
             title: t('Управление ценами', 'Pricing Control'),
             description: t('Устанавливайте цены, скидки и акции', 'Set prices, discounts, and promotions'),
             path: '/teacher/pricing',
-            stat: stats ? `${stats.courses} ${t('курсов', 'courses')}` : t('0 курсов', '0 courses'),
+            stat: stats ? `${stats.courses} ${t('курсов', 'courses')}` : '0',
         },
         {
             icon: 'folder',
@@ -87,7 +87,7 @@ export default function TeacherOverview() {
             title: t('Магазин ресурсов', 'Resource Store'),
             description: t('Продавайте PDF, рабочие тетради и материалы', 'Sell PDFs, workbooks, and materials'),
             path: '/teacher/resources',
-            stat: stats ? `${stats.resources} ${t('ресурсов', 'resources')}` : t('0 ресурсов', '0 resources'),
+            stat: stats ? `${stats.resources} ${t('ресурсов', 'resources')}` : '0',
         },
         {
             icon: 'flask',
@@ -95,7 +95,7 @@ export default function TeacherOverview() {
             title: t('Лаборатория', 'Laboratory'),
             description: t('Принимайте заказы и создавайте проекты', 'Accept orders and create projects'),
             path: '/teacher/laboratory',
-            stat: t('0 заказов', '0 orders'),
+            stat: '0',
         },
         {
             icon: 'users',
@@ -103,7 +103,7 @@ export default function TeacherOverview() {
             title: t('Ученики', 'Students'),
             description: t('Управляйте студентами, подписчиками и покупателями', 'Manage students, followers, and buyers'),
             path: '/teacher/students',
-            stat: stats ? `${stats.students} ${t('учеников', 'students')}` : t('0 учеников', '0 students'),
+            stat: stats ? `${stats.students} ${t('учеников', 'students')}` : '0',
         },
         {
             icon: 'wallet',
@@ -111,7 +111,7 @@ export default function TeacherOverview() {
             title: t('Доходы', 'Earnings'),
             description: t('Отслеживайте заработок и транзакции', 'Track earnings and transactions'),
             path: '/teacher/earnings',
-            stat: stats ? `$${stats.courses * 29.99 || 0}` : '$0',
+            stat: '$0',
         },
     ];
 
@@ -155,7 +155,7 @@ export default function TeacherOverview() {
                 </div>
                 <div className="teacher-stat-card">
                     <div className="teacher-stat-label">{t('Доход', 'Revenue')}</div>
-                    <div className="teacher-stat-value">${loading ? '...' : (stats?.courses * 29.99 || 0)}</div>
+                    <div className="teacher-stat-value">${loading ? '...' : '0'}</div>
                     <div className="teacher-stat-change">
                         {t('За всё время', 'All time')}
                     </div>

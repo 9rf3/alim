@@ -137,7 +137,7 @@ export async function deleteFile(path) {
 export function uploadVideoResumable(file, teacherId, courseId, metadata, onProgress) {
     return new Promise((resolve, reject) => {
         const path = `videos/${teacherId}/${courseId}/${Date.now()}_${file.name}`;
-        const uploadTask = uploadBytesResumable(ref(storage, path));
+        const uploadTask = uploadBytesResumable(ref(storage, path), file);
 
         uploadTask.on(
             'state_changed',

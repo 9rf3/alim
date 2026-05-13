@@ -80,7 +80,7 @@ export default function CabinetLayout({ children }) {
     if (loading) return null;
     if (!isAuthenticated) return null;
 
-    const photoUrl = localStorage.getItem('userPhoto') || userProfile?.photoURL;
+    const photoUrl = userProfile?.photoURL;
 
     const handleLogout = () => {
         logout();

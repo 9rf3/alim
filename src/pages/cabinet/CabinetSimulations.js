@@ -15,19 +15,19 @@ export default function CabinetSimulations() {
 
     const simulations = {
         chemistry: [
-            { title: t('Химические реакции', 'Chemical Reactions'), description: t('Визуализация взаимодействия молекул', 'Visualization of molecule interactions'), progress: 0 },
-            { title: t('Периодическая таблица', 'Periodic Table'), description: t('Интерактивное исследование элементов', 'Interactive element exploration'), progress: 45 },
-            { title: t('Кислоты и основания', 'Acids and Bases'), description: t('Эксперименты с pH', 'pH experiments'), progress: 0 },
+            { title: t('Химические реакции', 'Chemical Reactions'), description: t('Визуализация взаимодействия молекул', 'Visualization of molecule interactions') },
+            { title: t('Периодическая таблица', 'Periodic Table'), description: t('Интерактивное исследование элементов', 'Interactive element exploration') },
+            { title: t('Кислоты и основания', 'Acids and Bases'), description: t('Эксперименты с pH', 'pH experiments') },
         ],
         physics: [
-            { title: t('Системы сил', 'Force Systems'), description: t('Визуализация векторов сил', 'Force vector visualization'), progress: 0 },
-            { title: t('Электрические цепи', 'Electric Circuits'), description: t('Моделирование цепей', 'Circuit modeling'), progress: 20 },
-            { title: t('Оптика и волны', 'Optics and Waves'), description: t('Световые эксперименты', 'Light experiments'), progress: 0 },
+            { title: t('Системы сил', 'Force Systems'), description: t('Визуализация векторов сил', 'Force vector visualization') },
+            { title: t('Электрические цепи', 'Electric Circuits'), description: t('Моделирование цепей', 'Circuit modeling') },
+            { title: t('Оптика и волны', 'Optics and Waves'), description: t('Световые эксперименты', 'Light experiments') },
         ],
         math: [
-            { title: t('Графики функций', 'Function Graphs'), description: t('Интерактивные графики', 'Interactive graphs'), progress: 60 },
-            { title: t('Геометрия', 'Geometry'), description: t('3D геометрические фигуры', '3D geometric shapes'), progress: 0 },
-            { title: t('Формулы и уравнения', 'Formulas and Equations'), description: t('Симуляция решений', 'Solution simulation'), progress: 30 },
+            { title: t('Графики функций', 'Function Graphs'), description: t('Интерактивные графики', 'Interactive graphs') },
+            { title: t('Геометрия', 'Geometry'), description: t('3D геометрические фигуры', '3D geometric shapes') },
+            { title: t('Формулы и уравнения', 'Formulas and Equations'), description: t('Симуляция решений', 'Solution simulation') },
         ],
     };
 
@@ -44,7 +44,7 @@ export default function CabinetSimulations() {
                 </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
                 {subjects.map((subject) => (
                     <button
                         key={subject.id}
@@ -72,7 +72,7 @@ export default function CabinetSimulations() {
 
             <div className="cabinet-grid cabinet-grid-3">
                 {simulations[activeSubject].map((sim, idx) => (
-                    <div key={idx} className="cabinet-card clickable">
+                    <div key={idx} className="cabinet-card">
                         <div style={{
                             height: '140px',
                             background: 'var(--bg-tertiary)',
@@ -93,14 +93,16 @@ export default function CabinetSimulations() {
                         <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
                             {sim.description}
                         </p>
-                        <div className="cabinet-progress">
-                            <div className="cabinet-progress-header">
-                                <span className="cabinet-progress-label">{t('Прогресс', 'Progress')}</span>
-                                <span className="cabinet-progress-value">{sim.progress}%</span>
-                            </div>
-                            <div className="cabinet-progress-bar">
-                                <div className="cabinet-progress-fill" style={{ width: `${sim.progress}%` }}></div>
-                            </div>
+                        <div style={{
+                            display: 'inline-flex',
+                            padding: '6px 12px',
+                            background: 'rgba(59, 130, 246, 0.1)',
+                            borderRadius: '6px',
+                            color: 'var(--accent-primary)',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                        }}>
+                            {t('Скоро', 'Coming Soon')}
                         </div>
                     </div>
                 ))}

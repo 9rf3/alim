@@ -75,7 +75,7 @@ export default function TeacherLayout({ children }) {
 
     if (loading) return null;
 
-    const photoUrl = localStorage.getItem('userPhoto') || userProfile?.photoURL;
+    const photoUrl = userProfile?.photoURL;
 
     const handleLogout = () => {
         logout();
